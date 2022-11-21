@@ -1,0 +1,124 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.RequestForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+}
+
+.RequestForm input {
+  margin: 10px;
+  font-size: 1.1em;
+}
+
+.RequestForm button {
+  margin: 10px;
+  font-size: 1.1em;
+}
+
+.RequestForm p {
+  font-size: .5em;
+}
+
+.popup-image {
+  width: 100px;
+  height: 100px;
+}
+
+.popup-text {
+  text-align: left;
+}
+
+.e-icon {
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.Page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.SearchResults {
+  width: 100%;
+  height: 100%;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 20vh;
+  font-size: .5em;
+  text-align: left;
+  width: 90vw;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+}
+
+.result div {
+  margin-left: 1vw;
+}
+
+.result p {
+  font-size: 1.25em;
+}
+
+.result button {
+  width: 25%;
+}
+
+.result img:not(.e-icon) {
+  width: 100px;
+  height: 100px;
+  margin-right: 1vw;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

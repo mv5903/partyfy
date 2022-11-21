@@ -1,0 +1,131 @@
+.App {
+  text-align: center;
+}
+
+body {
+  height: 100%;
+  background-color: #282c34;
+  color: white;
+  font-family: Verdana, Geneva, Tahoma, sans-serif
+}
+
+h1 {
+  font-size: 4rem;
+  margin-top: 8vh;
+}
+
+.center {
+  font-family: "Arial Black", Gadget, sans-serif;
+  margin-top: 0vh;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.progress {
+  position: absolute;
+  top: 60%;
+  left: 50px;
+  width: 500px;
+  background-color: grey;
+}
+
+.progress-bar {
+  width: 50%;
+  background-color: black;
+}
+
+.time {
+  position: absolute;
+  top: 63%;
+  left: 50px;
+  display: flex;
+  justify-content: space-between;
+  width: 500px;
+}
+
+.e-icon {
+  width: 35px;
+  height: 35px;
+  background-color: lightgrey;
+  border-radius: 10px;
+  margin-left: 15px;
+  margin-bottom: 20px;
+}
+
+.currentTime {
+  position: relative;
+}
+
+.maxTime {
+  position: relative;
+}
+
+.songinfo {
+  position: absolute;
+  left: 60px;
+  top: 300px;
+  font-size: 1.5em;
+  text-align: left;
+  max-width: 550px;
+}
+
+.songinfo h3 {
+  margin-bottom: 24px;
+}
+
+#albumart {
+  position: absolute;
+  top: 250px;
+  left: 35%;
+  border-radius: 20px;
+  box-shadow:
+      0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+      0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+      0 12.5px 10px rgba(0, 0, 0, 0.06),
+      0 22.3px 17.9px rgba(0, 0, 0, 0.072),
+      0 41.8px 33.4px rgba(0, 0, 0, 0.086),
+      0 100px 80px rgba(0, 0, 0, 0.12);
+  
+}
+
+.wifi {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 2em;
+  margin-top: 0vh;
+}
+
+.wifi-title {
+  margin-left: 50px;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+
+.wifi p {
+  font-size: 18px;
+  margin: 0;
+}
+
+#wifi-image {
+  border-radius: 20px;
+  width: 19vh;
+  height: 20vh;
+  margin-top: 2vh;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
