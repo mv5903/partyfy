@@ -6,11 +6,22 @@ export default function RequestForm() {
     const [results, setResults] = useState([]); 
 
     const clientID = '56b011ba0994424ea55cd9f2205c6439';
-    const redirectURI = encodeURIComponent('http://192.168.0.37:3000/callback');
+    const redirectURI = 'http://localhost:3000/callback';
     const scopes = 'user-read-playback-state';
     const responseType = 'code';
-    const authURL = `https://accounts.spotify.com/authorize?response_type=${responseType}&client_id=${clientID}&scope=${scopes}&redirect_uri=${redirectURI}`;
+    const authURL = `https://accounts.spotify.com/authorize?response_type=${responseType}&client_id=${clientID}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectURI)}`;
 
+    /**
+     * When a user loads the webpage for the first time, they will be redirected to the Spotify login page.
+     * 
+     * Spotify authentication is required to access the public directory of songs, and is used to prevent
+     * abuse of the service (i.e. spamming the queue with songs).
+     * 
+     * The user will automatically be redirected to this page after logging in, and will automatically request
+     * an access_token and refresh_token from the Spotify API.
+     * 
+     * If the access token expires, the refresh token will be used to request a new access token.
+     */
     useEffect(() => {
         if (!localStorage.getItem('access_token') || localStorage.getItem('access_token') === 'undefined')  { 
             if (!window.location.href.includes('code')) {
@@ -27,7 +38,7 @@ export default function RequestForm() {
                 body: new URLSearchParams({
                     'grant_type': 'authorization_code',
                     'code': code,
-                    'redirect_uri': 'http://192.168.0.37:3000/callback',
+                    'redirect_uri': redirectURI,
                 })
             })
             .then(response => response.json())
@@ -41,6 +52,12 @@ export default function RequestForm() {
         }
     }, []);
 
+
+    /**
+     * When the user submits a search query, the Spotify API is queried for the search results.
+     * If the results come back with an error, it is assumed that the access token has expired, which
+     * will trigger a refresh token request.
+     */
     function search() {
         let access_token = localStorage.getItem('access_token');
         let title = document.getElementById('title').value;
@@ -58,15 +75,19 @@ export default function RequestForm() {
         .then(data => {
             console.log('Search data', data);
             // Need to generate new access token if expired
-            if (!data || data == null || data == undefined) {
+            if (!data || data == null || data == undefined || data.error) {
                 console.log("Fetching new access token");
                 fetchNewAccessToken();
+                window.location.reload();
             } else {
                 setResults(data.tracks.items);
             }
         });
     }
 
+    /**
+     * When the user's access token expires, a new access token is requested using the refresh token with this function.
+     */
     function fetchNewAccessToken() {
         const refresh_token = localStorage.getItem('refresh_token');
         fetch('https://accounts.spotify.com/api/token', {
@@ -92,12 +113,12 @@ export default function RequestForm() {
             <div className="RequestForm">
                 <h3>Search for a Song:</h3>
                 <p>Enter Song and/or Artist</p>
-                <input id="title" type="text" placeholder="Song Title" required/>
-                <input id="artist" type="text" placeholder="Artist" required/>
+                <input id="title" type="text" placeholder="Song Title" required autoComplete="false" autoCorrect="false"/>
+                <input id="artist" type="text" placeholder="Artist" required autoComplete="false" autoCorrect="false"/>
                 <button type="button" onClick={search}>Search</button>
             </div>
             <div className="SearchResults">
-                <h4 id="results">Results:</h4>
+                {results.length > 0 && <h4 id="results">Results:</h4>}
                 {results.map((result) => {
                     return (
                         <div className="result" key={result.uri} id={result.uri}>
