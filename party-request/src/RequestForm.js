@@ -6,8 +6,9 @@ export default function RequestForm() {
     const [results, setResults] = useState([]); 
 
     const clientID = '56b011ba0994424ea55cd9f2205c6439';
-    const redirectURI = 'http://localhost:3000/callback';
-    const scopes = 'user-read-playback-state';
+    const redirectURI = 'http://192.168.0.52/';
+    const apiURI = 'http://192.168.0.52:8080/';
+    const scopes = 'user-read-playback-state user-read-private user-read-email';
     const responseType = 'code';
     const authURL = `https://accounts.spotify.com/authorize?response_type=${responseType}&client_id=${clientID}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectURI)}`;
 
@@ -62,7 +63,7 @@ export default function RequestForm() {
         let access_token = localStorage.getItem('access_token');
         let title = document.getElementById('title').value;
         let artist = document.getElementById('artist').value;
-        let query = `https://api.spotify.com/v1/search?q=${title}%20${artist}&type=track&limit=10`;
+        let query = `https://api.spotify.com/v1/search?q=${encodeURIComponent(title)}%20${encodeURIComponent(artist)}&type=track&limit=10`;
         fetch(query, {
             method: 'GET',
             headers: {
@@ -78,7 +79,6 @@ export default function RequestForm() {
             if (!data || data == null || data == undefined || data.error) {
                 console.log("Fetching new access token");
                 fetchNewAccessToken();
-                window.location.reload();
             } else {
                 setResults(data.tracks.items);
             }
@@ -150,11 +150,28 @@ export default function RequestForm() {
                                 })
                                 .then((value) => {
                                     if (value) {
-                                        swal("Song Requested!", "Your song has been requested!", "success");
-                                        fetch('http://192.168.0.37:8080/request?id=' + result.uri)
+                                        // Get information about the user that requested the song
+                                        const access_token = localStorage.getItem('access_token');
+                                        fetch("https://api.spotify.com/v1/me", {
+                                            headers: {
+                                                "Accept": "application/json",
+                                                "Authorization": "Bearer " + access_token,
+                                                "Content-Type": "application/json"
+                                            }
+                                        })
                                         .then(response => response.json())
                                         .then(data => {
-                                            console.log(data);
+                                            if (!data.uri) {
+                                                fetchNewAccessToken();
+                                            }
+                                            fetch(`${apiURI}request?id=${result.uri}&fullname=${encodeURIComponent(data.display_name)}&accounturi=${data.uri}&accountimage=${encodeURIComponent(data.images[0].url)}&songname=${encodeURIComponent(result.name)}&songartist=${encodeURIComponent(result.artists[0].name)}&songimg=${encodeURIComponent(result.album.images[0].url)}&explicit=${result.explicit}`)
+                                            .then(responseapi => responseapi.json())
+                                            .then(reqdata => {
+                                                if (reqdata.message) {
+                                                    swal("Song Requested!", "Your song has been requested!", "success");
+                                                }
+                                                console.log(reqdata);
+                                            });
                                         });
                                     }
                                 });

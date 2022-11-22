@@ -24,21 +24,21 @@ h1 {
 
 .progress {
   position: absolute;
-  top: 60%;
-  left: 50px;
+  top: 72%;
+  left: 100px;
   width: 500px;
-  background-color: grey;
+  background-color: #222222;
 }
 
 .progress-bar {
   width: 50%;
-  background-color: black;
+  background-color: rgb(68, 68, 68);
 }
 
 .time {
   position: absolute;
-  top: 63%;
-  left: 50px;
+  top: 75%;
+  left: 100px;
   display: flex;
   justify-content: space-between;
   width: 500px;
@@ -63,8 +63,8 @@ h1 {
 
 .songinfo {
   position: absolute;
-  left: 60px;
-  top: 300px;
+  left: 100px;
+  top: 450px;
   font-size: 1.5em;
   text-align: left;
   max-width: 550px;
@@ -76,7 +76,7 @@ h1 {
 
 #albumart {
   position: absolute;
-  top: 250px;
+  top: 320px;
   left: 35%;
   border-radius: 20px;
   box-shadow:
@@ -128,4 +128,68 @@ h1 {
 
 .App-link {
   color: #61dafb;
+}
+
+.popup {
+  display: flex;
+  border-radius: 5px;
+  padding: 20px;
+  color: black;
+  background-color: lightgrey;
+  position: absolute;
+  right: -30vw;
+  text-align: left;
+  max-width: 30vw;
+  -webkit-animation: slide 0.5s forwards;
+  -webkit-animation-delay: 2s;
+  animation: slide 0.5s forwards;
+  animation-delay: 2s;
+}
+
+@-webkit-keyframes slide {
+  100% {
+    right: 50px;
+  }
+}
+
+@keyframes slide {
+  100% {
+    right: 50px;
+  }
+}
+
+.popup-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  margin-right: 10px;
+  margin-left: 25px;
+}
+
+.popup-header {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.popup .e-icon {
+  margin-top: 12px;
+  margin-left: -1px;
+}
+
+.move {
+  margin-right: 250px;
 }

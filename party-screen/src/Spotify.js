@@ -4,10 +4,11 @@ import e from './assets/e.png';
 export default function Spotify() {
   const [latest, setLatest] = useState({});
   const [progress, setProgress] = useState({});
+  const [queue, setQueue] = useState({});
 
   useEffect(() => {
     let interval = setInterval(() => {
-      fetch(`http://localhost:8080/latest`)
+      fetch(`http://192.168.0.52:8080/latest`)
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
@@ -23,6 +24,26 @@ export default function Spotify() {
     return () => {
       clearInterval(interval);
     };
+  }, []);
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      fetch('http://192.168.0.52:8080/latestqueue')
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.message) {
+            console.log('New queue:', data);
+            // Show queue popup.
+            setQueue(data);
+            setTimeout(() => {
+              setQueue({});
+            }, 10000);
+          }
+        });
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    }
   }, []);
 
   function fancyTimeFormat(duration){   
@@ -52,7 +73,7 @@ export default function Spotify() {
             ?           
             <div className="center">
               <h3><strong>{latest.name}</strong></h3>
-              <img className="e-icon" src={e}></img>
+              <img className="e-icon" src={e} alt="explicit"></img>
             </div>
             :
             <h3><strong>{latest.name}</strong></h3>
@@ -68,6 +89,26 @@ export default function Spotify() {
           <p className="maxTime">{progress.maxTime}</p>
         </div>
         <img id="albumart" src={latest.album} alt="album" />
+        {
+          Object.keys(queue).length > 0
+          ? 
+          <div className="popup">
+            <div>
+              <div class="flex">
+                <img className="account-image"  src={decodeURIComponent(queue.accountimage)} alt="account" />
+                <h3 className="popup-header"><strong>{decodeURIComponent(queue.fullname)} Added to the Queue!</strong></h3>
+              </div>
+              <div class="flex">
+                <div>
+                  <h3>{decodeURIComponent(queue.songname)} {queue.explicit ? <img className="e-icon" src={e} alt="explicit"></img> : null}</h3>
+                  <h3><i>{decodeURIComponent(queue.songartist)}</i></h3>
+                </div>
+                <img className="popup-image" src={decodeURIComponent(queue.songimg)} alt="album" />
+              </div>
+            </div>
+          </div>
+          : 
+          null}
       </div>
     );
   }
