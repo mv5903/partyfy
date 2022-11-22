@@ -4,6 +4,10 @@ This is a simple party screen that allows you to request songs to be played at t
 
 ## Features
 
+![](readmeImages/screen.gif)
+<br><br>
+![](readmeImages/request.png)
+
 #### Party Screen TV Webpage:
 * Displays the current song playing:
     - Song name
