@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SECRETS } from './assets/secrets';
 import e from './assets/e.png';
 
 export default function Spotify() {
@@ -6,9 +7,10 @@ export default function Spotify() {
   const [progress, setProgress] = useState({});
   const [queue, setQueue] = useState({});
 
+  // Constantly updates the latest song
   useEffect(() => {
     let interval = setInterval(() => {
-      fetch(`http://192.168.0.52:8080/latest`)
+      fetch(`${SECRETS.apiAddress}/latest`)
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
@@ -26,14 +28,15 @@ export default function Spotify() {
     };
   }, []);
 
+  // Constantly updates the queue
   useEffect(() => {
     let interval = setInterval(() => {
-      fetch('http://192.168.0.52:8080/latestqueue')
+      fetch(`${SECRETS.apiAddress}/latestqueue`)
         .then((response) => response.json())
         .then((data) => {
           if (!data.message) {
             console.log('New queue:', data);
-            // Show queue popup.
+            // Show queue popup
             setQueue(data);
             setTimeout(() => {
               setQueue({});
@@ -46,6 +49,7 @@ export default function Spotify() {
     }
   }, []);
 
+  // Formats song time labels from ms to mm:ss
   function fancyTimeFormat(duration){   
     // Hours, minutes and seconds
     var hrs = ~~(duration / 3600);
@@ -67,6 +71,8 @@ export default function Spotify() {
   if (latest.name) {
     return (
       <div className="now-playing">
+
+        {/* Song Text Information */}
         <div className="songinfo">
           {
             latest.explicit 
@@ -81,6 +87,8 @@ export default function Spotify() {
           <h3>{latest.artist}</h3>
           <h3><i>{latest.album_name}</i></h3>
         </div>
+
+        {/* Progress Bar */}
         <div className="progress">
           <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" width="75%"></div>
         </div>
@@ -88,7 +96,11 @@ export default function Spotify() {
           <p className="currentTime">{progress.currentTime}</p>
           <p className="maxTime">{progress.maxTime}</p>
         </div>
+
+        {/* Album Art */}
         <img id="albumart" src={latest.album} alt="album" />
+
+        {/* Queue Popup */}
         {
           Object.keys(queue).length > 0
           ? 

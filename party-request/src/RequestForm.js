@@ -1,17 +1,12 @@
 import { useState, useEffect } from "react";
+import { SECRETS } from "./assets/secrets";
 import e from "./assets/e.png";
 import swal from '@sweetalert/with-react'
 
 export default function RequestForm() {
-    const [results, setResults] = useState([]); 
+    const authURL = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SECRETS.clientID}&scope=${SECRETS.scopes}&redirect_uri=${encodeURIComponent(SECRETS.redirectURI)}`;
 
-    const clientID = '56b011ba0994424ea55cd9f2205c6439';
-    const redirectURI = 'http://192.168.0.52/';
-    const apiURI = 'http://192.168.0.52:8080/';
-    const scopes = 'user-read-playback-state user-read-private user-read-email';
-    const responseType = 'code';
-    const authURL = `https://accounts.spotify.com/authorize?response_type=${responseType}&client_id=${clientID}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectURI)}`;
-
+    const [results, setResults] = useState([]);
     /**
      * When a user loads the webpage for the first time, they will be redirected to the Spotify login page.
      * 
@@ -25,25 +20,28 @@ export default function RequestForm() {
      */
     useEffect(() => {
         if (!localStorage.getItem('access_token') || localStorage.getItem('access_token') === 'undefined')  { 
+            // If the user has not logged in yet, redirect them to the Spotify login page. 
             if (!window.location.href.includes('code')) {
                 window.location.href = authURL;
                 return;
             }
+            // If the user has logged in, request an access token and refresh token from the Spotify API, based on the code provided in the URL.
             let code = window.location.href.split('code=')[1];
             fetch('https://accounts.spotify.com/api/token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': 'Basic ' + btoa(clientID + ':' + 'a1c30414fcd24f5893d8450b0839e290')
+                    'Authorization': 'Basic ' + btoa(SECRETS.clientID + ':' + SECRETS.clientSecret)
                 },
                 body: new URLSearchParams({
                     'grant_type': 'authorization_code',
                     'code': code,
-                    'redirect_uri': redirectURI,
+                    'redirect_uri': SECRETS.redirectURI,
                 })
             })
             .then(response => response.json())
             .then(data => {
+                // Store the access token and refresh token in local storage.
                 if (data.access_token) {
                     console.log(data);
                     localStorage.setItem('access_token', data.access_token);
@@ -94,7 +92,7 @@ export default function RequestForm() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + btoa(clientID + ':' + 'a1c30414fcd24f5893d8450b0839e290')
+                'Authorization': 'Basic ' + btoa(SECRETS.clientID + ':' + SECRETS.clientSecret)
             },
             body: new URLSearchParams({
                 'grant_type': 'refresh_token',
@@ -103,7 +101,7 @@ export default function RequestForm() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            console.log('Fetched new access token.');
             localStorage.setItem('access_token', data.access_token);
         });
     }
@@ -164,11 +162,13 @@ export default function RequestForm() {
                                             if (!data.uri) {
                                                 fetchNewAccessToken();
                                             }
-                                            fetch(`${apiURI}request?id=${result.uri}&fullname=${encodeURIComponent(data.display_name)}&accounturi=${data.uri}&accountimage=${encodeURIComponent(data.images[0].url)}&songname=${encodeURIComponent(result.name)}&songartist=${encodeURIComponent(result.artists[0].name)}&songimg=${encodeURIComponent(result.album.images[0].url)}&explicit=${result.explicit}`)
+                                            fetch(`${SECRETS.apiURI}request?id=${result.uri}&fullname=${encodeURIComponent(data.display_name)}&accounturi=${data.uri}&accountimage=${encodeURIComponent(data.images[0].url)}&songname=${encodeURIComponent(result.name)}&songartist=${encodeURIComponent(result.artists[0].name)}&songimg=${encodeURIComponent(result.album.images[0].url)}&explicit=${result.explicit}`)
                                             .then(responseapi => responseapi.json())
                                             .then(reqdata => {
                                                 if (reqdata.message) {
                                                     swal("Song Requested!", "Your song has been requested!", "success");
+                                                } else {
+                                                    swal("Error", "There was an error requesting your song. Please try again.", "error");
                                                 }
                                                 console.log(reqdata);
                                             });

@@ -2,6 +2,7 @@ import wifiimage from './assets/wifi.png';
 import request from './assets/request.png';
 import { FaWifi } from 'react-icons/fa';
 import { GiLoveSong } from 'react-icons/gi';
+import { SECRETS } from './assets/secrets';
 
 export default function Wifi() {
     return(
@@ -11,8 +12,8 @@ export default function Wifi() {
                     <h2 className="wifi-title">Wi-Fi</h2>
                     <FaWifi/>
                 </div>
-                <p>SSID: Matt's Room</p>
-                <p>Password: 6638Weyers</p>
+                <p>SSID: {SECRETS.ssid}</p>
+                <p>Password: {SECRETS.password}</p>
                 <img src={wifiimage} alt="wifi" id="wifi-image"/>
             </div>
             <div className="wifi move">
