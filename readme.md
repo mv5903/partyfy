@@ -6,7 +6,7 @@ This is a simple party screen that allows you to request songs to be played at t
 
 ![](readmeImages/screen.gif)
 <br><br>
-![](readmeImages/request.png)
+<img src="readmeImages/request.png" data-canonical-src="hreadmeImages/request.png" width="200" height="400" />
 
 #### Party Screen TV Webpage:
 * Displays the current song playing:
