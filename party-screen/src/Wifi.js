@@ -1,7 +1,6 @@
 import wifiimage from './assets/wifi.png';
 import request from './assets/request.png';
-import { FaWifi } from 'react-icons/fa';
-import { GiLoveSong } from 'react-icons/gi';
+import { FaWifi, FaSpotify } from 'react-icons/fa';
 import { SECRETS } from './assets/secrets';
 
 export default function Wifi() {
@@ -19,7 +18,7 @@ export default function Wifi() {
             <div className="wifi move">
                 <div className="center">
                     <h2 className="wifi-title">Song Requests</h2>
-                    <GiLoveSong/>
+                    <FaSpotify/>
                 </div>
                 <p>Scan Below!</p>
                 <p>You must be connected</p>
