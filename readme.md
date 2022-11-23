@@ -57,6 +57,9 @@ This is a simple party screen that allows you to request songs to be played at t
 2. Follow the instructions in the [Node-Red Spotify Connect](https://flows.nodered.org/node/node-red-contrib-spotify) to initialize the Spotify OAuth flow.
 3. Create a new flow, and name it whatever you want.
 4. Add a new `inject` node. Set `msg.payload = timestamp`, and set the `Repeat` interval to `every 1 seconds`. This will allow Node-Red to pick up the current song playing on Spotify and constantly update the party screen status.
+
+> If you are having issues contacting the Spotify API after some time has passed, disable the flow, wait a couple hours, then increase the `Repeat` interval. You are most likely encountering rate limit issues with the Spotify API.
+
 5. Current State Node
     1. Connect the end of the `inject` node to the start of a new `current state` node. 
     2. Change the `entity_id` to `media_player.spotify_[your account name]`. 
