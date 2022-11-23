@@ -40,6 +40,7 @@ This is a simple party screen that allows you to request songs to be played at t
 > Using ethernet is recommended, as it will be running 24/7 and will be used to update the Spotify queue. It allows for the most stable connection to your home network as possible.
 <br>
 > These instructions will be using a Debian server.
+
 * Another device running a [Home Assistant](https://www.home-assistant.io/) instance that supports addons, with the [Node-Red addon](https://github.com/hassio-addons/addon-node-red) installed. You must also have the Spotify Connect integration installed in Home Assistant, with **the same account you will be using for the party**. 
 > This is used to communicate with the Spotify API and the server running the party screen.
 
