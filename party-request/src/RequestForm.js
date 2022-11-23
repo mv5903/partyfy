@@ -22,8 +22,24 @@ export default function RequestForm() {
         if (!localStorage.getItem('access_token') || localStorage.getItem('access_token') === 'undefined')  { 
             // If the user has not logged in yet, redirect them to the Spotify login page. 
             if (!window.location.href.includes('code')) {
-                window.location.href = authURL;
-                return;
+                swal({
+                    content: (
+                    <div className="popup left-popup">
+                        <h2>Notice</h2>
+                        <p>You are about to be redirected to the Spotify Login Page. Log in with your own Spotify account. By proceeding you are aware that:</p>
+                        <ul>
+                            <li>Your login information is not stored anywhere and is only used to generate an access token.</li>
+                            <li>The access token is stored in your web browser's local storage and is only used to make requests to the Spotify Song Search API.</li>
+                            <li>The access token is only stored on your phone and expires after 1 hour. A new token will automatically be regenerated should the old one expire. This does not require you to log in again.</li>
+                            <li>Your name, username, and account photo is collected solely for the popup displayed when you request a song and is not stored anywhere. It is also used to ensure you do not go over the rate limit.</li>
+                            <li>There is a rate limit of 10 songs for every 1 hour time period. Should you go over this limit, you will see an error message.</li>
+                        </ul>
+                    </div>)
+                })
+                .then(data => {
+                    window.location.href = authURL;
+                    return;
+                })
             }
             // If the user has logged in, request an access token and refresh token from the Spotify API, based on the code provided in the URL.
             let code = window.location.href.split('code=')[1];

@@ -2,3 +2,4 @@
 .env
 secrets.js
 wifi.png
+.DS_Store

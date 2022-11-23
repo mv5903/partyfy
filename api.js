@@ -8,6 +8,20 @@ var requested = [];
 
 app.use(cors());
 
+// Used to update the song progress without needing to constantly query the Spotify API
+let interval = null;
+function setUpdateInterval() {
+    if (interval) {
+        clearInterval(interval);
+    }
+    const updateInterval = 250;
+    interval = setInterval(() => {
+        // Make sure the progress doesn't exceed the total duration
+        if (latest.progress_ms + updateInterval <= latest.duration_ms) {
+            latest.progress_ms += updateInterval;
+        }
+    }, updateInterval);
+}
 
 app.listen(8080, () => {
   console.log("App is listening on port 8080!\n");
@@ -85,6 +99,7 @@ app.get('/request', (req, res) => {
  * Accessed by the api to access the latest current song playing information
  */
 app.get('/latest', (req, res) => {
+    setUpdateInterval();
     res.send(latest);
 })
 
