@@ -125,26 +125,26 @@ export default function RequestForm() {
     return (
         <div className="Page">
             <div className="RequestForm">
-                <h3>Search for a Song:</h3>
-                <p>Enter Song and/or Artist</p>
-                <input id="title" type="text" placeholder="Song Title" required autoComplete="false" autoCorrect="false"/>
-                <input id="artist" type="text" placeholder="Artist" required autoComplete="false" autoCorrect="false"/>
-                <button type="button" onClick={search}>Search</button>
+                <h4 className="display-4 mt-4">Search for a Song:</h4>
+                <p className="text-muted">Enter Song and/or Artist</p>
+                <input id="title" type="text" placeholder="Song Title" className="form-control" autoComplete="false" autoCorrect="false"/>
+                <input id="artist" type="text" placeholder="Artist" className="form-control" autoComplete="false" autoCorrect="false"/>
+                <button type="button" className="btn btn-primary" onClick={search}>Search</button>
             </div>
             <div className="SearchResults">
-                {results.length > 0 && <h4 id="results">Results:</h4>}
+                {results.length > 0 && <h4 id="results" className="display-4 mt-4">Results:</h4>}
                 {results.map((result) => {
                     return (
-                        <div className="result" key={result.uri} id={result.uri}>
+                        <div className="result card text-dark bg-secondary" key={result.uri} id={result.uri}>
                             <div className="flex">
                                 <div>
-                                    <p>{result.name} {result.explicit ? <img className="e-icon" src={e}></img> : null}</p>
-                                    <p>{result.artists[0].name}</p>
-                                    <p>{result.album.name}</p>
+                                    <p className="mt-4"><strong>{result.name} {result.explicit ? <img className="e-icon ms-1" src={e}></img> : null}</strong></p>
+                                    <p className="lead">{result.artists[0].name}</p>
+                                    <p className="text">{result.album.name}</p>
                                 </div>
                                 <img src={result.album.images[0].url} />
                             </div>
-                            <button type="button" onClick={() => {
+                            <button type="button" className="btn btn-success mb-2" onClick={() => {
                                 swal({
                                     content: (<div>
                                         <h3>Are you sure you want to request this song?</h3>

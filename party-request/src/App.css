@@ -45,18 +45,18 @@
 .e-icon {
   width: 10px;
   height: 10px;
-  background-color: white;
   border-radius: 2px;
 }
 
 .App-header {
-  background-color: #282c34;
+  background-image: linear-gradient(to bottom, #000823, #00253f, #003e51, #005856, #00714e);
   min-height: 100vh;
   display: flex;
   align-items: center;
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   color: white;
+  clear: both;
 }
 
 .App-link {
@@ -83,7 +83,6 @@
   font-size: .5em;
   text-align: left;
   width: 90vw;
-  border: 1px solid black;
   border-radius: 5px;
   margin-bottom: 10px;
 }

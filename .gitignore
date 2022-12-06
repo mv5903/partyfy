@@ -3,3 +3,4 @@
 secrets.js
 wifi.png
 .DS_Store
+**/dist/**
