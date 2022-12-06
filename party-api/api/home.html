@@ -39,6 +39,14 @@
             box-shadow: rgba(28, 28, 30, 0.2) 0px 7px 29px 0px;
             border-radius: 5px;
         }
+        .tables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .table {
+            width: 40vw;
+            height: 40vh;
+        }
     </style>
     <script defer>
         window.onload = () => {
@@ -46,17 +54,41 @@
         }
 
         function fetchNowPlaying() {
+            let currentSong = '';
             setInterval(() => {
                 fetch('/controlpanel/getspotifylatest')
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
-                    if (!data.item) {
+                    if (!data) {
                         fetch('/controlpanel')
                     }
                     document.getElementById('nowplayingtrack').innerHTML = data.item.name;
                     document.getElementById('nowplayingartist').innerHTML = data.item.artists[0].name;
                     document.getElementById('nowplayingalbum').setAttribute('src', data.item.album.images[1].url);
+                    if (currentSong != data.item.id) {
+                        currentSong = data.item.id;
+                        fetch('/controlpanel/addToPlayed?' + new URLSearchParams({
+                            track: data.item.name,
+                            artist: data.item.artists[0].name,
+                            album: data.item.album.name,
+                            albumart: data.item.album.images[1].url,
+                            trackid: data.item.id,
+                            duration: data.item.duration_ms,
+                            explicit: data.item.explicit
+                        }))
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('add to played', data);
+                        })
+                    }
+                });
+            }, 1000);
+        }
+
+        function populateAllTables() {
+            setInterval(() => {
+                fetch('/controlpanel/getalltables').then(response => response.json()).then(data => {
+                    console.log("Get all tables:" , data);
                 });
             }, 1000);
         }
@@ -74,8 +106,68 @@
     </div>
     <div class="content">
         <h4 class="display-4 text-center">Database</h4>
-        <div class="actions">
-            <button onclick="fetch('/controlpanel/updatedb')">Update Database</button>
+        <div class="tables">
+            <div class="table text-white">
+                <thead>
+                    <h5>Songs Played</h5>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Artist</th>
+                        <th scope="col">Album</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">User Requested?</th>
+                        <th scope="col">Song ID</th>
+                    </tr>
+                </thead>
+                <tbody id="songs_played"></tbody>
+            </div>
+            <div class="table text-white">
+                <thead>
+                    <h5>Songs Queued</h5>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Artist</th>
+                        <th scope="col">Album</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">User Requested?</th>
+                        <th scope="col">Song ID</th>
+                        <th scope="col">Account URI</th>
+                    </tr>
+                </thead>
+                <tbody id="songs_queued"></tbody>
+            </div>
+            <div class="table text-white">
+                <thead>
+                    <h5>Users</h5>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Account URI</th>
+                        <th scope="col"># Songs Requested</th>
+                    </tr>
+                </thead>
+                <tbody id="users"></tbody>
+            </div>
+            <div class="options">
+                <h5>Options</h5>
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-primary">Clear Database</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-primary">Clear Queue</button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-primary">Clear Users</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table actions">
+            <!-- <button onclick="fetch('/controlpanel/updatedb')">Update Database</button> -->
         </div>
     </div>
 </body>
