@@ -1,31 +1,31 @@
 export class Song {
-    id;
-    albumart;
-    name;
-    artists;
-    album;
-    explicit;
-    length;
+    Album_Art;
+    Name;
+    Artist;
+    Album;
+    Length;
+    Explicit;
+    ID;
 
     constructor(id, albumart, name, artists, album, explicit, length) {
-        this.id = id;
-        this.albumart = albumart;
-        this.name = name;
+        this.ID = id;
+        this.Album_Art = albumart;
+        this.Name = name;
         this.artists = artists;
-        this.album = album;
-        this.explicit = explicit;
-        this.length = length;
+        this.Album = album;
+        this.Explicit = explicit;
+        this.Length = length;
     }
 
     toJSON() {
         return {
-            id: this.id,
-            albumart: this.albumart,
-            name: this.name,
-            artists: this.artists,
-            album: this.album,
-            explicit: this.explicit,
-            length: this.length
+            ID: this.ID,
+            Album_Art: this.Album_Art,
+            Name: this.Name,
+            Artists: this.artists,
+            Album: this.Album,
+            Explicit: this.Explicit === 'true',
+            Length: parseInt(this.Length)
         }
     }
 }

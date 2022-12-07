@@ -6,6 +6,7 @@ import { DB } from './db.js';
 import { Song } from './song.js';
 import path from 'path';
 const __dirname = path.resolve(path.dirname(''));
+app.use(express.static(__dirname + '/external'));
 
 let latest = {
     progress_ms: 0,
@@ -154,7 +155,10 @@ app.get('/controlpanel', (req, res) => {
                     access_token = data.access_token;
                     refresh_token = data.refresh_token;
                 }
-            });
+            })
+            .catch(error => {
+                console.log(error);
+            })
         }
         
     } else {
@@ -177,9 +181,9 @@ app.get('/controlpanel/getalltables', (req, res) => {
 
 app.get('/controlpanel/addToPlayed', (req, res) => {
     const database = new DB();
-    const song = new Song(req.query.id, req.query.name, req.query.artist, req.query.album, req.query.album_name, req.query.explicit, parseInt(req.query.duration_ms));
+    const song = new Song(req.query.id, req.query.albumart, req.query.name, req.query.artists, req.query.album, req.query.explicit, parseInt(req.query.duration_ms));
     database.connect().then(() => {
-        database.addSongPlayed(song).then(() => {
+        database.addSongPlayed(song).then((response) => {
             res.send({message: 'Success'});
         });
     });
@@ -196,6 +200,18 @@ app.get('/controlpanel/getspotifylatest', (req, res) => {
     .then(response => response.json())
     .then((data) => {
         res.send(data);
-    });
+    })
+    .catch(error => {
+        console.log(error);
+    })
 })
+
+app.get('/controlpanel/clear', (req, res) => {
+    const database = new DB();
+    database.connect().then(() => {
+        database.clearTable(req.query.table).then((response) => {
+            res.send({message: 'Success'});
+        });
+    });
+});
 

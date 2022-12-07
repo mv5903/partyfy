@@ -19,22 +19,23 @@ export class DB {
 
     async getSongsPlayed() {
         await this.db.connect();
-        return await this.db.db(this.dbName).collection('songs_played').find().toArray();
+        return await this.db.db(this.dbName).collection('songs_played').find().sort({ $natural: -1 }).toArray();
     }
 
     async getSongRequests() {
         await this.db.connect();
-        return await this.db.db(this.dbName).collection('song_requests').find().toArray();
+        return await this.db.db(this.dbName).collection('song_requests').find().sort({ $natural: -1 }).toArray();
     }
 
     async getUsers() {
         await this.db.connect();
-        return await this.db.db(this.dbName).collection('users').find().toArray();
+        return await this.db.db(this.dbName).collection('users').find().sort({ $natural: -1 }).toArray();
     }
 
     async getAllTables() {
         await this.db.connect();
         const tables = {
+            headings: ['songs_played', 'song_requests', 'users'],
             songs_played: await this.getSongsPlayed(),
             song_requests: await this.getSongRequests(),
             users: await this.getUsers()
@@ -44,6 +45,11 @@ export class DB {
 
     async addSongPlayed(song) {
         await this.db.connect();
+        // Confirm that the last song played is not the same as the current song to avoid duplicates
+        const lastSongAdded = await this.getSongsPlayed();
+        if (lastSongAdded[0] && lastSongAdded[0].ID === song.ID) {
+            return;
+        }
         await this.db.db(this.dbName).collection('songs_played').insertOne(song.toJSON());
     }
 
@@ -55,6 +61,11 @@ export class DB {
     async updateUser(user) {
         await this.db.connect();
         await this.db.db(this.dbName).collection('users').updateOne( { uri: user.uri }, { $set: user.toJSON() });
+    }
+
+    async clearTable(table) {
+        await this.db.connect();
+        await this.db.db(this.dbName).collection(table).deleteMany({});
     }
 }
 
