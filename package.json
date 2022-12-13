@@ -5,5 +5,18 @@
     "react-alert": "^7.0.3",
     "react-icons": "^4.6.0",
     "react-router-dom": "^6.4.3"
-  }
+  },
+  "devDependencies": {
+    "electron": "^22.0.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "name": "my-electron-app",
+  "version": "1.0.0",
+  "description": "Spotify Electron Wrapper",
+  "main": "main.js",
+  "author": "Matthew Vandenberg",
+  "license": "MIT"
 }

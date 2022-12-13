@@ -13,14 +13,34 @@ export default function Spotify() {
       fetch(`${SECRETS.apiAddress}/latest`)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          setLatest(data);
-          setProgress({
-            width: `${(data.progress_ms / data.duration_ms) * 100}%`,
-            currentTime: `${fancyTimeFormat(data.progress_ms/1000)}`,
-            maxTime: `${fancyTimeFormat(data.duration_ms/1000)}`,
-          })
-          document.querySelector('.progress-bar').style.width = `${(data.progress_ms / data.duration_ms) * 100}%`;
+          // Assuming that Home Assistant version of API is not being used
+          if (data.duration_ms === 0) {
+            fetch(`${SECRETS.apiAddress}/controlpanel/getLatest`)
+              .then((response) => response.json())
+              .then((data) => {
+                setLatest({
+                  explicit: data.Explicit,
+                  name: data.Name,
+                  artist: data.Artists,
+                  album_name: data.Album,
+                  album: data.Album_Art,
+                });
+                setProgress({
+                  width: `${(data.progress_ms / data.Length) * 100}%`,
+                  currentTime: `${fancyTimeFormat(data.progress_ms/1000)}`,
+                  maxTime: `${fancyTimeFormat(data.Length/1000)}`,
+                })
+                document.querySelector('.progress-bar').style.width = `${(data.progress_ms / data.Length) * 100}%`;
+              });
+          } else {
+            setLatest(data);
+            setProgress({
+              width: `${(data.progress_ms / data.duration_ms) * 100}%`,
+              currentTime: `${fancyTimeFormat(data.progress_ms/1000)}`,
+              maxTime: `${fancyTimeFormat(data.duration_ms/1000)}`,
+            })
+            document.querySelector('.progress-bar').style.width = `${(data.progress_ms / data.duration_ms) * 100}%`;
+          }
         });
     }, 1000);
     return () => {

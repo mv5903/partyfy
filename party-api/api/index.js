@@ -215,3 +215,26 @@ app.get('/controlpanel/clear', (req, res) => {
     });
 });
 
+app.get('/controlpanel/updateNowPlaying', (req, res) => {
+    const database = new DB();
+    const song = new Song(req.query.id, req.query.albumart, req.query.name, req.query.artists, req.query.album, req.query.explicit, parseInt(req.query.duration_ms));
+    let songJSON = song.toJSON();
+    songJSON['progress_ms'] = parseInt(req.query.progress_ms);
+    database.connect().then(() => {
+        database.updateNowPlaying(songJSON).then((response) => {
+            res.send({message: 'Success'});
+        });
+    });
+});
+
+app.get('/controlpanel/getLatest', (req, res) => {
+    const database = new DB();
+    database.connect().then(() => {
+        database.getNowPlaying().then((data) => {
+            res.send(data);
+        });
+    });
+});
+
+
+// pm2 start index.js --cron-restart="0 0 * * *"

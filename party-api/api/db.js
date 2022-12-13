@@ -67,7 +67,20 @@ export class DB {
         await this.db.connect();
         await this.db.db(this.dbName).collection(table).deleteMany({});
     }
+
+    async updateNowPlaying(song) {
+        await this.db.connect();
+        await this.db.db(this.dbName).collection('now_playing').deleteMany({});
+        await this.db.db(this.dbName).collection('now_playing').insertOne(song);
+    }
+
+    async getNowPlaying() {
+        await this.db.connect();
+        return await this.db.db(this.dbName).collection('now_playing').findOne({});
+    }
 }
+
+
 
 /**
  * Installation

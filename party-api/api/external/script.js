@@ -29,6 +29,18 @@ function fetchNowPlaying() {
                 eicon.style.backgroundColor = 'white';
             }
             document.getElementById('nowplayingalbum').setAttribute('src', data.item.album.images[1].url);
+            // Update Now Playing item in database
+            fetch('/controlpanel/updateNowPlaying?' + new URLSearchParams({
+                id: data.item.id,
+                albumart: data.item.album.images[0].url,
+                name: data.item.name,
+                artists: data.item.artists[0].name,
+                album: data.item.album.name,
+                explicit: data.item.explicit,
+                duration_ms: data.item.duration_ms,
+                progress_ms: data.progress_ms
+            }));
+            // Avoid duplicate being added to played database
             if (currentSong != data.item.id) {
                 currentSong = data.item.id;
                 fetch('/controlpanel/addToPlayed?' + new URLSearchParams({
@@ -46,7 +58,7 @@ function fetchNowPlaying() {
                 })
             }
         });
-    }, 3000);
+    }, 1000);
 }
 
 function populateAllTables() {
