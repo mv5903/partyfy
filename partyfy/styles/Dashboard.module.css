@@ -1,0 +1,16 @@
+.tables {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    grid-column-gap: 40px;
+    grid-row-gap: 40px;
+}
+
+.tables div {
+    width: 40vw;
+    height: 40vh;
+}
+
+.now-playing {
+    margin-top: 20vh;
+}
