@@ -3,7 +3,7 @@ import DataTable from './DataTable';
 import Settings from './Settings';
 import NowPlaying from './NowPlaying';
 
-export default function Dashboard({ spotifyAuth }) {
+export default function Dashboard({ spotifyAuth, setSpotifyAuthenticated }) {
     console.log(spotifyAuth);
 
     return (
@@ -16,7 +16,7 @@ export default function Dashboard({ spotifyAuth }) {
                     <DataTable />
                     <Settings />
                 </div>
-                <NowPlaying />
+                <NowPlaying spotifyAuth={spotifyAuth} setSpotifyAuthenticated={setSpotifyAuthenticated}/>
             </div>
         </div>
     )

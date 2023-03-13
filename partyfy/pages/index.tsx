@@ -76,20 +76,20 @@ export default function Home() {
             spotifyAuthenticated
             ? 
             <div className="d-flex flex-column justify-content-center align-items-center">
-              <Dashboard spotifyAuth={spotifyAuth.current}/> 
+              <Dashboard spotifyAuth={spotifyAuth.current} setSpotifyAuthenticated={setSpotifyAuthenticated} /> 
             </div>
             :
             <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
               <h3 className="m-4">You're almost ready to party!</h3>
               <p className="m-4">To get started, you'll need to authenticate your Spotify account.</p>
-              <AnchorLink
-                href={spotifyAuthURL}
-                className="btn btn-primary btn-margin m-4"
-                icon={null}
-                testId="navbar-logout-mobile"
-                tabIndex={0}>
-                Authenticate Spotify
-              </AnchorLink>
+                <AnchorLink
+                  href={spotifyAuthURL}
+                  className="btn btn-success btn-margin m-4 decoration-none"
+                  icon={null}
+                  testId="navbar-logout-mobile"
+                  tabIndex={0}>
+                  Authenticate Spotify
+                </AnchorLink>
             </div>
           }
 
