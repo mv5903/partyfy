@@ -7,6 +7,8 @@ import { CONSTANTS } from './assets/Constants';
 import Loading from '../components/Loading';
 import { SpotifyAuth } from './helpers/SpotifyAuth';
 import Dashboard from '../components/Dashboard';
+import UserContext from './providers/UserContext';
+
 
 export default function Home() {
   const { user, isLoading } = useUser();
@@ -16,11 +18,25 @@ export default function Home() {
 
   // Handles spotify authentication
   async function handleSpotifyAuth() {
-    if (!spotifyAuthenticated) {
+    let storedRefreshToken = sessionStorage.getItem('spotifyRefreshToken');
+    if (storedRefreshToken && !spotifyAuthenticated) {
+      spotifyAuth.current = new SpotifyAuth('');
+      spotifyAuth.current.refreshToken = storedRefreshToken;
+      await spotifyAuth.current.refreshAccessToken();
+      sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
+      setSpotifyAuthenticated(true);
+      return;
+    }
+    if (!spotifyAuthenticated || !spotifyAuth.current?.initialized) {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
-      if (code) {
+      if (code && !storedRefreshToken) {
         spotifyAuth.current = new SpotifyAuth(code);
+        await spotifyAuth.current.getRefreshToken();
+        await spotifyAuth.current.refreshAccessToken();
+        console.log('access token: ', spotifyAuth.current.accessToken, 'refresh token: ', spotifyAuth.current.refreshToken);
+        sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
+        sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
         setSpotifyAuthenticated(true);
         return;
       } 
@@ -74,10 +90,16 @@ export default function Home() {
           </nav>
           { 
             spotifyAuthenticated
-            ? 
-            <div className="d-flex flex-column justify-content-center align-items-center">
-              <Dashboard spotifyAuth={spotifyAuth.current} setSpotifyAuthenticated={setSpotifyAuthenticated} /> 
-            </div>
+            ?
+            <>
+              { user && spotifyAuth.current?.accessToken &&
+              <div className="d-flex flex-column justify-content-center align-items-center">
+                  <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user }} >
+                    <Dashboard/> 
+                  </UserContext.Provider>
+              </div>
+              }
+            </> 
             :
             <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
               <h3 className="m-4">You're almost ready to party!</h3>

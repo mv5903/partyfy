@@ -103,6 +103,8 @@ app.get('/request', (req, res) => {
         queued: false
     }
     requested.push(data);
+    const database = new DB();
+    
     res.send({message: "Song requested successfully"});
 });
 

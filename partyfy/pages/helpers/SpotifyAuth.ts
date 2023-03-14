@@ -10,7 +10,6 @@ export class SpotifyAuth {
         this.authorizationCode = code;
         if (code !== '') {
             this.initialized = true;
-            this.getRefreshToken();
         }
     }
 

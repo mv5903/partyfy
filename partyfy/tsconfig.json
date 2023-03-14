@@ -18,6 +18,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/dashboard/index.tss", "pages/assets/Constants.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/dashboard/index.tss", "pages/assets/Constants.js", "components/DataTable.jsx", "pages/providers/UserContext.js"],
   "exclude": ["node_modules"]
 }

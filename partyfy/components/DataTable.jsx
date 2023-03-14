@@ -1,7 +1,7 @@
-export default function DataTable() {
+export default function DataTable({ title }) {
     return (
         <div>
-            <h2 className="text-center">DataTable</h2>
+            <h3 className="text-center">{title}</h3>
         </div>
     )
 }
