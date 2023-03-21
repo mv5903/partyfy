@@ -1,0 +1,9 @@
+.datatable {
+    font-size: .2em;
+    color: white;
+}
+
+.tableTD {
+    height: auto !important;
+    width: auto;
+}

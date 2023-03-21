@@ -78,7 +78,7 @@ export default function Home() {
       {
         user && <main className={`${styles.main_loggedin} `}>
           <nav className='d-flex flex-row justify-content-between'>
-            <h2 className={`${styles.title} m-4`}>{`Welcome back, ${user.given_name}!`}</h2>
+            <h4 className={`${styles.title} m-4`}>{`Welcome back, ${user.given_name}!`}</h4>
             <AnchorLink
               href="/api/auth/logout"
               className="btn btn-primary btn-margin m-4"

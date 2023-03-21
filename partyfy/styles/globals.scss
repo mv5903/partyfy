@@ -21,6 +21,8 @@ html {
 
 body {
   background-color: transparent;
+  overflow: hidden;
+  height: 100%;
 }
 
 body, head {
@@ -97,4 +99,21 @@ h2 {
   text-align: left;
   margin: 0;
   padding: 0;
+}
+
+h6 {
+  font-family: $title-font;
+}
+
+table {
+  overflow-y: scroll;
+  border-radius: 10px;
+}
+
+th {
+  font-size:.7em;
+  min-width: 6vw;
+  font-weight: bold;
+  text-align: left;
+  padding: 6px;
 }

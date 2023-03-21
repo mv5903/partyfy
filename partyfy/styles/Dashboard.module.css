@@ -1,18 +1,17 @@
 .tables {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    grid-column-gap: 40px;
-    grid-row-gap: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .tables div {
     width: 40vw;
-    height: 40vh;
+    margin: 10px;
 }
 
 .nowplaying {
     width: 10vw;
+    margin-left: 3vw;
 }
 
 .eicon {
@@ -30,6 +29,14 @@
     border: 1px solid white;
 }
 
-.songname {
-    margin-top: 50px;
+.datatable {
+    font-size: .4em;
+    color: white;
+    border-radius: 10px;
+    height: 80vh;
+}
+
+.tableTD {
+    height: auto !important;
+    width: auto;
 }
