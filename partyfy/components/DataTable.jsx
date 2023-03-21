@@ -44,9 +44,8 @@ export default function DataTable({ title }) {
 
     return (
     <div className={styles.datatable}>
-        <div>
+        <div className="d-flex justify-content-center align-items-center">
             <h3 className={"text-center"}>{title}</h3> 
-            <ClearTable table={title} /> 
         </div>
         <table className='table table-dark' style={{ display: 'block', height: '80vh' }}>
             <thead>

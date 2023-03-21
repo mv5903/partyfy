@@ -29,5 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(200).json(data);
       return;
     }
+    else if (req.method === 'DELETE') {
+      let body = req.body;
+      let data = await database.deleteRecentSong(body.OwnerUserID as string) as any;
+      res.status(200).json(data);
+      return;
+    }
     res.status(405).end();
 }

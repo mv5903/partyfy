@@ -117,3 +117,7 @@ th {
   text-align: left;
   padding: 6px;
 }
+
+*::-webkit-scrollbar {
+  display: none;
+}

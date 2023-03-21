@@ -1,9 +1,16 @@
 import Swal from 'sweetalert2';
+import { useContext } from 'react';
+import UserContext from '../pages/providers/UserContext';
 
-export default function ClearTable({ table: string }) {
+export default function ClearTable({ table }) {
+
+    const {
+        spotifyAuth,
+        user
+    } = useContext(UserContext);
 
     async function clearTable() {
-        let choice = Swal.fire({
+        let choice = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
             icon: 'warning',
@@ -13,23 +20,30 @@ export default function ClearTable({ table: string }) {
             confirmButtonText: 'Yes, clear it!'
         })
 
-        if (!choice) return;
+        if (choice.isConfirmed) {
+            const response = await fetch('/api/database/recents', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    OwnerUserID: user.sub ?? user.user_id
+                })
+            });
 
-        console.log('clear');
-        // const response = await fetch('/api/database/clear', {
-        //     method: 'DELETE',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         table: table
-        //     })
-        // });
+            if (response.status === 200) {
+                Swal.fire(
+                    'Cleared!',
+                    'The table has been cleared.',
+                    'success'
+                )
+            }
+        }
     }
 
     return (
-        <div>
-            <button className="btn btn-danger" onClick={clearTable}>{`Clear #${table}`}</button>
-        </div>
+        <>
+            <button className="btn btn-danger m-2" onClick={clearTable}>{`Clear ${table}`}</button>
+        </>
     );
 }

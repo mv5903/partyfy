@@ -41,17 +41,18 @@ export default class Database {
     async insertRecentSong(OwnerUserID: string, SongID: string, SongName: string, SongArtist: string, SongAlbum: string, SongArt: string, SongExplicit: string) {
         try {
             if (this.initialized) {
-                console.log({
-                    OwnerUserID,
-                    SongID,
-                    SongArtist,
-                    SongName,
-                    SongAlbum,
-                    SongArt,
-                    SongExplicit
-                });
-                const response =  await sql.query`INSERT INTO Recents (OwnerUserID, PlayedAt, SongID, SongName, SongArtist, SongAlbum, SongArt, SongExplicit) VALUES (${OwnerUserID}, CURRENT_TIMESTAMP, ${SongID}, ${SongName}, ${SongArtist}, ${SongAlbum}, ${SongArt}, ${SongExplicit})`;
-                return response;
+                return await sql.query`INSERT INTO Recents (OwnerUserID, PlayedAt, SongID, SongName, SongArtist, SongAlbum, SongArt, SongExplicit) VALUES (${OwnerUserID}, CURRENT_TIMESTAMP, ${SongID}, ${SongName}, ${SongArtist}, ${SongAlbum}, ${SongArt}, ${SongExplicit})`;
+            }
+            throw new Error('Database not initialized');
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async deleteRecentSong(OwnerUserID: string) {
+        try {
+            if (this.initialized) {
+                return await sql.query`DELETE FROM Recents WHERE OwnerUserID = ${OwnerUserID}`;
             }
             throw new Error('Database not initialized');
         } catch (err) {

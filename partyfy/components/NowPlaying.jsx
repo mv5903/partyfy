@@ -5,6 +5,7 @@ import { fancyTimeFormat } from '@/pages/helpers/Utils';
 import Loading from './Loading';
 import UserContext from '../pages/providers/UserContext';
 import { useContext } from 'react';
+import Options from './Options';
 
 const timer = 1000;
 
@@ -109,6 +110,7 @@ export default function NowPlaying() {
                 :
                 <h3 className="text-center">Nothing Playing</h3>
             }
+            <Options />
         </div>
     );
 }
