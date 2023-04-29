@@ -11,10 +11,11 @@ export default function DataTable({ title }) {
     } = useContext(UserContext);
 
     const [recents, setRecents] = useState([]);
+    const [queue, setQueue] = useState([]);
 
-    if (user && title === "Recently Played") {
+    if (user) {
         useEffect(() => {
-            async function fn() {
+            async function getRecents() {
                 let response = await fetch('/api/database/recents?UserID=' + user.sub ?? user.user_id); 
                 let data = await response.json();
                 let songs = data.recordset;
@@ -22,9 +23,26 @@ export default function DataTable({ title }) {
                 if (songs.length === 0) return;
                 setRecents(songs);
             }
+            
+            async function getQueue() {
+                let response = await fetch('/api/database/queue?UserID=' + user.sub ?? user.user_id); 
+                let data = await response.json();
+                let songs = data.recordset;
+                if (!songs) return;
+                if (songs.length === 0) return;
+                setQueue(songs);
+            }
 
-            const interval = setInterval(fn, 3000);
-            return () => clearInterval(interval);
+            if (title === "Recently Played") {
+                var interval = setInterval(getRecents, 3000);
+            }
+            else if (title === "Queue") {
+                var interval = setInterval(getQueue, 3000);
+            }
+
+            if (interval) {
+                return () => clearInterval(interval);
+            }
         })
     }
 
@@ -57,6 +75,14 @@ export default function DataTable({ title }) {
                             if (removeHeaders.includes(key)) return;
                             return <th scope='col' key={index}>{key}</th>
                         })
+                    }
+                    {
+                        title === "Queue" &&
+                        <>
+                            <th scope='col'>Name</th>
+                            <th scope='col'>Artist</th>
+                            <th scope='col'>Added At</th>
+                        </>
                     }
                 </tr>
             </thead>

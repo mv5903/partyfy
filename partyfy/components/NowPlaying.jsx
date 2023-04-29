@@ -9,7 +9,7 @@ import Options from './Options';
 
 const timer = 1000;
 
-export default function NowPlaying() {
+export default function NowPlaying({ setIsAHost }) {
 
     const [nowPlaying, setNowPlaying] = useState(false);
 
@@ -114,7 +114,7 @@ export default function NowPlaying() {
                 :
                 <h3 className="text-center">Nothing Playing</h3>
             }
-            <Options />
+            <Options setIsAHost={setIsAHost} />
         </div>
     );
 }
