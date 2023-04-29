@@ -59,4 +59,37 @@ export default class Database {
             console.error(err);
         }
     }
+
+    async getUser(UserID: string) {
+        try {
+            if (this.initialized) {
+                return await sql.query`SELECT * FROM Users WHERE UserID = ${UserID}`;
+            }
+            throw new Error('Database not initialized');
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async addNewUser(UserID: string) {
+        try {
+            if (this.initialized) {
+                return await sql.query`INSERT INTO Users (UserID) VALUES (${UserID})`;
+            }
+            throw new Error('Database not initialized');
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async addUserRefreshToken(UserID: string, RefreshToken: string) {
+        try {
+            if (this.initialized) {
+                return await sql.query`UPDATE Users SET RefreshToken = ${RefreshToken} WHERE UserID = ${UserID}`;
+            }
+            throw new Error('Database not initialized');
+        } catch (err) {
+            console.error(err);
+        }
+    }
 }

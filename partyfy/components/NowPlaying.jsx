@@ -34,6 +34,10 @@ export default function NowPlaying() {
             if (!data) return;
             // Get first song in recent songs, see if it matches current song. If not, add to database
             const firstSong = data[0][0];
+            if (!currentSong || !currentSong.item) {
+                await spotifyAuth.refreshAccessToken();
+                return;
+            }
             if (!firstSong || firstSong.SongID !== currentSong.item.id) {
                 await fetch('/api/database/recents', {
                     method: 'POST',

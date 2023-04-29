@@ -18,6 +18,7 @@ export default function Home() {
 
   // Handles spotify authentication
   async function handleSpotifyAuth() {
+    // Attempt to first get stored refresh token from session storage
     let storedRefreshToken = sessionStorage.getItem('spotifyRefreshToken');
     if (storedRefreshToken && !spotifyAuthenticated) {
       spotifyAuth.current = new SpotifyAuth('');
@@ -25,8 +26,27 @@ export default function Home() {
       await spotifyAuth.current.refreshAccessToken();
       sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
       setSpotifyAuthenticated(true);
-      return;
     }
+    // Then, if no refresh token is stored, attempt to get refresh token from user in database
+    if (!storedRefreshToken && user) {
+      const response = await fetch('/api/database/users?UserID=' + user?.sub ?? user?.user_id, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+      });
+      let data = await response.json();
+      if (data && data.recordset) data = data.recordset;
+      if (data && data[0]?.RefreshToken) {
+        spotifyAuth.current = new SpotifyAuth('');
+        spotifyAuth.current.refreshToken = data[0]?.RefreshToken;
+        await spotifyAuth.current.refreshAccessToken();
+        sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
+        sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
+        setSpotifyAuthenticated(true);
+      }
+    }
+    // Else, get a new refresh token from Spotify based on the code in the URL
     if (!spotifyAuthenticated || !spotifyAuth.current?.initialized) {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
@@ -41,10 +61,22 @@ export default function Home() {
         return;
       } 
     }
+    // Finally, if no refresh token is stored and no code is in the URL, show a login with Spotify button
   }
   useEffect(() => {
-    if (user) handleSpotifyAuth();
-  }), [];
+    if (user) {
+      fetch('/api/database/users', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              UserID: user?.sub ?? user?.user_id,
+          })
+      });
+      handleSpotifyAuth();
+    } 
+  }), [user];
 
   if (isLoading) {
     return (
