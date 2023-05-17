@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": true
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "CockroachDB",
+            "name": "Cockroach Partyfy",
+            "connectString": "postgresql://matt:Weyers6638!@biased-imp-10661.7tt.cockroachlabs.cloud:26257/partyfy?sslmode=verify-full"
+        }
+    ]
+}
