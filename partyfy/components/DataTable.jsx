@@ -25,12 +25,12 @@ export default function DataTable({ title }) {
             }
             
             async function getQueue() {
-                let response = await fetch('/api/database/queue?UserID=' + user.sub ?? user.user_id); 
+                let response = await fetch("/api/spotify/queue?UserID=&access_token=" + spotifyAuth.accessToken); 
                 let data = await response.json();
-                let songs = data.recordset;
-                if (!songs) return;
-                if (songs.length === 0) return;
-                setQueue(songs);
+                console.log(data);
+                if (!data) return;
+                if (data.queue.length === 0) return;
+                setQueue(data.queue);
             }
 
             if (title === "Recently Played") {
@@ -63,7 +63,7 @@ export default function DataTable({ title }) {
     return (
     <div className={styles.datatable}>
         <div className="d-flex justify-content-center align-items-center">
-            <h3 className={"text-center"}>{title}</h3> 
+            <h3 className={"text-center"}>{title === "Queue" ? "Up Next" : title}</h3> 
         </div>
         <table className='table table-dark' style={{ display: 'block', height: '80vh' }}>
             <thead>
@@ -105,6 +105,26 @@ export default function DataTable({ title }) {
                                 <td><h5>{song.SongArtist}</h5></td>
                                 <td><h5>{song.SongAlbum}</h5></td>
                                 <td><h5>{formatTime(playedAt)}</h5></td>
+                            </tr>
+                        )
+                    })
+                }
+                {
+                    title === "Queue" && queue && queue.length > 0 && queue.map((song, index) => {
+                        return (
+                            <tr key={index}>
+                                <td>
+                                    <div className="d-flex" style={{ width: 'auto' }}>
+                                        <img src={song.album.images[2].url} style={{ width: '3vh', height: '3vh', marginRight: '1vh' }}/>
+                                        <h5>{song.name}</h5>
+                                        {
+                                            song.explicit && 
+                                            <img className={`${styles.eicon} ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
+                                        }
+                                    </div>
+                                </td>
+                                <td><h5>{song.artists.map(artist => artist.name).join(", ")}</h5></td>
+                                <td><h5>{song.album.name}</h5></td>
                             </tr>
                         )
                     })
