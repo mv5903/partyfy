@@ -1,4 +1,17 @@
 .options {
-    margin-top: 10vh;
-    width: 10vw;
+    z-index: 1;
+    padding: 12px 16px;
+    min-width: 160px;
+    position: absolute;
+    right: 0;
+    margin-top: 5vh;
+    background-color: #333;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quickMenu:hover {
+    cursor: pointer;
 }

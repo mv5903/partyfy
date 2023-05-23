@@ -8,11 +8,13 @@ import Loading from '../components/Loading';
 import { SpotifyAuth } from './helpers/SpotifyAuth';
 import Dashboard from '../components/Dashboard';
 import UserContext from './providers/UserContext';
+import UserQuickAction from '../components/UserQuickAction';
 
 
 export default function Home() {
   const { user, isLoading } = useUser();
   const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(false);
+  const [isAHost, setIsAHost] = useState(null);
   const spotifyAuth = useRef<SpotifyAuth>();
   const spotifyAuthURL = CONSTANTS.SPOTIFY_AUTH_URL;
 
@@ -110,15 +112,8 @@ export default function Home() {
       {
         user && <main className={`${styles.main_loggedin} `}>
           <nav className='d-flex flex-row justify-content-between'>
-            <h4 className={`${styles.title} m-4`}>{`Welcome back, ${user.given_name}!`}</h4>
-            <AnchorLink
-              href="/api/auth/logout"
-              className="btn btn-primary btn-margin m-4"
-              icon={null}
-              testId="navbar-logout-mobile"
-              tabIndex={0}>
-              Log out
-            </AnchorLink>
+            <h4 className={`${styles.title} ms-2 mt-2`}>{`Welcome back, ${user.given_name}!`}</h4>
+            <UserQuickAction setIsAHost={setIsAHost} />
           </nav>
           { 
             spotifyAuthenticated
@@ -127,7 +122,7 @@ export default function Home() {
               { user && spotifyAuth.current?.accessToken &&
               <div className="d-flex flex-column justify-content-center align-items-center">
                   <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user }} >
-                    <Dashboard/> 
+                    <Dashboard isAHost={isAHost} setIsAHost={setIsAHost}/> 
                   </UserContext.Provider>
               </div>
               }

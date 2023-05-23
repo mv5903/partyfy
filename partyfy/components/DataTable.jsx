@@ -65,7 +65,7 @@ export default function DataTable({ title }) {
         <div className="d-flex justify-content-center align-items-center">
             <h3 className={"text-center"}>{title === "Queue" ? "Up Next" : title}</h3> 
         </div>
-        <table className='table table-dark' style={{ display: 'block', height: '80vh' }}>
+        <table className='table table-dark' style={{ display: 'block', height: '75vh' }}>
             <thead>
                 <tr style={{ width: '40vw'}}>
                     { 

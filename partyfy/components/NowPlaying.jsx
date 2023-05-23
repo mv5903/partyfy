@@ -114,7 +114,6 @@ export default function NowPlaying({ setIsAHost }) {
                 :
                 <h3 className="text-center">Nothing Playing</h3>
             }
-            <Options setIsAHost={setIsAHost} />
         </div>
     );
 }

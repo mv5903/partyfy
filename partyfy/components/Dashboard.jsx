@@ -5,13 +5,11 @@ import NowPlaying from './NowPlaying';
 import { useContext, useEffect, useState } from 'react';
 import UserContext from '../pages/providers/UserContext';
 
-export default function Dashboard() {
+export default function Dashboard({ isAHost, setIsAHost }) {
     const {
         spotifyAuth,
         user
     } = useContext(UserContext);
-
-    const [isAHost, setIsAHost] = useState(null);
 
     useEffect(() => {
         // When user logs in and is redirected to dashboard, we can store the refresh token in the database.
@@ -39,7 +37,7 @@ export default function Dashboard() {
              isAHost &&
              <>  
                 <div className={styles.dashboard}>
-                    <h3 className="text-center mb-4"><i>Dashboard</i></h3>
+                    <h3 className="text-center mb-2"><i>Dashboard</i></h3>
                     <div className="d-flex flex-row justify-content-between">
                         <div className={styles.tables}>
                             <DataTable title="Queue"/>
