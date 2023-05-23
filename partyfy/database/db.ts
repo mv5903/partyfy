@@ -1,4 +1,6 @@
 import * as sql from 'mssql';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 export default class Database {
     initialized: boolean = false;
@@ -31,17 +33,30 @@ export default class Database {
     async getRecentSongs(OwnerUserID: string){
         try {
             if (this.initialized) {
-                return await sql.query`SELECT SongName, SongArtist, SongAlbum, PlayedAt, SongExplicit, SongArt, OwnerUserID, SongID FROM Recents WHERE OwnerUserID = ${OwnerUserID} ORDER BY PlayedAt DESC`;
+                return await prisma.recents.findMany();
+                //return await sql.query`SELECT SongName, SongArtist, SongAlbum, PlayedAt, SongExplicit, SongArt, OwnerUserID, SongID FROM Recents WHERE OwnerUserID = ${OwnerUserID} ORDER BY PlayedAt DESC`;
             }
         } catch (err) {
             console.error(err);
         }
     }
 
-    async insertRecentSong(OwnerUserID: string, SongID: string, SongName: string, SongArtist: string, SongAlbum: string, SongArt: string, SongExplicit: string) {
+    async insertRecentSong(OwnerUserID: string, SongID: string, SongName: string, SongArtist: string, SongAlbum: string, SongArt: string, SongExplicit: boolean) {
         try {
             if (this.initialized) {
-                return await sql.query`INSERT INTO Recents (OwnerUserID, PlayedAt, SongID, SongName, SongArtist, SongAlbum, SongArt, SongExplicit) VALUES (${OwnerUserID}, CURRENT_TIMESTAMP, ${SongID}, ${SongName}, ${SongArtist}, ${SongAlbum}, ${SongArt}, ${SongExplicit})`;
+                //return await sql.query`INSERT INTO Recents (OwnerUserID, PlayedAt, SongID, SongName, SongArtist, SongAlbum, SongArt, SongExplicit) VALUES (${OwnerUserID}, CURRENT_TIMESTAMP, ${SongID}, ${SongName}, ${SongArtist}, ${SongAlbum}, ${SongArt}, ${SongExplicit})`;
+                return await prisma.recents.create({
+                    data: {
+                        OwnerUserID: OwnerUserID,
+                        PlayedAt: new Date(),
+                        SongID: SongID,
+                        SongName: SongName,
+                        SongArtist: SongArtist,
+                        SongAlbum: SongAlbum,
+                        SongArt: SongArt,
+                        SongExplicit: SongExplicit
+                    }
+                })
             }
             throw new Error('Database not initialized');
         } catch (err) {
@@ -90,6 +105,21 @@ export default class Database {
             throw new Error('Database not initialized');
         } catch (err) {
             console.error(err);
+        }
+    }
+
+    async addUsername(UserID: string, Username: string) {
+        try {
+            if (this.initialized) {
+                return await sql.query`UPDATE Users SET Username = ${Username} WHERE UserID = ${UserID}`;
+            }
+            throw new Error('Database not initialized');
+        } catch (err: any) {
+            if (err.toString().includes('Cannot insert duplicate key')) {
+                return {
+                    duplicate: true
+                }
+            }
         }
     }
 }

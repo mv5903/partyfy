@@ -21,7 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     })
     .then(response => response.json())
     .then((data: any) => {
-        console.log(data);
         if (!data.access_token) throw "Error while attempting to fetch a refresh token with the provided code: " + code;
         res.status(200).json(data);
     })

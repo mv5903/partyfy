@@ -4,6 +4,7 @@ import Settings from './Settings';
 import NowPlaying from './NowPlaying';
 import { useContext, useEffect, useState } from 'react';
 import UserContext from '../pages/providers/UserContext';
+import { isMobile } from 'react-device-detect';
 
 export default function Dashboard({ isAHost, setIsAHost }) {
     const {
@@ -34,7 +35,7 @@ export default function Dashboard({ isAHost, setIsAHost }) {
     return (
         <>
         {
-             isAHost &&
+             isAHost && !isMobile && 
              <>  
                 <div className={styles.dashboard}>
                     <h3 className="text-center mb-2"><i>Dashboard</i></h3>
@@ -49,7 +50,7 @@ export default function Dashboard({ isAHost, setIsAHost }) {
              </>
         }
         {
-            isAHost === false &&
+            (isAHost === false || isMobile) &&
             <>
                 <div className={styles.dashboard}>
                     <h3 className="text-center mb-4"><i>Dashboard</i></h3>
@@ -60,7 +61,7 @@ export default function Dashboard({ isAHost, setIsAHost }) {
              </>
         }
         {
-            isAHost === null &&
+            isAHost === null && !isMobile &&
             <>
                 <div className={styles.dashboard}>
                     <h3 className="text-center mb-4">What would you like to do next?</h3>

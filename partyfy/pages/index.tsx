@@ -9,10 +9,11 @@ import { SpotifyAuth } from './helpers/SpotifyAuth';
 import Dashboard from '../components/Dashboard';
 import UserContext from './providers/UserContext';
 import UserQuickAction from '../components/UserQuickAction';
+import Swal from 'sweetalert2';
 
 
 export default function Home() {
-  const { user, isLoading } = useUser();
+  const { user, error, isLoading } = useUser();
   const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(false);
   const [isAHost, setIsAHost] = useState(null);
   const spotifyAuth = useRef<SpotifyAuth>();
@@ -56,7 +57,6 @@ export default function Home() {
         spotifyAuth.current = new SpotifyAuth(code);
         await spotifyAuth.current.getRefreshToken();
         await spotifyAuth.current.refreshAccessToken();
-        console.log('access token: ', spotifyAuth.current.accessToken, 'refresh token: ', spotifyAuth.current.refreshToken);
         sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
         sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
         setSpotifyAuthenticated(true);
@@ -79,6 +79,62 @@ export default function Home() {
       handleSpotifyAuth();
     } 
   }), [user];
+
+  async function checkUsername(username: string) {
+    if (username.length < 1 || username.length > 16) return false;
+    const response = await fetch('/api/database/username', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        UserID: user?.sub ?? user?.user_id,
+        Username: username
+      })
+    })
+    let data = await response.json();
+    return false;
+  }
+
+  useEffect(() => {
+    async function f() {
+      const response = await fetch('/api/database/users?UserID=' + user?.sub ?? user?.user_id, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+      });
+      let data = await response.json();
+      if (data && data.recordset) data = data.recordset[0];
+      if (!data) return;
+      if (!data.Username) {
+        let { value: username } = await Swal.fire({
+          title: 'Welcome! Please enter a username to get started.',
+          input: 'text',
+          inputLabel: 'Your username. Choose up to 16 characters.',
+          inputPlaceholder: 'johndoe24',
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        })
+
+        let usernameOK = false;
+        while (!usernameOK) {
+          if (!await checkUsername(username)) {
+            username = await Swal.fire({
+              title: `${username} is already taken. Please try another.`,
+              input: 'text',
+              inputLabel: 'Your username. Choose up to 16 characters.',
+              inputPlaceholder: 'johndoe24',
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            })
+          }
+        }
+      }
+    }
+
+    f();
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -113,7 +169,9 @@ export default function Home() {
         user && <main className={`${styles.main_loggedin} `}>
           <nav className='d-flex flex-row justify-content-between'>
             <h4 className={`${styles.title} ms-2 mt-2`}>{`Welcome back, ${user.given_name}!`}</h4>
-            <UserQuickAction setIsAHost={setIsAHost} />
+            <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user }} >
+              <UserQuickAction isAHost={isAHost} setIsAHost={setIsAHost} />
+            </UserContext.Provider>
           </nav>
           { 
             spotifyAuthenticated

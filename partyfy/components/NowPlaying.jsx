@@ -39,7 +39,7 @@ export default function NowPlaying({ setIsAHost }) {
                 return;
             }
             if (!firstSong || firstSong.SongID !== currentSong.item.id) {
-                await fetch('/api/database/recents', {
+                const response = await fetch('/api/database/recents', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

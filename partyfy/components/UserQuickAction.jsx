@@ -3,8 +3,9 @@ import styles from '../styles/Options.module.css';
 import { useState } from 'react';
 import { BsFillPersonFill } from 'react-icons/bs';
 import { IoMdArrowDropdown } from 'react-icons/io';
+import { isMobile } from 'react-device-detect';
 
-export default function UserQuickAction({ setIsAHost }) {
+export default function UserQuickAction({ isAHost, setIsAHost }) {
 
     const [ showQuickActionMenu, setShowQuickActionMenu ] = useState(false);
 
@@ -20,9 +21,15 @@ export default function UserQuickAction({ setIsAHost }) {
         </div>
         {
             showQuickActionMenu &&
-            <div className={styles.options}>
-                <Options />
-                <button className="btn btn-primary" onClick={() => { exitMenu(); setIsAHost(null); }}>Return to Mode Selection</button>
+            <div className={styles.actionMenu}>
+                {
+                    !isMobile && isAHost &&
+                    <Options />
+                }
+                {
+                    !isMobile &&
+                    <button className="btn btn-primary" onClick={() => { exitMenu(); setIsAHost(null); }}>Return to Mode Selection</button>
+                }
                 <a href="/api/auth/logout" className="btn btn-primary" onClick={() => exitMenu()}>Log Out</a>
             </div>
         }

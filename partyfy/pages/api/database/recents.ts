@@ -24,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
     else if (req.method === 'POST') {
       let body = req.body;
-      console.log('body', body);
       let data = await database.insertRecentSong(body.UserID as string, body.SongID as string, body.SongName as string, body.SongArtist as string, body.SongAlbum as string, body.SongArt as string, body.SongExplicit ? '1' : '0') as any;
       res.status(200).json(data);
       return;

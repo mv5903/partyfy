@@ -27,7 +27,6 @@ export default function DataTable({ title }) {
             async function getQueue() {
                 let response = await fetch("/api/spotify/queue?UserID=&access_token=" + spotifyAuth.accessToken); 
                 let data = await response.json();
-                console.log(data);
                 if (!data) return;
                 if (data.queue.length === 0) return;
                 setQueue(data.queue);

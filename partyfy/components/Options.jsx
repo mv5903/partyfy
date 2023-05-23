@@ -5,6 +5,11 @@ import { BsGearWideConnected } from 'react-icons/bs';
 
 export default function Options() {
     const [showOptions, setShowOptions] = useState(false);
+
+    function unattendedQueues() {
+        
+    }
+
     return (
         <>
             <button className="btn btn-primary" onClick={() => setShowOptions(true)}>Options</button>
@@ -17,6 +22,7 @@ export default function Options() {
                             <ClearTable table={'Queue'} />  
                             <ClearTable table={'Recently Played'} />
                         </div>
+                        <button className="btn btn-warning m-2" onClick={() => unattendedQueues()}>Allow Unattended Queues</button>
                     </div>
                 </div>
             }
