@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import UserContext from '../pages/providers/UserContext';
 import styles from '../styles/Dashboard.module.css';
 import e from '../pages/assets/e.png';
-import ClearTable from './ClearTable';
 
 export default function DataTable({ title }) {
     const {
@@ -18,7 +17,7 @@ export default function DataTable({ title }) {
             async function getRecents() {
                 let response = await fetch('/api/database/recents?UserID=' + user.sub ?? user.user_id); 
                 let data = await response.json();
-                let songs = data.recordset;
+                let songs = data;
                 if (!songs) return;
                 if (songs.length === 0) return;
                 setRecents(songs);
@@ -57,35 +56,32 @@ export default function DataTable({ title }) {
         return strTime;
     }
 
-    const removeHeaders = ['OwnerUserID', 'Explicit', 'ID', 'Art'];
-
     return (
     <div className={styles.datatable}>
-        <div className="d-flex justify-content-center align-items-center">
-            <h3 className={"text-center"}>{title === "Queue" ? "Up Next" : title}</h3> 
-        </div>
-        <table className='table table-dark' style={{ display: 'block', height: '75vh' }}>
+        <h3 className="text-center">{title === "Queue" ? "Up Next" : title}</h3> 
+        <table className='table table-dark'>
             <thead>
-                <tr style={{ width: '40vw'}}>
+                <tr className='w-40'>
                     { 
-                        title === "Recently Played" && recents && recents.length > 0 && Object.keys(recents[0]).map((key, index) => {
-                            if (key.includes("Song")) key = key.replace("Song", "");
-                            if (key === 'PlayedAt') key = 'Played At';
-                            if (removeHeaders.includes(key)) return;
-                            return <th scope='col' key={index}>{key}</th>
-                        })
+                        title === "Recently Played" && 
+                        <>
+                            <th scope='col'>Name</th>
+                            <th scope='col'>Artist</th>
+                            <th scope='col'>Album</th>
+                            <th scope='col'>Played At</th>
+                        </>
                     }
                     {
                         title === "Queue" &&
                         <>
                             <th scope='col'>Name</th>
                             <th scope='col'>Artist</th>
-                            <th scope='col'>Added At</th>
+                            <th scope='col'>Status</th>
                         </>
                     }
                 </tr>
             </thead>
-            <tbody style={{ height: '80vh' }}>
+            <tbody>
                 {
                     title === "Recently Played" && recents && recents.length > 0 && recents.map((song, index) => {
                         let playedAt = new Date(song.PlayedAt);
@@ -123,7 +119,7 @@ export default function DataTable({ title }) {
                                     </div>
                                 </td>
                                 <td><h5>{song.artists.map(artist => artist.name).join(", ")}</h5></td>
-                                <td><h5>{song.album.name}</h5></td>
+                                <td><h5>From Spotify</h5></td>
                             </tr>
                         )
                     })

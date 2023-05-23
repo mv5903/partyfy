@@ -30,16 +30,33 @@ export default function NowPlaying({ setIsAHost }) {
 
             // Get recent songs from database
             res = await fetch('/api/database/recents?UserID=' + user.sub ?? user.user_id);
-            let data = (await res.json()).recordsets;
-            if (!data) return;
-            // Get first song in recent songs, see if it matches current song. If not, add to database
-            const firstSong = data[0][0];
-            if (!currentSong || !currentSong.item) {
-                await spotifyAuth.refreshAccessToken();
-                return;
-            }
-            if (!firstSong || firstSong.SongID !== currentSong.item.id) {
-                const response = await fetch('/api/database/recents', {
+            let data = (await res.json());
+            if (data) {
+                // Get first song in recent songs, see if it matches current song. If not, add to database
+                const firstSong = data[0];
+                if (!currentSong || !currentSong.item) {
+                    await spotifyAuth.refreshAccessToken();
+                    return;
+                }
+                if (!firstSong || firstSong.SongID !== currentSong.item.id) {
+                    await fetch('/api/database/recents', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            SongID: currentSong.item.id,
+                            UserID: user.sub ?? user.user_id,
+                            SongName: currentSong.item.name,
+                            SongArtist: currentSong.item.artists.map(artist => { return artist.name }).join(', '),
+                            SongAlbum: currentSong.item.album.name,
+                            SongExplicit: currentSong.item.explicit === 1,
+                            SongArt: currentSong.item.album.images[0].url,
+                        })
+                    });
+                }
+            } else {
+                await fetch('/api/database/recents', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -50,7 +67,7 @@ export default function NowPlaying({ setIsAHost }) {
                         SongName: currentSong.item.name,
                         SongArtist: currentSong.item.artists.map(artist => { return artist.name }).join(', '),
                         SongAlbum: currentSong.item.album.name,
-                        SongExplicit: currentSong.item.explicit,
+                        SongExplicit: currentSong.item.explicit === 1,
                         SongArt: currentSong.item.album.images[0].url,
                     })
                 });

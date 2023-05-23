@@ -33,7 +33,7 @@ export default class Database {
     async getRecentSongs(OwnerUserID: string){
         try {
             if (this.initialized) {
-                return await prisma.recents.findMany();
+                return (await prisma.recents.findMany()).reverse();
                 //return await sql.query`SELECT SongName, SongArtist, SongAlbum, PlayedAt, SongExplicit, SongArt, OwnerUserID, SongID FROM Recents WHERE OwnerUserID = ${OwnerUserID} ORDER BY PlayedAt DESC`;
             }
         } catch (err) {

@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model AskedQueues {
   id       Int      @id @default(autoincrement())
   OwnerUserID String   @db.VarChar(255)
@@ -15,7 +14,6 @@ model AskedQueues {
   SongID      String   @db.VarChar(255)
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model Recents {
   id       Int      @id @default(autoincrement())
   OwnerUserID  String   @db.VarChar(255)

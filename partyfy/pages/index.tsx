@@ -93,7 +93,8 @@ export default function Home() {
       })
     })
     let data = await response.json();
-    return false;
+    console.log(data);
+    return data != null;
   }
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function Home() {
 
         let usernameOK = false;
         while (!usernameOK) {
-          if (!await checkUsername(username)) {
+          if (!(await checkUsername(username))) {
             username = await Swal.fire({
               title: `${username} is already taken. Please try another.`,
               input: 'text',
@@ -128,6 +129,8 @@ export default function Home() {
               allowOutsideClick: false,
               allowEscapeKey: false
             })
+          } else {
+            usernameOK = true;
           }
         }
       }
