@@ -5,7 +5,7 @@ import { BsFillPersonFill } from 'react-icons/bs';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { isMobile } from 'react-device-detect';
 
-export default function UserQuickAction({ isAHost, setIsAHost }) {
+const UserQuickAction = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) =>  {
 
     const [ showQuickActionMenu, setShowQuickActionMenu ] = useState(false);
 
@@ -36,3 +36,5 @@ export default function UserQuickAction({ isAHost, setIsAHost }) {
         </>
     )
 }
+
+export default UserQuickAction;

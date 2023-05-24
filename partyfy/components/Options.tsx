@@ -1,9 +1,8 @@
 import ClearTable from './ClearTable';
 import styles from '../styles/Options.module.css';
 import { useState } from 'react';
-import { BsGearWideConnected } from 'react-icons/bs';
 
-export default function Options() {
+const Options = () => {
     const [showOptions, setShowOptions] = useState(false);
 
     function unattendedQueues() {
@@ -29,3 +28,5 @@ export default function Options() {
         </>
     )
 }
+
+export default Options;

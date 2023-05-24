@@ -9,9 +9,9 @@ import Options from './Options';
 
 const timer = 1000;
 
-export default function NowPlaying({ setIsAHost }) {
-
-    const [nowPlaying, setNowPlaying] = useState(false);
+const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
+    let nowPlayingType = false as any;
+    const [nowPlaying, setNowPlaying] = useState(nowPlayingType);
 
     const {
         spotifyAuth,
@@ -29,7 +29,7 @@ export default function NowPlaying({ setIsAHost }) {
             let currentSong = await res.json();
 
             // Get recent songs from database
-            res = await fetch('/api/database/recents?UserID=' + user.sub ?? user.user_id);
+            res = await fetch('/api/database/recents?UserID=' + (user.sub ?? user.user_id) as string);
             let data = (await res.json());
             if (data) {
                 // Get first song in recent songs, see if it matches current song. If not, add to database
@@ -48,7 +48,7 @@ export default function NowPlaying({ setIsAHost }) {
                             SongID: currentSong.item.id,
                             UserID: user.sub ?? user.user_id,
                             SongName: currentSong.item.name,
-                            SongArtist: currentSong.item.artists.map(artist => { return artist.name }).join(', '),
+                            SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                             SongAlbum: currentSong.item.album.name,
                             SongExplicit: currentSong.item.explicit === 1,
                             SongArt: currentSong.item.album.images[0].url,
@@ -65,7 +65,7 @@ export default function NowPlaying({ setIsAHost }) {
                         SongID: currentSong.item.id,
                         UserID: user.sub ?? user.user_id,
                         SongName: currentSong.item.name,
-                        SongArtist: currentSong.item.artists.map(artist => { return artist.name }).join(', '),
+                        SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                         SongAlbum: currentSong.item.album.name,
                         SongExplicit: currentSong.item.explicit === 1,
                         SongArt: currentSong.item.album.images[0].url,
@@ -78,7 +78,7 @@ export default function NowPlaying({ setIsAHost }) {
         return () => clearInterval(interval);
     }, []);
     // Show progress bar as a value between 0 and 100
-    let progress = null, songname = null;
+    let progress = null, songname : any = null;
     if (nowPlaying) {
         progress = nowPlaying.progress_ms ? nowPlaying.progress_ms / nowPlaying.item.duration_ms * 100 : null;
     
@@ -112,7 +112,7 @@ export default function NowPlaying({ setIsAHost }) {
                             :
                             <h3 className={styles.songname}><strong>{songname}</strong></h3>
                         }
-                        <h4>{nowPlaying.item.artists.map(artist => { return artist.name }).join(', ')}</h4>
+                        <h4>{nowPlaying.item.artists.map((artist : any) => { return artist.name }).join(', ')}</h4>
                         <h5><i>{nowPlaying.item.album.name}</i></h5>
                         <div className="d-flex flex-row mt-2 mb-2">
                             <img src={nowPlaying.item.album.images[0].url} alt="album art" className={styles.album}/>   
@@ -121,7 +121,7 @@ export default function NowPlaying({ setIsAHost }) {
 
                     {/* Progress Bar */}
                     <div className="progress">
-                        <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ width: `${progress}%` }}></div>
+                        <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{ width: `${progress}%` }}></div>
                     </div>
                     <div className="d-flex flex-row justify-content-between">
                         <h6 className="currentTime">{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
@@ -134,3 +134,5 @@ export default function NowPlaying({ setIsAHost }) {
         </div>
     );
 }
+
+export default NowPlaying;

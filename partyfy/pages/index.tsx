@@ -33,7 +33,7 @@ export default function Home() {
     }
     // Then, if no refresh token is stored, attempt to get refresh token from user in database
     if (!storedRefreshToken && user) {
-      const response = await fetch('/api/database/users?UserID=' + user?.sub ?? user?.user_id, {
+      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -107,14 +107,13 @@ export default function Home() {
 
   useEffect(() => {
     async function f() {
-      const response = await fetch('/api/database/users?UserID=' + user?.sub ?? user?.user_id, {
+      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
         }
       });
       let data = await response.json();
-      console.log(response);
       if (data && data.recordset) data = data.recordset[0];
       if (!data) return;
       if (!data.Username) {
