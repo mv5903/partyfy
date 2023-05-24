@@ -2,7 +2,7 @@ import Swal from 'sweetalert2';
 import { useContext } from 'react';
 import UserContext from '../pages/providers/UserContext';
 
-export default function ClearTable({ table }) {
+const ClearTable = ({ table } : { table: string }) => {
 
     const {
         spotifyAuth,
@@ -47,3 +47,5 @@ export default function ClearTable({ table }) {
         </>
     );
 }
+
+export default ClearTable;

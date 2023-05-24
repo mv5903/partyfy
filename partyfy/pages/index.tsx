@@ -40,10 +40,11 @@ export default function Home() {
         }
       });
       let data = await response.json();
-      if (data && data.recordset) data = data.recordset;
-      if (data && data[0]?.RefreshToken) {
+      console.log('data', data);
+      if (data && data.RefreshToken) {
         spotifyAuth.current = new SpotifyAuth('');
-        spotifyAuth.current.refreshToken = data[0]?.RefreshToken;
+        spotifyAuth.current.refreshToken = data.RefreshToken;
+        console.log('refreshtoken', data.RefreshToken);
         await spotifyAuth.current.refreshAccessToken();
         sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
         sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
@@ -107,40 +108,42 @@ export default function Home() {
 
   useEffect(() => {
     async function f() {
-      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-      });
-      let data = await response.json();
-      if (data && data.recordset) data = data.recordset[0];
-      if (!data) return;
-      if (!data.Username) {
-        let enteredUsername = null;
-        let { value: username } = await Swal.fire({
-          title: 'Welcome! Please enter a username to get started.',
-          input: 'text',
-          inputLabel: 'Your username. Choose up to 16 characters.',
-          inputPlaceholder: 'johndoe24',
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        })
-        enteredUsername = username;
-        let usernameOK = false;
-        while (!usernameOK) {
-          if (!(await checkUsername(enteredUsername))) {
-            let { value: userName } = await Swal.fire({
-              title: `${enteredUsername} is already taken. Please try another.`,
-              input: 'text',
-              inputLabel: 'Your username. Choose up to 16 characters.',
-              inputPlaceholder: 'johndoe24',
-              allowOutsideClick: false,
-              allowEscapeKey: false
-            })
-            enteredUsername = userName as string;
-          } else {
-            usernameOK = true;
+      if (user && user.sub) {
+        const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json'
+          }
+        });
+        let data = await response.json();
+        if (data && data.recordset) data = data.recordset[0];
+        if (!data) return;
+        if (!data.Username) {
+          let enteredUsername = null;
+          let { value: username } = await Swal.fire({
+            title: 'Welcome! Please enter a username to get started.',
+            input: 'text',
+            inputLabel: 'Your username. Choose up to 16 characters.',
+            inputPlaceholder: 'johndoe24',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          })
+          enteredUsername = username;
+          let usernameOK = false;
+          while (!usernameOK) {
+            if (!(await checkUsername(enteredUsername))) {
+              let { value: userName } = await Swal.fire({
+                title: `${enteredUsername} is already taken. Please try another.`,
+                input: 'text',
+                inputLabel: 'Your username. Choose up to 16 characters.',
+                inputPlaceholder: 'johndoe24',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+              })
+              enteredUsername = userName as string;
+            } else {
+              usernameOK = true;
+            }
           }
         }
       }

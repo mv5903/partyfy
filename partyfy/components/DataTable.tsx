@@ -3,7 +3,7 @@ import UserContext from '../pages/providers/UserContext';
 import styles from '../styles/Dashboard.module.css';
 import e from '../pages/assets/e.png';
 
-export default function DataTable({ title }) {
+const DataTable = ({ title } : { title: string }) => {
     const {
         spotifyAuth,
         user
@@ -15,7 +15,7 @@ export default function DataTable({ title }) {
     if (user) {
         useEffect(() => {
             async function getRecents() {
-                let response = await fetch('/api/database/recents?UserID=' + user.sub ?? user.user_id); 
+                let response = await fetch('/api/database/recents?UserID=' + (user.sub ?? user.user_id) as string); 
                 let data = await response.json();
                 let songs = data;
                 if (!songs) return;
@@ -45,7 +45,7 @@ export default function DataTable({ title }) {
     }
 
     // Format date object to HH:MM with am/pm
-    function formatTime(date) {
+    function formatTime(date : any) {
         let hours = date.getHours();
         let minutes = date.getMinutes();
         let ampm = hours >= 12 ? 'pm' : 'am';
@@ -118,7 +118,7 @@ export default function DataTable({ title }) {
                                         }
                                     </div>
                                 </td>
-                                <td><h5>{song.artists.map(artist => artist.name).join(", ")}</h5></td>
+                                <td><h5>{song.artists.map((artist : any) => artist.name).join(", ")}</h5></td>
                                 <td><h5>From Spotify</h5></td>
                             </tr>
                         )
@@ -129,3 +129,5 @@ export default function DataTable({ title }) {
     </div>
     );
 }
+
+export default DataTable;

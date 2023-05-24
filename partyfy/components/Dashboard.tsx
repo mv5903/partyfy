@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import UserContext from '../pages/providers/UserContext';
 import { isMobile } from 'react-device-detect';
 
-export default function Dashboard({ isAHost, setIsAHost }) {
+const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
     const {
         spotifyAuth,
         user
@@ -73,6 +73,7 @@ export default function Dashboard({ isAHost, setIsAHost }) {
             </>
         }
         </>
-        
     )
 }
+
+export default Dashboard;
