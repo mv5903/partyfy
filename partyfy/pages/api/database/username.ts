@@ -6,12 +6,9 @@ type Data = {
   name: string
 }
 
-const database = new Database(config);
+const database = new Database();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-    if (!database.initialized) {
-        await database.connect();
-    }
     // Attempt to create the username for a user
     if (req.method === 'PATCH') {
         let data = await database.addUsername(req.body.UserID as string, req.body.Username as string) as any;

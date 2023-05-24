@@ -18,6 +18,7 @@ export default function Home() {
   const [isAHost, setIsAHost] = useState(null);
   const spotifyAuth = useRef<SpotifyAuth>();
   const spotifyAuthURL = CONSTANTS.SPOTIFY_AUTH_URL;
+  const [ showLoading, setShowLoading ] = useState(false);
 
   // Handles spotify authentication
   async function handleSpotifyAuth() {
@@ -76,7 +77,9 @@ export default function Home() {
               UserID: user?.sub ?? user?.user_id,
           })
       });
+      setShowLoading(true);
       handleSpotifyAuth();
+      setShowLoading(false);
     } 
   }), [user];
 
@@ -92,9 +95,14 @@ export default function Home() {
         Username: username
       })
     })
-    let data = await response.json();
-    console.log(data);
-    return data != null;
+    try {
+      let data = await response.json();
+      if ('duplicate' in data && data.duplicate) return false;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+    return true;
   }
 
   useEffect(() => {
@@ -106,9 +114,11 @@ export default function Home() {
         }
       });
       let data = await response.json();
+      console.log(response);
       if (data && data.recordset) data = data.recordset[0];
       if (!data) return;
       if (!data.Username) {
+        let enteredUsername = null;
         let { value: username } = await Swal.fire({
           title: 'Welcome! Please enter a username to get started.',
           input: 'text',
@@ -117,18 +127,19 @@ export default function Home() {
           allowOutsideClick: false,
           allowEscapeKey: false
         })
-
+        enteredUsername = username;
         let usernameOK = false;
         while (!usernameOK) {
-          if (!(await checkUsername(username))) {
-            username = await Swal.fire({
-              title: `${username} is already taken. Please try another.`,
+          if (!(await checkUsername(enteredUsername))) {
+            let { value: userName } = await Swal.fire({
+              title: `${enteredUsername} is already taken. Please try another.`,
               input: 'text',
               inputLabel: 'Your username. Choose up to 16 characters.',
               inputPlaceholder: 'johndoe24',
               allowOutsideClick: false,
               allowEscapeKey: false
             })
+            enteredUsername = userName as string;
           } else {
             usernameOK = true;
           }
@@ -189,18 +200,26 @@ export default function Home() {
               }
             </> 
             :
-            <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
-              <h3 className="m-4">You're almost ready to party!</h3>
-              <p className="m-4">To get started, you'll need to authenticate your Spotify account.</p>
-                <AnchorLink
-                  href={spotifyAuthURL}
-                  className="btn btn-success btn-margin m-4 decoration-none"
-                  icon={null}
-                  testId="navbar-logout-mobile"
-                  tabIndex={0}>
-                  Authenticate Spotify
-                </AnchorLink>
-            </div>
+            <>
+              {
+                showLoading
+                ?
+                <Loading />
+                :
+                <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
+                  <h3 className="m-4">You're almost ready to party!</h3>
+                  <p className="m-4">To get started, you'll need to authenticate your Spotify account.</p>
+                    <AnchorLink
+                      href={spotifyAuthURL}
+                      className="btn btn-success btn-margin m-4 decoration-none"
+                      icon={null}
+                      testId="navbar-logout-mobile"
+                      tabIndex={0}>
+                      Authenticate Spotify
+                    </AnchorLink>
+                </div>
+              }   
+            </>
           }
 
         </main>

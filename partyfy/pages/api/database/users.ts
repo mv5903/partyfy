@@ -1,21 +1,17 @@
 import Database from '@/database/db';
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { config } from '../config'
 
 type Data = {
   name: string
 }
 
-const database = new Database(config);
+const database = new Database();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-    if (!database.initialized) {
-        await database.connect();
-    }
     // Add new user into database if it doesn't exist
     if (req.method === 'POST') {
         let data = await database.getUser(req.body.UserID as string) as any;
-        if (data.recordset.length == 0) {
+        if (!data) {
             data = await database.addNewUser(req.body.UserID as string) as any;
         }
         res.status(200).json(data);

@@ -6,7 +6,7 @@ type Data = {
   name: string
 }
 
-const database = new Database(config);
+const database = new Database();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     let access_token = req.query.access_token as string;

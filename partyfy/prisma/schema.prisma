@@ -34,4 +34,5 @@ model Users {
   Username         String?  @db.VarChar(32)
 
   @@unique ([Username])
+  @@unique ([UserID])
 }
