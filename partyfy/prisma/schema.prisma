@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model AskedQueues {
+  id       Int      @id @default(autoincrement())
+  OwnerUserID String   @db.VarChar(255)
+  RequestedAt DateTime @db.DateTime
+  SongID      String   @db.VarChar(255)
+}
+
+model Recents {
+  id       Int      @id @default(autoincrement())
+  OwnerUserID  String   @db.VarChar(255)
+  PlayedAt     DateTime @db.DateTime
+  SongID       String   @db.VarChar(255)
+  SongName     String?  @db.VarChar(255)
+  SongArtist   String?  @db.VarChar(255)
+  SongAlbum    String?  @db.VarChar(255)
+  SongArt      String?  @db.VarChar(255)
+  SongExplicit Boolean?
+}
+
+model Users {
+  id       Int      @id @default(autoincrement())
+  UserID           String?  @db.VarChar(255)
+  RefreshToken     String?  @db.VarChar(512)
+  UnattendedQueues Boolean?
+  Username         String?  @db.VarChar(32)
+
+  @@unique ([Username])
+  @@unique ([UserID])
+}
+
+model Friends {
+  id              Int     @id @default(autoincrement())
+  UserID          String? @db.VarChar(255)
+  FriendUserID    String? @db.VarChar(255)
+  IsFriendRequest Boolean?
+}
