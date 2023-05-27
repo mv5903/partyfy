@@ -17,6 +17,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 res.status(200).json(data as any);
                 return;
             }
+            if (action === 'sent') {
+                let data = await database.getSentFriendRequests(req.query.UserID as string);
+                res.status(200).json(data as any);
+                return;
+            }
         } else {
             let data = await database.getFriends(req.query.UserID as string) as any;
             res.status(200).json(data);

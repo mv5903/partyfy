@@ -157,7 +157,7 @@ export default function Home() {
     f();
   }, [user]);
 
-  if (isLoading) {
+  if (isLoading || showLoading) {
     return (
       <div>
         <Loading />
@@ -218,7 +218,7 @@ export default function Home() {
                 :
                 <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
                   <h3 className="m-4">You're almost ready to party!</h3>
-                  <p className="m-4" style={{ fontSize: isMobile ? '.5em' : '' }}>To get started, you'll need to authenticate your Spotify account.</p>
+                  <p className="m-4 text-center" style={{ fontSize: isMobile ? '.5em' : '' }}>To get started, you'll need to authenticate your Spotify account.</p>
                     <AnchorLink
                       href={spotifyAuthURL}
                       className="btn btn-success btn-margin m-4 decoration-none"

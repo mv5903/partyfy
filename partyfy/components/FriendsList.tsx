@@ -1,4 +1,5 @@
 import { FaUserFriends, FaPaperPlane } from 'react-icons/fa';
+import { GiCancel } from 'react-icons/gi';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { useContext, useEffect, useState } from 'react';
 import UserContext from '../pages/providers/UserContext';
@@ -7,6 +8,7 @@ import { UserProfile } from '@auth0/nextjs-auth0/client';
 import styles from '@/styles/FriendsList.module.css'
 import { isMobile } from 'react-device-detect';
 import Swal from 'sweetalert2';
+import Loading from './Loading';
 
 const FriendsList = () => {
 
@@ -101,8 +103,51 @@ const FriendsList_Requests = ({ user } : { user : UserProfile } ) => {
     )
 }
 const FriendsList_Sent = ({ user } : { user : UserProfile } ) => {
+    const [usersReturned, setUsersReturned] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fn() {
+            const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=sent')
+            const data = await response.json();
+            if (data && data.length > 0) {
+                setLoading(false);
+                setUsersReturned(data);
+            }
+        }
+
+        fn();
+    }, [user]);
+
+    function cancelFriendRequest(UserID: string, Username: string) {
+
+    }
+
     return (
-        <p>sent</p>
+        <div>
+            {
+                loading 
+                ?
+                <Loading />
+                :
+                    usersReturned.length === 0 || !usersReturned
+                    ?
+                    <div>
+                        <h5 className="text-center">You have no sent friend requests.</h5>
+                    </div>
+                    :
+                    usersReturned.map((user, index) => {
+                        return (
+                            <div key={index} className="card bg-dark p-2 mt-3">
+                                <div className="d-flex flex-row align-items-center justify-content-between">
+                                    <h5 className="me-4 mt-2">{user.Username}</h5>
+                                    <button className="btn btn-small btn-danger" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel className="me-1 mb-1"/>Cancel</button>
+                                </div>
+                            </div>
+                        );
+                    })
+            }
+        </div>
     )
 }
 const FriendsList_Search = ({ user } : { user : UserProfile } ) => {

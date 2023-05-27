@@ -206,8 +206,15 @@ export default class Database {
                 IsFriendRequest: true
             }
         });
+        const usernamesForData = await prisma.users.findMany({
+            where: {
+                UserID: {
+                    in: data.map(u => u.FriendUserID)
+                }
+            },
+        });
         await prisma.$disconnect();
-        return data;
+        return usernamesForData;
     }
 
     // Delete [UserID]'s friendship with [FriendUserID].
