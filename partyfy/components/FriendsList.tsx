@@ -1,4 +1,4 @@
-import { FaUserFriends, FaPaperPlane } from 'react-icons/fa';
+import { FaUserFriends, FaPaperPlane, FaCheckCircle, FaTrash } from 'react-icons/fa';
 import { GiCancel } from 'react-icons/gi';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { useContext, useEffect, useState } from 'react';
@@ -76,8 +76,48 @@ const FriendsList_Friends = ({ user } : { user : UserProfile } ) => {
             setFriends(data);
         }
 
-        fn();
-    }, [user])
+        const interval = setInterval(fn, 2000);
+        return () => clearInterval(interval);
+    }, [user]);
+
+    function removeFriend(FriendUserID: string, FriendUsername: string) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to remove ${FriendUsername} from your friends list?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Remove',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/api/database/friends', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        UserID: user.sub ?? user.user_id,
+                        FriendUserID: FriendUserID,
+                        action: 'DeleteFriend'
+                    }) 
+                }).then(response => {
+                    if (response.status === 200) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: `You have removed ${FriendUsername} from your friends list.`,
+                            icon: 'success'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: `You have not removed ${FriendUsername} from your friends list.`,
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    }
 
     return (
         <div>
@@ -88,39 +128,158 @@ const FriendsList_Friends = ({ user } : { user : UserProfile } ) => {
                     <h5 className="text-center">You have no friends yet.</h5>
                 </div>
                 :
-                <div>
-
-                </div>
+                friends.map((user, index) => {
+                    return (
+                        <div key={index} className="card bg-dark p-2 mt-3">
+                            <div className="d-flex flex-row align-items-center justify-content-between">
+                                <h5 className="me-4 mt-2">{user.Username}</h5>
+                                <button className="btn btn-small btn-danger" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash className="me-1 mb-1"/></button>
+                            </div>
+                        </div>
+                    );
+                })
             }
         </div>
     );
 }
 const FriendsList_Requests = ({ user } : { user : UserProfile } ) => {
+    const [usersReturned, setUsersReturned] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    async function fetchRequests() {
+        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=requests')
+        const data = await response.json();
+        if (data) {
+            setLoading(false);
+            setUsersReturned(data);
+        }
+    }
+
+    useEffect(() => {
+        fetchRequests();
+    }, [user]);
+
+    async function deleteIncomingRequest(FriendUserID: string, FriendUsername: string) {
+        let result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to delete your friend request from ${FriendUsername}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        });
+
+        if (result.isConfirmed) {
+            await fetch('/api/database/friends', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    UserID: user.sub ?? user.user_id,
+                    FriendID: FriendUserID,
+                    action: 'DeleteFriendRequest'
+                })
+            });
+        }
+        fetchRequests();
+    }
+
+    async function acceptIncomingRequest(FriendUserID: string, FriendUsername: string) {
+        let result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to accept the friend request from ${FriendUsername}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        });
+
+        if (result.isConfirmed) {
+            await fetch('/api/database/friends', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    UserID: user.sub ?? user.user_id,
+                    FriendID: FriendUserID,
+                    action: 'AcceptFriendRequest'
+                })
+            });
+        }
+        fetchRequests();
+    }
+
     return (
         <div>
-            
-        </div>
+        {
+            loading 
+            ?
+            <Loading />
+            :
+                usersReturned.length === 0 || !usersReturned
+                ?
+                <div>
+                    <h5 className="text-center">You have no sent friend requests.</h5>
+                </div>
+                :
+                usersReturned.map((user, index) => {
+                    return (
+                        <div key={index} className="card bg-dark p-2 mt-3">
+                            <div className="d-flex flex-row align-items-center justify-content-between">
+                                <h5 className="me-4 mt-2">{user.Username}</h5>
+                                <div className="d-flex flex-row align-items-center">
+                                    <button className="btn btn-small btn-success me-2" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
+                                    <button className="btn btn-small btn-danger" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })
+        }
+    </div>
     )
 }
 const FriendsList_Sent = ({ user } : { user : UserProfile } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fn() {
-            const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=sent')
-            const data = await response.json();
-            if (data && data.length > 0) {
-                setLoading(false);
-                setUsersReturned(data);
-            }
+    async function loadSentFriendRequests() {
+        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=sent')
+        const data = await response.json();
+        if (data) {
+            setLoading(false);
+            setUsersReturned(data);
         }
+    }
+    
+    useEffect(() => { loadSentFriendRequests() }, [user]);
 
-        fn();
-    }, [user]);
+    async function cancelFriendRequest(FriendUserID: string, FriendUsername: string) {
+        let result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to cancel your friend request to ${FriendUsername}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        });
 
-    function cancelFriendRequest(UserID: string, Username: string) {
-
+        if (result.isConfirmed) {
+            await fetch('/api/database/friends', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    UserID: user.sub ?? user.user_id,
+                    FriendID: FriendUserID,
+                    action: 'DeleteFriendRequest'
+                })
+            });
+            loadSentFriendRequests();
+        }
     }
 
     return (

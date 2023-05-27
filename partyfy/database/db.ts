@@ -170,16 +170,10 @@ export default class Database {
 
     // [FriendUserID] accepts [UserID]'s friend request.
     async acceptFriendRequest(UserID: string, FriendUserID: string) {
-        await prisma.friends.create({
-            data: {
-                UserID: FriendUserID,
-                FriendUserID: UserID,
-                IsFriendRequest: false,
-            }
-        });
         await prisma.friends.updateMany({
             where: {
-                UserID: UserID
+                UserID: FriendUserID,
+                FriendUserID: UserID
             },
             data: {
                 IsFriendRequest: false
@@ -191,12 +185,27 @@ export default class Database {
     async getFriends(UserID: string) {
         const data = await prisma.friends.findMany({
             where: {
-                UserID: UserID,
-                IsFriendRequest: false
-            }
+                OR: [
+                    {
+                        UserID: UserID,
+                        IsFriendRequest: false
+                    },
+                    {
+                        FriendUserID: UserID,
+                        IsFriendRequest: false
+                    }
+                ]
+            },
+        });
+        const usernamesForData = await prisma.users.findMany({
+            where: {
+                UserID: {
+                    in: data.map(u => u.UserID)
+                }
+            },
         });
         await prisma.$disconnect();
-        return data;
+        return usernamesForData;
     }
 
     async getSentFriendRequests(UserID: string) {
@@ -218,7 +227,7 @@ export default class Database {
     }
 
     // Delete [UserID]'s friendship with [FriendUserID].
-    // Delete [FriendUserID]'s friendship with [UserID]
+    // Delete [FriendUserID]'s friendship with [UserID].
     async removeFriend(UserID: string, FriendUserID: string) {
         await prisma.friends.deleteMany({
             where: {
@@ -230,6 +239,60 @@ export default class Database {
             where: {
                 UserID: FriendUserID,
                 FriendUserID: UserID
+            }
+        });
+        await prisma.$disconnect();
+    }
+
+    async getIncomingFriendRequests(UserID: string) {
+        const data = await prisma.friends.findMany({
+            where: {
+                FriendUserID: UserID,
+                IsFriendRequest: true
+            }
+        });
+        const usernamesForData = await prisma.users.findMany({
+            where: {
+                UserID: {
+                    in: data.map(u => u.UserID)
+                }
+            },
+        });
+        await prisma.$disconnect();
+        return usernamesForData;
+    }
+
+    async deleteFriendRequest(UserID: string, FriendUserID: string) {
+        await prisma.friends.deleteMany({
+            where: {
+                UserID: UserID,
+                FriendUserID: FriendUserID,
+                IsFriendRequest: true
+            }
+        });
+        await prisma.friends.deleteMany({
+            where: {
+                UserID: FriendUserID,
+                FriendUserID: UserID,
+                IsFriendRequest: true
+            }
+        });
+        await prisma.$disconnect();
+    }
+
+    async deleteFriend(UserID: string, FriendUserID: string) {
+        await prisma.friends.deleteMany({
+            where: {
+                UserID: UserID,
+                FriendUserID: FriendUserID,
+                IsFriendRequest: false
+            }
+        });
+        await prisma.friends.deleteMany({
+            where: {
+                UserID: FriendUserID,
+                FriendUserID: UserID,
+                IsFriendRequest: false
             }
         });
         await prisma.$disconnect();
