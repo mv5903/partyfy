@@ -197,15 +197,25 @@ export default class Database {
                 ]
             },
         });
-        const usernamesForData = await prisma.users.findMany({
+        
+        let friendUsernames: any = [];
+        data.forEach(user => {
+            if (user.UserID == UserID) {
+                friendUsernames.push(user.FriendUserID);
+            } else {
+                friendUsernames.push(user.UserID);
+            }
+        })
+        
+        const friends = await prisma.users.findMany({
             where: {
                 UserID: {
-                    in: data.map(u => u.UserID)
+                    in: friendUsernames
                 }
             },
         });
         await prisma.$disconnect();
-        return usernamesForData;
+        return friends;
     }
 
     async getSentFriendRequests(UserID: string) {

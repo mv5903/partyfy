@@ -3,6 +3,7 @@ export class SpotifyAuth {
     refreshToken: string;
     authorizationCode: string;
     initialized: boolean = false;
+    lastRefresh: Date;
 
     constructor(code: string) {
         this.accessToken = '';
@@ -10,6 +11,7 @@ export class SpotifyAuth {
         this.authorizationCode = code;
         if (code !== '') {
             this.initialized = true;
+            this.lastRefresh = new Date();
         }
     }
 
@@ -21,13 +23,13 @@ export class SpotifyAuth {
                 if (data.access_token) {
                     this.accessToken = data.access_token;
                     success = true;
+                    this.lastRefresh = new Date();
                     return;
                 }
                 console.error(data);
             });
         return success;
     }
-
     async getRefreshToken() {
         let success = false;
         await fetch('/api/spotify/refreshtoken?code=' + this.authorizationCode)
@@ -45,5 +47,13 @@ export class SpotifyAuth {
             });
         this.authorizationCode = '';
         return success;
+    }
+
+    async getAccessToken() {
+        var hoursDifference = Math.abs(new Date().getTime() - this.lastRefresh.getTime()) / 36e5;
+        if (hoursDifference > 0.9) {
+            await this.refreshAccessToken();
+        }
+        return this.accessToken;
     }
 }

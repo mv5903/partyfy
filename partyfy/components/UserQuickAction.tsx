@@ -21,7 +21,7 @@ const UserQuickAction = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHos
         </div>
         {
             showQuickActionMenu &&
-            <div style={{ marginTop: isMobile ? '12vh' : '9vh' }} className={styles.actionMenu}>
+            <div  style={{ top: isMobile ? '7vh' : '22vh' }} className={styles.actionMenu}>
                 {
                     !isMobile && isAHost &&
                     <Options />

@@ -1,7 +1,7 @@
 import { FaUserFriends, FaPaperPlane, FaCheckCircle, FaTrash } from 'react-icons/fa';
 import { GiCancel } from 'react-icons/gi';
 import { IoMdArrowDropdown } from 'react-icons/io';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, forwardRef } from 'react';
 import UserContext from '../pages/providers/UserContext';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 
@@ -9,7 +9,6 @@ import styles from '@/styles/FriendsList.module.css'
 import { isMobile } from 'react-device-detect';
 import Swal from 'sweetalert2';
 import Loading from './Loading';
-
 const FriendsList = () => {
 
     enum FriendListScreen {
@@ -21,6 +20,8 @@ const FriendsList = () => {
 
     const [visible, setVisible] = useState(false);
     const [friendListScreen, setFriendListScreen] = useState(FriendListScreen.Friends);
+
+    const DEFAULT_SCREEN = FriendListScreen.Friends;
 
     const {
         spotifyAuth,
@@ -42,6 +43,10 @@ const FriendsList = () => {
             case FriendListScreen.Search:
                 return <FriendsList_Search user={user} />
         }
+    }
+
+    if (!visible && user && friendListScreen !== DEFAULT_SCREEN) {
+        setFriendListScreen(DEFAULT_SCREEN);
     }
 
     return (
@@ -72,10 +77,10 @@ const FriendsList_Friends = ({ user } : { user : UserProfile } ) => {
         async function fn() {
             const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
             const data = await response.json();
-            console.log(data);
             setFriends(data);
         }
 
+        fn();
         const interval = setInterval(fn, 2000);
         return () => clearInterval(interval);
     }, [user]);
@@ -157,6 +162,8 @@ const FriendsList_Requests = ({ user } : { user : UserProfile } ) => {
 
     useEffect(() => {
         fetchRequests();
+        const interval = setInterval(fetchRequests, 2000);
+        return () => clearInterval(interval);
     }, [user]);
 
     async function deleteIncomingRequest(FriendUserID: string, FriendUsername: string) {
@@ -254,7 +261,10 @@ const FriendsList_Sent = ({ user } : { user : UserProfile } ) => {
         }
     }
     
-    useEffect(() => { loadSentFriendRequests() }, [user]);
+    useEffect(() => { 
+        const interval = setInterval(loadSentFriendRequests, 2000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     async function cancelFriendRequest(FriendUserID: string, FriendUsername: string) {
         let result = await Swal.fire({

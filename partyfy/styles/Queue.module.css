@@ -1,0 +1,5 @@
+.overlay {
+    position: absolute;
+    top: 10vh;
+    z-index: 3;
+}
