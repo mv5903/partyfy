@@ -57,7 +57,7 @@ const FriendsList = () => {
             </div>
             {
                 visible && 
-                <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '22vh' }}>
+                <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '4vh' }}>
                     <select onChange={e => setFriendListScreen(FriendListScreen[e.target.value as keyof typeof FriendListScreen])}>
                         {Object.values(FriendListScreen).filter(i => !isNumeric(i)).map((header, index) => {
                             return <option key={index} value={header}>{header}</option>
