@@ -3,7 +3,7 @@ import { FaEye, FaPlus, FaPlusCircle } from "react-icons/fa";
 import { BsExplicitFill } from "react-icons/bs";
 import { useContext, useState } from "react";
 
-import UserContext from '@/pages/providers/UserContext';
+import UserContext from '@/providers/UserContext';
 import Swal from "sweetalert2";
 import UserQueueOverlay from "./UserQueueOverlay";
 

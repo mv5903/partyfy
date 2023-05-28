@@ -1,7 +1,7 @@
 import ClearTable from './ClearTable';
 import styles from '../styles/Options.module.css';
 import { useEffect, useState, useContext } from 'react';
-import UserContext from '@/pages/providers/UserContext';
+import UserContext from '@/providers/UserContext';
 import { isMobile } from 'react-device-detect';
 
 const Options = () => {

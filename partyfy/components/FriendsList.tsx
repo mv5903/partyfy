@@ -2,7 +2,7 @@ import { FaUserFriends, FaPaperPlane, FaCheckCircle, FaTrash } from 'react-icons
 import { GiCancel } from 'react-icons/gi';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { useContext, useEffect, useState, forwardRef } from 'react';
-import UserContext from '../pages/providers/UserContext';
+import UserContext from '../providers/UserContext';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 
 import styles from '@/styles/FriendsList.module.css'

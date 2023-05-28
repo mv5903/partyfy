@@ -3,7 +3,7 @@ import DataTable from './DataTable';
 import Settings from './Settings';
 import NowPlaying from './NowPlaying';
 import { useContext, useEffect, useState } from 'react';
-import UserContext from '../pages/providers/UserContext';
+import UserContext from '../providers/UserContext';
 import { isMobile } from 'react-device-detect';
 import RequestPage from './RequestPage';
 

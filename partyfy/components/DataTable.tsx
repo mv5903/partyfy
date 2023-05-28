@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import UserContext from '../pages/providers/UserContext';
+import UserContext from '../providers/UserContext';
 import styles from '../styles/Dashboard.module.css';
 import e from '../pages/assets/e.png';
 

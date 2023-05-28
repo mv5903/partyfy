@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { SpotifyAuth } from '@/pages/helpers/SpotifyAuth';
+import { SpotifyAuth } from '@/helpers/SpotifyAuth';
 import SpotifyAuth_Backend from '../helpers/SpotifyAuth';
 
 type Data = {

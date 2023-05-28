@@ -3,11 +3,11 @@ import styles from '@/styles/Home.module.css'
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useEffect, useRef, useState } from 'react';
 import AnchorLink from '../components/AnchorLink'
-import { CONSTANTS } from './assets/Constants';
+import { CONSTANTS } from '../assets/Constants';
 import Loading from '../components/Loading';
-import { SpotifyAuth } from './helpers/SpotifyAuth';
+import { SpotifyAuth } from '../helpers/SpotifyAuth';
 import Dashboard from '../components/Dashboard';
-import UserContext from './providers/UserContext';
+import UserContext from '../providers/UserContext';
 import UserQuickAction from '../components/UserQuickAction';
 import Swal from 'sweetalert2';
 import FriendsList from '@/components/FriendsList';
@@ -18,7 +18,7 @@ export default function Home() {
   const { user, error, isLoading } = useUser();
   const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(false);
   const [isAHost, setIsAHost] = useState(null);
-  const spotifyAuth = useRef<SpotifyAuth>();
+  const spotifyAuth = useRef();
   const spotifyAuthURL = CONSTANTS.SPOTIFY_AUTH_URL;
   const [ showLoading, setShowLoading ] = useState(false);
   const [ username, setUsername ] = useState(undefined);
@@ -36,7 +36,7 @@ export default function Home() {
     }
     // Then, if no refresh token is stored, attempt to get refresh token from user in database
     if (!storedRefreshToken && user) {
-      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
+      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id), {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ export default function Home() {
     } 
   }), [user];
 
-  async function checkUsername(username: string) {
+  async function checkUsername(username) {
     if (username.length < 1 || username.length > 16) return false;
     const response = await fetch('/api/database/username', {
       method: 'PATCH',
@@ -112,7 +112,7 @@ export default function Home() {
   useEffect(() => {
     async function f() {
       if (user && user.sub) {
-        const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id) as string, {
+        const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id), {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json'
@@ -142,7 +142,7 @@ export default function Home() {
                 allowOutsideClick: false,
                 allowEscapeKey: false
               })
-              enteredUsername = userName as string;
+              enteredUsername = userName;
             } else {
               usernameOK = true;
               setUsername(enteredUsername);

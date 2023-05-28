@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import UserContext from '@/pages/providers/UserContext';
+import UserContext from '@/providers/UserContext';
 import Loading from "./Loading";
 import UserRequest from "./UserRequest";
 

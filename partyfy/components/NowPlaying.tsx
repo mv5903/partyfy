@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/Dashboard.module.css';
 import e from '../pages/assets/e.png';
-import { fancyTimeFormat } from '@/pages/helpers/Utils';
+import { fancyTimeFormat } from '@/helpers/Utils';
 import Loading from './Loading';
-import UserContext from '../pages/providers/UserContext';
+import UserContext from '../providers/UserContext';
 import { useContext } from 'react';
 import Options from './Options';
 
