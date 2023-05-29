@@ -1,7 +1,6 @@
 import styles from '../styles/Queue.module.css'
 
 const UserQueueOverlay = ({ user, showOverlay, setShowOverlay } : { user : any, showOverlay: boolean, setShowOverlay: Function }) => {
-    console.log(showOverlay);
 
     return (
         <div>

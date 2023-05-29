@@ -1,5 +1,6 @@
 export default class SpotifyAuth_Backend {
     static async getAnAccessToken(refreshToken: string) {
+        if (refreshToken === '') return;
         let authorization = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64');
         const response = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',

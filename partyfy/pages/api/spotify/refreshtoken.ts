@@ -6,6 +6,10 @@ type Data = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     let code = req.query.code as string;
+    if (!code || code === '') {
+        res.status(400).json({name: "No code provided"});
+        return;
+    }
     let authorization = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64');
     await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
@@ -21,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     })
     .then(response => response.json())
     .then((data: any) => {
-        if (!data.access_token) throw "Error while attempting to fetch a refresh token with the provided code: " + code;
         res.status(200).json(data);
     })
     .catch((error: any) => {

@@ -1,57 +1,52 @@
 export class SpotifyAuth {
-    accessToken: string;
+    accessToken: string = null;
     refreshToken: string;
-    authorizationCode: string;
-    initialized: boolean = false;
     lastRefresh: Date;
 
-    constructor(code: string) {
-        this.accessToken = '';
-        this.refreshToken = '';
-        this.authorizationCode = code;
-        if (code !== '') {
-            this.initialized = true;
-            this.lastRefresh = new Date();
-        }
+    constructor(refreshToken: string) {
+        if (refreshToken === '' || refreshToken === undefined) return;
+        this.refreshToken = refreshToken;
+        this.lastRefresh = new Date();
     }
 
     async refreshAccessToken() {
-        let success = false;
+        if (this.refreshToken === '' || this.refreshToken === undefined) return;
         await fetch('/api/spotify/refreshaccesstoken?refresh_token=' + this.refreshToken)
             .then(res => res.json())
             .then(data => {
                 if (data.access_token) {
                     this.accessToken = data.access_token;
-                    success = true;
                     this.lastRefresh = new Date();
-                    return;
                 }
-                console.error(data);
             });
-        return success;
     }
-    async getRefreshToken() {
-        let success = false;
-        await fetch('/api/spotify/refreshtoken?code=' + this.authorizationCode)
+
+    async getRefreshToken(authorizationCode: string) {
+        if (authorizationCode === '') return;
+        let returnedData = null;
+        await fetch('/api/spotify/refreshtoken?code=' + authorizationCode)
             .then(res => res.json())
             .then(data => {
                 if (data.refresh_token) {
                     this.accessToken = data.access_token;
                     this.refreshToken = data.refresh_token;
-                    success = true;
+                    returnedData = data;
                 }
             })
             .catch(err => {
-                console.error(err);
                 return;
             });
-        this.authorizationCode = '';
-        return success;
+        if (returnedData) {
+            this.lastRefresh = new Date();
+            return returnedData;
+        }
     }
 
     async getAccessToken() {
+        if (this.accessToken == null || this.accessToken == undefined) await this.refreshAccessToken();
         var hoursDifference = Math.abs(new Date().getTime() - this.lastRefresh.getTime()) / 36e5;
-        if (hoursDifference > 0.9) {
+        // If time difference is greater than 1 hour, refresh the access token
+        if (hoursDifference > 1) {
             await this.refreshAccessToken();
         }
         return this.accessToken;

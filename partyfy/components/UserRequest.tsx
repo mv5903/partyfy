@@ -65,18 +65,18 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
 
     async function showFullQueue() {
         let accessToken = await spotifyAuth.getAccessToken();
+        if (!accessToken) return;
         const response = await fetch('/api/spotify/queue?access_token=' + accessToken);
         const data = await response.json();
-        console.log(data);
         if (data && data.queue) {
             Swal.fire({
                 title: 'Full Queue',
-                html: '<div class="text-small"><table class="table"><thead><tr><th scope="col">#</th><th scope="col">Name</th><th scope="col">Artist</th></tr></thead><tbody>' + data.queue.map((item: any, index: number) => {
-                    return `<tr><div class="d-flex flex-row justify-content-between"><th scope="row">${index + 1}</th><td><h6 style="text-align: left">${item.name}</h6></td><td><h6 style="text-align: left">${item.artists[0].name}</h6></td></div></tr>`
+                html: '<div class="text-small"><table class="table"><thead><tr><th scope="col">#</th><th scope="col">Name <i>Artist</i></th></tr></thead><tbody>' + data.queue.map((item: any, index: number) => {
+                    return `<tr><div class="d-flex flex-row justify-content-between"><th scope="row">${index + 1}</th><td><h6 style="text-align: left"><strong>${item.name}</strong> ${item.explicit === true ?  '[E]' : ''} <i>${item.artists[0].name}</i></h6></td></div></tr>`
                 }).join('') + '</tbody></table></div>',
                 showConfirmButton: true,
                 confirmButtonText: 'Close',
-                width: '95vw'
+                showCloseButton: true
             })
         }
     }

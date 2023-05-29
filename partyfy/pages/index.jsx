@@ -16,60 +16,49 @@ import { isMobile } from 'react-device-detect';
 
 export default function Home() {
   const { user, error, isLoading } = useUser();
-  const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(false);
+  const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(null);
   const [isAHost, setIsAHost] = useState(null);
   const spotifyAuth = useRef();
   const spotifyAuthURL = CONSTANTS.SPOTIFY_AUTH_URL;
-  const [ showLoading, setShowLoading ] = useState(false);
   const [ username, setUsername ] = useState(undefined);
 
   // Handles spotify authentication
   async function handleSpotifyAuth() {
-    // Attempt to first get stored refresh token from session storage
-    let storedRefreshToken = sessionStorage.getItem('spotifyRefreshToken');
-    if (storedRefreshToken && !spotifyAuthenticated) {
-      spotifyAuth.current = new SpotifyAuth('');
-      spotifyAuth.current.refreshToken = storedRefreshToken;
-      await spotifyAuth.current.refreshAccessToken();
-      sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
-      setSpotifyAuthenticated(true);
+    // Refresh token already in database
+    const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id));
+    const data = await response.json();
+    if (data && data.RefreshToken && data.RefreshToken.length > 0) {
+      if (spotifyAuth.current && spotifyAuth.current.RefreshToken && spotifyAuth.current?.RefreshToken != null) return true;
+      let storedRefreshToken = data.RefreshToken;
+      spotifyAuth.current = new SpotifyAuth(storedRefreshToken);
+      spotifyAuth.current.accessToken = await spotifyAuth.current.refreshAccessToken();
+      return true;
     }
-    // Then, if no refresh token is stored, attempt to get refresh token from user in database
-    if (!storedRefreshToken && user) {
-      const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id), {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-      });
-      let data = await response.json();
-      console.log('data', data);
-      if (data && data.RefreshToken) {
-        spotifyAuth.current = new SpotifyAuth('');
-        spotifyAuth.current.refreshToken = data.RefreshToken;
-        console.log('refreshtoken', data.RefreshToken);
-        await spotifyAuth.current.refreshAccessToken();
-        sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
-        sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
-        setSpotifyAuthenticated(true);
+    // No refresh token in database, then check for code in url
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    if (code) {
+      spotifyAuth.current = new SpotifyAuth();
+      let data = await spotifyAuth.current.getRefreshToken(code);
+      if (data && data.access_token && data.refresh_token) {
+        spotifyAuth.current.accessToken = data.access_token;
+        spotifyAuth.current.refreshToken = data.refresh_token;
+        await fetch('/api/database/users', {
+          method: 'PATCH',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              UserID: user?.sub ?? user?.user_id,
+              RefreshToken: data.refresh_token
+          })
+        });
       }
+      return true;
     }
-    // Else, get a new refresh token from Spotify based on the code in the URL
-    if (!spotifyAuthenticated || !spotifyAuth.current?.initialized) {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      if (code && !storedRefreshToken) {
-        spotifyAuth.current = new SpotifyAuth(code);
-        await spotifyAuth.current.getRefreshToken();
-        await spotifyAuth.current.refreshAccessToken();
-        sessionStorage.setItem('spotifyAccessToken', spotifyAuth.current.accessToken);
-        sessionStorage.setItem('spotifyRefreshToken', spotifyAuth.current.refreshToken);
-        setSpotifyAuthenticated(true);
-        return;
-      } 
-    }
-    // Finally, if no refresh token is stored and no code is in the URL, show a login with Spotify button
+    return false;
   }
+
   useEffect(() => {
     if (user) {
       fetch('/api/database/users', {
@@ -81,11 +70,11 @@ export default function Home() {
               UserID: user?.sub ?? user?.user_id,
           })
       });
-      setShowLoading(true);
-      handleSpotifyAuth();
-      setShowLoading(false);
+      handleSpotifyAuth().then((result) => {
+        setSpotifyAuthenticated(result || result === undefined);
+      });  
     } 
-  }), [user];
+  }), [];
 
   async function checkUsername(username) {
     if (username.length < 1 || username.length > 16) return false;
@@ -103,7 +92,6 @@ export default function Home() {
       let data = await response.json();
       if ('duplicate' in data && data.duplicate) return false;
     } catch (e) {
-      console.error(e);
       return false;
     }
     return true;
@@ -157,12 +145,9 @@ export default function Home() {
     f();
   }, [user]);
 
-  if (isLoading || showLoading) {
-    return (
-      <div>
-        <Loading />
-      </div>
-    )
+  
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (
@@ -201,7 +186,8 @@ export default function Home() {
             spotifyAuthenticated
             ?
             <>
-              { user != null && spotifyAuth.current?.accessToken != null &&
+              { 
+              user != null && 
               <div className="d-flex flex-column justify-content-center align-items-center">
                   <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
                     <Dashboard isAHost={isAHost} setIsAHost={setIsAHost}/> 
@@ -210,26 +196,18 @@ export default function Home() {
               }
             </> 
             :
-            <>
-              {
-                showLoading
-                ?
-                <Loading />
-                :
-                <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
-                  <h3 className="m-4">You're almost ready to party!</h3>
-                  <p className="m-4 text-center" style={{ fontSize: isMobile ? '.5em' : '' }}>To get started, you'll need to authenticate your Spotify account.</p>
-                    <AnchorLink
-                      href={spotifyAuthURL}
-                      className="btn btn-success btn-margin m-4 decoration-none"
-                      icon={null}
-                      testId="navbar-logout-mobile"
-                      tabIndex={0}>
-                      Authenticate Spotify
-                    </AnchorLink>
-                </div>
-              }   
-            </>
+            <div className={`${styles.spotifylogin} d-flex flex-column justify-content-center align-items-center`}>
+              <h3 className="m-4">You're almost ready to party!</h3>
+              <p className="m-4 text-center" style={{ fontSize: isMobile ? '.5em' : '' }}>To get started, you'll need to authenticate your Spotify account.</p>
+                <AnchorLink
+                  href={spotifyAuthURL}
+                  className="btn btn-success btn-margin m-4 decoration-none"
+                  icon={null}
+                  testId="navbar-logout-mobile"
+                  tabIndex={0}>
+                  Authenticate Spotify
+                </AnchorLink>
+            </div>
           }
         </main>
       }
