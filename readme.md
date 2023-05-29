@@ -13,4 +13,4 @@ Have both of your friends sign into the app, set up a username, authenticate wit
 
 #### Known issues: 
 1. The friend and account icons require the user to click on their respective icons in order to close them.
-2. On desktop only, the host screen is currently broken (note that you can still access the unattended queues option by clicking on your profile button, then clicking on options.
+2. On desktop only, the host screen is currently broken (note that you can still access the unattended queues option by clicking on your profile button, then clicking on options.)
