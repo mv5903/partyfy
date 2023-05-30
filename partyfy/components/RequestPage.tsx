@@ -81,9 +81,9 @@ const RequestPage = () => {
                         <h3>Choose a friend to request a song from:</h3>
                         <div className="d-flex flex-wrap flex-column justify-content-center mt-4">
                             {
-                                friendsList.map((friend: any) => {
+                                friendsList.map((friend: any, index: number) => {
                                     return (
-                                        <button onClick={() => setActiveUser(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-primary' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
+                                        <button key={index} onClick={() => setActiveUser(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-primary' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
                                     )
                                 })
                             }
