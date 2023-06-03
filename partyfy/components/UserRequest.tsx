@@ -126,11 +126,21 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
     const [searchResults, setSearchResults] = useState([]);
 
     async function searchSpotify(searchQuery: string) {
+        if (searchQuery.length === 0) {
+            setSearchResults([]);
+            return;
+        } 
         let accessToken = await spotifyAuth.getAccessToken();
         const response = await fetch('/api/spotify/search?query=' + searchQuery + '&access_token=' + accessToken);
         const data = await response.json();
         if (!data) return;
-        if (!data.tracks) return;
+        if (!data.tracks ) {
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while searching for songs, response: ' + JSON.stringify(data) + '. Please try again later. Spotify Authentication Information: ' + spotifyAuth.toString(),
+                icon: 'error',
+            })
+        }
         if (!data.tracks.items) return;
         if (data.tracks.items.length === 0) return;
         setSearchResults(data.tracks.items);
