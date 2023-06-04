@@ -1,17 +1,19 @@
-import Head from 'next/head'
-import styles from '@/styles/Home.module.css'
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { useEffect, useRef, useState } from 'react';
-import AnchorLink from '../components/AnchorLink'
-import { CONSTANTS } from '../assets/Constants';
-import Loading from '../components/Loading';
-import { SpotifyAuth } from '../helpers/SpotifyAuth';
-import Dashboard from '../components/Dashboard';
-import UserContext from '../providers/UserContext';
-import UserQuickAction from '../components/UserQuickAction';
-import Swal from 'sweetalert2';
-import FriendsList from '@/components/FriendsList';
 import { isMobile } from 'react-device-detect';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { SpotifyAuth } from '@/helpers/SpotifyAuth';
+import { CONSTANTS } from '@/assets/Constants';
+
+import Head from 'next/head'
+import Swal from 'sweetalert2';
+import AnchorLink from '@/components/misc/AnchorLink'
+import Loading from '@/components/misc/Loading';
+import Dashboard from '@/components/Dashboard';
+import UserQuickAction from '@/components/dropdowns/UserQuickAction';
+import FriendsList from '@/components/dropdowns/friends/Friends';
+import UserContext from '@/providers/UserContext';
+
+import styles from '@/styles/Home.module.css'
 
 
 export default function Home() {

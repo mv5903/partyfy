@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { TiRefresh } from "react-icons/ti";
 import { isMobile } from "react-device-detect";
 import UserContext from '@/providers/UserContext';
-import Loading from "./Loading";
+import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
 
 const RequestPage = () => {

@@ -6,8 +6,7 @@ import { RadioGroup, Radio } from "react-radio-group";
 
 import UserContext from '@/providers/UserContext';
 import Swal from "sweetalert2";
-import UserQueueOverlay from "./UserQueueOverlay";
-import Loading from "./Loading";
+import Loading from "../misc/Loading";
 
 const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Function }) => {
 

@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
-import styles from '../styles/Dashboard.module.css';
-import e from '../pages/assets/e.png';
+import { useState, useEffect, useContext } from 'react';
 import { fancyTimeFormat } from '@/helpers/Utils';
-import Loading from './Loading';
-import UserContext from '../providers/UserContext';
-import { useContext } from 'react';
-import Options from './Options';
+import e from '@/pages/assets/e.png';
+import UserContext from '@/providers/UserContext';
+
+import styles from '@/styles/Dashboard.module.css';
 
 const timer = 1000;
 

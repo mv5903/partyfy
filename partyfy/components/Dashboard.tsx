@@ -1,11 +1,12 @@
-import styles from '../styles/Dashboard.module.css';
-import DataTable from './DataTable';
-import Settings from './Settings';
-import NowPlaying from './NowPlaying';
-import { useContext, useEffect, useState } from 'react';
-import UserContext from '../providers/UserContext';
+import { useContext, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
-import RequestPage from './RequestPage';
+
+import DataTable from './host/DataTable';
+import NowPlaying from './host/NowPlaying';
+import UserContext from '@/providers/UserContext';
+import RequestPage from './request/RequestPage';
+
+import styles from '@/styles/Dashboard.module.css';
 
 const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
     const {

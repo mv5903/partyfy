@@ -20,5 +20,12 @@
             "connectString": "postgres://default:kTPI8s5vQSaM@ep-jolly-lake-558973.us-east-1.postgres.vercel-storage.com:5432/verceldb",
             "name": "Partyfy"
         }
-    ]
+    ],
+    "editor.formatOnSave": false,
+    "eslint.validate": [
+        "typescript"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    }
 }

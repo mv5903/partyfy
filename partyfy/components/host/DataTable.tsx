@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import UserContext from '../providers/UserContext';
-import styles from '../styles/Dashboard.module.css';
-import e from '../pages/assets/e.png';
+import UserContext from '@/providers/UserContext';
+import e from '@/pages/assets/e.png';
+
+import styles from '@/styles/Dashboard.module.css';
 
 const DataTable = ({ title } : { title: string }) => {
     const {

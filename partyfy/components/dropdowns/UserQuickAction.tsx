@@ -1,9 +1,11 @@
-import Options from '@/components/Options';
-import styles from '../styles/Options.module.css';
 import { BsFillPersonFill } from 'react-icons/bs';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { isMobile } from 'react-device-detect';
+
+import Options from '@/components/host/Options';
 import useComponentVisible from '@/hooks/useComponentVisible';
+
+import styles from '@/styles/Options.module.css';
 
 const UserQuickAction = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) =>  {
 
