@@ -9,6 +9,16 @@
             "driver": "CockroachDB",
             "name": "Cockroach Partyfy",
             "connectString": "postgresql://matt:Weyers6638!@biased-imp-10661.7tt.cockroachlabs.cloud:26257/partyfy?sslmode=verify-full"
+        },
+        {
+            "pgOptions": {
+                "ssl": true
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "connectString": "postgres://default:kTPI8s5vQSaM@ep-jolly-lake-558973.us-east-1.postgres.vercel-storage.com:5432/verceldb",
+            "name": "Partyfy"
         }
     ]
 }

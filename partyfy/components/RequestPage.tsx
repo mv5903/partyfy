@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { TiRefresh } from "react-icons/ti";
 import { isMobile } from "react-device-detect";
 import UserContext from '@/providers/UserContext';
 import Loading from "./Loading";
@@ -16,21 +17,23 @@ const RequestPage = () => {
     const [loading, setLoading] = useState(true);
     const [activeUser, setActiveUser] = useState(null);
 
-    useEffect(() => {
-        async function fn() {
-            const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
-            const data = await response.json();
-            setFriendsList(data);
-            setLoading(false);
-        }
+    async function displayFriends() {
+        if (activeUser) return;
+        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
+        let data = await response.json();
+        // Show users who have functionality enabled first
+        data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
+        setFriendsList(data);
+        setLoading(false);
+    }
 
-        fn();
-        const interval = setInterval(fn, 2000);
-        return () => clearInterval(interval);
+    useEffect(() => {
+       displayFriends();
     }, [user]);
 
     useEffect(() => {
         async function fn() {
+            if (activeUser) return;
             const response = await fetch('/api/database/unattendedqueues?UserID=' + (user.sub ?? user.user_id) as string);
             const data = await response.json();
             if (data) {
@@ -77,18 +80,21 @@ const RequestPage = () => {
                 }
                 {
                     !activeUser && !loading && friendsList.length > 0 &&
-                    <>
-                        <h3>Choose a friend to request a song from:</h3>
+                    <div>
+                        <div className="d-flex flex-row align-items-center">
+                            <h3 className="me-3">Choose a friend to request a song from:</h3>
+                            <button className="btn btn-primary" onClick={() => displayFriends()}><TiRefresh size={30} /></button>
+                        </div>
                         <div className="d-flex flex-wrap flex-column justify-content-center mt-4">
                             {
                                 friendsList.map((friend: any, index: number) => {
                                     return (
-                                        <button key={index} onClick={() => setActiveUser(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-primary' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
+                                        <button key={index} onClick={() => setActiveUser(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-success' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
                                     )
                                 })
                             }
                         </div>
-                    </>
+                    </div>
                 }
                 {
                     activeUser &&

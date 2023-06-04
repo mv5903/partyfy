@@ -38,7 +38,7 @@ const FriendsList = () => {
     const currentFriendListScreen = () => {
         switch (friendListScreen) {
             case FriendListScreen.Friends:
-                return <FriendsList_Friends user={user} />
+                return <FriendsList_Friends user={user} isComponentVisible={isComponentVisible}/>
             case FriendListScreen.Requests:
                 return <FriendsList_Requests user={user} />
             case FriendListScreen.Sent:
@@ -73,11 +73,12 @@ const FriendsList = () => {
     );
 }
 
-const FriendsList_Friends = ({ user } : { user : UserProfile } ) => {
+const FriendsList_Friends = ({ user, isComponentVisible } : { user : UserProfile, isComponentVisible: boolean } ) => {
     const [friends, setFriends] = useState([]);
 
     useEffect(() => {
         async function fn() {
+            if (!isComponentVisible) return;
             const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
             const data = await response.json();
             setFriends(data);

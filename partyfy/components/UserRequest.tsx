@@ -132,6 +132,13 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
         } 
         let accessToken = await spotifyAuth.getAccessToken();
         const response = await fetch('/api/spotify/search?query=' + searchQuery + '&access_token=' + accessToken);
+        if (!response.ok) {
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while searching for songs, response: ' + response.statusText + '. Please try again later. Spotify Authentication Information: ' + spotifyAuth.toString(),
+                icon: 'error',
+            })
+        }
         const data = await response.json();
         if (!data) return;
         if (!data.tracks ) {
