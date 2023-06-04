@@ -9,7 +9,11 @@ import styles from '@/styles/FriendsList.module.css'
 import { isMobile } from 'react-device-detect';
 import Swal from 'sweetalert2';
 import Loading from './Loading';
+import useComponentVisible from '@/hooks/useComponentVisible';
+
 const FriendsList = () => {
+
+    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
 
     enum FriendListScreen {
         Friends,
@@ -18,7 +22,6 @@ const FriendsList = () => {
         Search
     }
 
-    const [visible, setVisible] = useState(false);
     const [friendListScreen, setFriendListScreen] = useState(FriendListScreen.Friends);
 
     const DEFAULT_SCREEN = FriendListScreen.Friends;
@@ -45,25 +48,25 @@ const FriendsList = () => {
         }
     }
 
-    if (!visible && user && friendListScreen !== DEFAULT_SCREEN) {
+    if (!isComponentVisible && user && friendListScreen !== DEFAULT_SCREEN) {
         setFriendListScreen(DEFAULT_SCREEN);
     }
 
     return (
-        <div className="me-2 d-flex flex-row align-items-center">
-            <div onClick={() => setVisible(!visible)}>
+        <div className="me-2" ref={ref}>
+            <div className={styles.friendsMenuButton} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={45} className="mb-1" />
                 <IoMdArrowDropdown size={25} className="mb-1 ms-1" />
             </div>
             {
-                visible && 
-                <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : 'vh' }}>
+                isComponentVisible && 
+                <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '4vh' }}>
                     <select onChange={e => setFriendListScreen(FriendListScreen[e.target.value as keyof typeof FriendListScreen])}>
                         {Object.values(FriendListScreen).filter(i => !isNumeric(i)).map((header, index) => {
                             return <option key={index} value={header}>{header}</option>
                         })}
                     </select>
-                    { currentFriendListScreen() }
+                    { isComponentVisible && currentFriendListScreen() }
                 </div>
             }
         </div>

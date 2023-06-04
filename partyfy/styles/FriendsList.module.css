@@ -1,10 +1,10 @@
+
 .friendsMenu {
     z-index: 1;
     padding: 12px 16px;
     width: 350px;
     position: absolute;
     right: 0;
-    margin-right: 5vw;
     background-color: #333;
     border-radius: 5px;
     display: flex;
