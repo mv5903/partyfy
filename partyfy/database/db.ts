@@ -1,14 +1,22 @@
 import { prisma } from '@/./db'
+import { winston } from '@/logs/winston';
 
 export default class Database {
 
-    async getRecentSongs(OwnerUserID: string){
-        const data = (await prisma.recents.findMany()).reverse();
+    async getRecentSongs(OwnerUserID: string) {
+        winston.info(`[Database] Getting recent songs for ${OwnerUserID}`);
+        const data = (await prisma.recents.findMany({
+            where: {
+                OwnerUserID: OwnerUserID
+            },
+        })).reverse();
         await prisma.$disconnect();
+        if (data.length > 0) winston.info(`[Database] Successfully got ${data.length} recent songs for ${OwnerUserID}`);
         return data;
     }
 
     async insertRecentSong(OwnerUserID: string, SongID: string, SongName: string, SongArtist: string, SongAlbum: string, SongArt: string, SongExplicit: boolean) {
+        winston.info(`[Database] Inserting recent song for ${OwnerUserID}, content: ${SongName} by ${SongArtist}`);
         const data = await prisma.recents.create({
             data: {
                 OwnerUserID: OwnerUserID,
@@ -22,40 +30,49 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully inserted recent song for ${OwnerUserID}, content: ${SongName} by ${SongArtist}`);
         return data;
     }
 
     async deleteRecentSongs(OwnerUserID: string) {
+        winston.info(`[Database] Deleting recent songs for ${OwnerUserID}`);
         const data = await prisma.recents.deleteMany({
             where: {
                 OwnerUserID: OwnerUserID
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully deleted recent songs for ${OwnerUserID}`);
         return data;
     }
 
     async getUser(UserID: string) {
+        winston.info(`[Database] Getting user ${UserID}`);
         const data = await prisma.users.findFirst({
             where: {
                 UserID: UserID
             }
         });
         await prisma.$disconnect();
+        if (data) winston.info(`[Database] Successfully got user ${UserID}`);
+        else winston.info(`[Database] Failed to get user ${UserID}, likely does not exist`);
         return data;
     }
 
     async addNewUser(UserID: string) {
+        winston.info(`[Database] Adding new user ${UserID}`);
         const data = await prisma.users.create({
             data: {
                 UserID: UserID
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully added new user ${UserID}`);
         return data;
     }
 
     async addUserRefreshToken(UserID: string, RefreshToken: string) {
+        winston.info(`[Database] Adding refresh token ${RefreshToken} for ${UserID}`);
         const data = await prisma.users.update({
             where: {
                 UserID: UserID
@@ -65,10 +82,12 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully added refresh token ${RefreshToken} for ${UserID}`);
         return data;
     }
 
     async addUsername(UserID: string, Username: string) {
+        winston.info(`[Database] Adding username ${Username} for ${UserID}`);
         try {
             const data = await prisma.users.update({
                 where: {
@@ -79,9 +98,11 @@ export default class Database {
                 }
             });
             await prisma.$disconnect();
+            winston.info(`[Database] Successfully added username ${Username} for ${UserID}`);
             return data;
         } catch (err: any) {
             if (err.toString().includes('Cannot insert duplicate key')) {
+                winston.warn(`[Database] Failed to add username ${Username} for ${UserID}, already exists`);
                 return {
                     duplicate: true
                 }
@@ -90,6 +111,7 @@ export default class Database {
     }
 
     async enableUnattendedQueues(UserID: string) {
+        winston.info(`[Database] Enabling unattended queues for ${UserID}`);
         const data = await prisma.users.update({
             where: {
                 UserID: UserID
@@ -99,10 +121,12 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully enabled unattended queues for ${UserID}`);
         return data;
     }
 
     async disableUnattendedQueues(UserID: string) {
+        winston.info(`[Database] Disabling unattended queues for ${UserID}`);
         const data = await prisma.users.update({
             where: {
                 UserID: UserID
@@ -111,11 +135,13 @@ export default class Database {
                 UnattendedQueues: false
             }
         });
+        winston.info(`[Database] Successfully disabled unattended queues for ${UserID}`);
         await prisma.$disconnect();
         return data;
     }
 
     async getUnattendedQueues(UserID: string) {
+        winston.info(`[Database] Getting unattended queues for ${UserID}`);
         const data = await prisma.users.findFirst({
             where: {
                 UserID: UserID
@@ -125,11 +151,13 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        if (data) winston.info(`[Database] Successfully got unattended queues for ${UserID}`);
         return data;
     }
 
     async searchForUsers(UserID: string, Query: string) {
         // Ignore all users that are either friends with [UserID] or have an outgoing friend request already
+        winston.info(`[Database] Searching for users with query ${Query} for ${UserID}`);
         const userFriendRelations = await prisma.friends.findMany({
             where: {
                 UserID: UserID
@@ -151,11 +179,14 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        if (data) winston.info(`[Database] Successfully searched for users with query ${Query} for ${UserID}`);
+        else winston.info(`[Database] User ${UserID}'s search for users with query ${Query} returned no results`);
         return data;
     }
 
     // [UserID] sends [FriendUserID] a friend request. Appears in [FriendUserID]'s requests page.
     async addFriendRequest(UserID: string, FriendUserID: string) {
+        winston.info(`[Database] Adding friend request from ${UserID} to ${FriendUserID}`);
         const data = await prisma.friends.create({
             data: {
                 UserID: UserID,
@@ -164,11 +195,13 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully added friend request from ${UserID} to ${FriendUserID}`);
         return data;
     }
 
     // [FriendUserID] accepts [UserID]'s friend request.
     async acceptFriendRequest(UserID: string, FriendUserID: string) {
+        winston.info(`[Database] Accepting friend request from ${FriendUserID} to ${UserID}`);
         await prisma.friends.updateMany({
             where: {
                 UserID: FriendUserID,
@@ -179,9 +212,11 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully accepted friend request from ${FriendUserID} to ${UserID}`);
     }
 
     async getFriends(UserID: string) {
+        winston.info(`[Database] Getting friends for ${UserID}`);
         const data = await prisma.friends.findMany({
             where: {
                 OR: [
@@ -214,10 +249,13 @@ export default class Database {
             },
         });
         await prisma.$disconnect();
+        if (friends) winston.info(`[Database] Successfully got friends for ${UserID}`);
+        else winston.info(`[Database] User ${UserID} has no friends`);
         return friends;
     }
 
     async getSentFriendRequests(UserID: string) {
+        winston.info(`[Database] Getting sent friend requests for ${UserID}`);
         const data = await prisma.friends.findMany({
             where: {
                 UserID: UserID,
@@ -232,28 +270,13 @@ export default class Database {
             },
         });
         await prisma.$disconnect();
+        if (usernamesForData) winston.info(`[Database] Successfully got sent friend requests for ${UserID}`);
+        else winston.info(`[Database] User ${UserID} has no sent friend requests`);
         return usernamesForData;
     }
 
-    // Delete [UserID]'s friendship with [FriendUserID].
-    // Delete [FriendUserID]'s friendship with [UserID].
-    async removeFriend(UserID: string, FriendUserID: string) {
-        await prisma.friends.deleteMany({
-            where: {
-                UserID: UserID,
-                FriendUserID: FriendUserID
-            }
-        });
-        await prisma.friends.deleteMany({
-            where: {
-                UserID: FriendUserID,
-                FriendUserID: UserID
-            }
-        });
-        await prisma.$disconnect();
-    }
-
     async getIncomingFriendRequests(UserID: string) {
+        winston.info(`[Database] Getting incoming friend requests for ${UserID}`);
         const data = await prisma.friends.findMany({
             where: {
                 FriendUserID: UserID,
@@ -268,10 +291,13 @@ export default class Database {
             },
         });
         await prisma.$disconnect();
+        if (usernamesForData) winston.info(`[Database] Successfully got incoming friend requests for ${UserID}`);
+        else winston.info(`[Database] User ${UserID} has no incoming friend requests`);
         return usernamesForData;
     }
 
     async deleteFriendRequest(UserID: string, FriendUserID: string) {
+        winston.info(`[Database] Deleting friend request from ${UserID} to ${FriendUserID}`);
         await prisma.friends.deleteMany({
             where: {
                 UserID: UserID,
@@ -287,9 +313,11 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully deleted friend request from ${UserID} to ${FriendUserID}`);
     }
 
     async deleteFriend(UserID: string, FriendUserID: string) {
+        winston.info(`[Database] Deleting friendship between ${UserID} and ${FriendUserID}`);
         await prisma.friends.deleteMany({
             where: {
                 UserID: UserID,
@@ -305,5 +333,6 @@ export default class Database {
             }
         });
         await prisma.$disconnect();
+        winston.info(`[Database] Successfully deleted friendship between ${UserID} and ${FriendUserID}`);
     }
 }

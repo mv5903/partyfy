@@ -1,4 +1,5 @@
 import Database from '@/database/db';
+import { winston } from '@/logs/winston';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
@@ -25,5 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(200).json(data);
       return;
     }
+    winston.error(`Method ${req.method} not allowed`);
     res.status(405).end();
 }

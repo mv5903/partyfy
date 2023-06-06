@@ -61,7 +61,7 @@ export default function Home() {
     return false;
   }
 
-  useEffect(() => {
+  LoadSpotify: useEffect(() => {
     if (user) {
       fetch('/api/database/users', {
           method: 'POST',
@@ -99,7 +99,7 @@ export default function Home() {
     return true;
   }
 
-  useEffect(() => {
+  LoadAndGetUsername: useEffect(() => {
     async function f() {
       if (user && user.sub) {
         const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id), {
