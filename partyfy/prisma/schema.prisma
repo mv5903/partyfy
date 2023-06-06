@@ -3,21 +3,21 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
+  provider          = "postgresql"
+  url               = env("POSTGRES_PRISMA_URL")
+  directUrl         = env("POSTGRES_URL_NON_POOLING")
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model AskedQueues {
-  id       Int      @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   OwnerUserID String   @db.VarChar(255)
   RequestedAt DateTime
   SongID      String   @db.VarChar(255)
 }
 
 model Recents {
-  id       Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   OwnerUserID  String   @db.VarChar(255)
   PlayedAt     DateTime
   SongID       String   @db.VarChar(255)
@@ -29,19 +29,16 @@ model Recents {
 }
 
 model Users {
-  id       Int      @id @default(autoincrement())
-  UserID           String?  @db.VarChar(255)
+  id               Int      @id @default(autoincrement())
+  UserID           String?  @unique @db.VarChar(255)
   RefreshToken     String?  @db.VarChar(512)
   UnattendedQueues Boolean?
-  Username         String?  @db.VarChar(32)
-
-  @@unique ([Username])
-  @@unique ([UserID])
+  Username         String?  @unique @db.VarChar(32)
 }
 
 model Friends {
-  id              Int     @id @default(autoincrement())
-  UserID          String? @db.VarChar(255)
-  FriendUserID    String? @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
+  UserID          String?  @db.VarChar(255)
+  FriendUserID    String?  @db.VarChar(255)
   IsFriendRequest Boolean?
 }

@@ -7,8 +7,9 @@ import { RadioGroup, Radio } from "react-radio-group";
 import UserContext from '@/providers/UserContext';
 import Swal from "sweetalert2";
 import Loading from "../misc/Loading";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
-const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Function }) => {
+const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any, setCurrentFriend: Function }) => {
 
     enum RequestPageView {
         Search,
@@ -21,14 +22,30 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
         user
     } = useContext(UserContext);
 
+    const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
+
+    async function loadFriendSpotifyAuth() {
+        const response = await fetch('/api/database/friends?UserID=' + currentFriend.UserID);
+        const data = await response.json();
+        if (data.length > 0 && data[0] && data[0].RefreshToken) {
+            let friendRefreshToken = data[0].RefreshToken;
+            console.log(friendRefreshToken);
+            let friendSpotifyAuth = new SpotifyAuth(friendRefreshToken);
+            setFriendSpotifyAuth(friendSpotifyAuth);
+        }
+    }
+
+    useEffect(() => {
+        loadFriendSpotifyAuth();
+    }, []);
 
     const currentView = () => {
         switch (requestPageView) {
             case RequestPageView.Search:
                 return <Search you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
             case RequestPageView.TheirQueue:
-                return <TheirQueue you={user} spotifyAuth={spotifyAuth} friend={activeUser} />;
+                return <TheirQueue you={user} friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
             case RequestPageView.YourPlaylists:
                 return <YourPlaylists you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
         }
@@ -37,7 +54,7 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
     async function addToQueue(song: any) {
         let result = await Swal.fire({
             title: 'Queue Confirmation',
-            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${song.artists[0].name}</i> to ${activeUser.Username}'s queue.`,
+            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${song.artists[0].name}</i> to ${currentFriend.Username}'s queue.`,
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Add it!',
@@ -46,7 +63,7 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
 
         if (result.isConfirmed) {
             const uri = song.uri;
-            const UserID = activeUser.UserID;
+            let friendAccessToken = await friendSpotifyAuth.getAccessToken();
             const response = await fetch('/api/spotify/queue', {
                 method: 'POST',
                 headers: {
@@ -54,8 +71,8 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
                 },
                 body: JSON.stringify({
                     uri: uri,
-                    UserID: UserID,
-                    refresh_token: encodeURIComponent(activeUser.RefreshToken)
+                    UserID: currentFriend.UserID,
+                    access_token: friendAccessToken
                 })
             });
             const data = await response.json();
@@ -98,24 +115,29 @@ const UserRequest = ({ user: activeUser, setUser } : { user: any, setUser: Funct
 
     return (
         <div>
-            <div className="d-flex flex-row align-items-center justify-content-between card bg-dark p-2">
-                <h3 className="text-center me-2 pt-2">{`Controlling: ${activeUser.Username}`}</h3>
-                <button className="btn btn-danger" onClick={() => setUser(null)}><TiArrowBack size={25}/></button>
-            </div>
-            <div>
-                <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
-                    <label className="btn btn-dark active">
-                        <Radio value="Search" style={{ visibility: "hidden"}} />Search
-                    </label>
-                    <label className="btn btn-dark">
-                        <Radio value="Your Playlists" style={{ visibility: "hidden"}} />Your Playlists
-                    </label>
-                    <label className="btn btn-dark">
-                        <Radio value="Their Queue" style={{ visibility: "hidden"}} />Their Queue
-                    </label>
-                </RadioGroup>
-                { currentView() }
-            </div>
+            {
+                !friendSpotifyAuth ? <Loading /> :
+                <>
+                    <div className="d-flex flex-row align-items-center justify-content-between card bg-dark p-2">
+                        <h3 className="text-center me-2 pt-2">{`Controlling: ${currentFriend.Username}`}</h3>
+                        <button className="btn btn-danger" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                    </div>
+                    <div>
+                        <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
+                            <label className="btn btn-dark active">
+                                <Radio value="Search" style={{ visibility: "hidden"}} />Search
+                            </label>
+                            <label className="btn btn-dark">
+                                <Radio value="Your Playlists" style={{ visibility: "hidden"}} />Your Playlists
+                            </label>
+                            <label className="btn btn-dark">
+                                <Radio value="Their Queue" style={{ visibility: "hidden"}} />Their Queue
+                            </label>
+                        </RadioGroup>
+                        { currentView() }
+                    </div>
+                </>
+            }
         </div>
     )
 }
@@ -192,7 +214,7 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
     );
 }
 
-const TheirQueue = ({ you, spotifyAuth, friend } : { you: any, spotifyAuth: any, friend: any }) => {
+const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpotifyAuth: any, friend: any }) => {
 
     const [queue, setQueue] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -204,7 +226,7 @@ const TheirQueue = ({ you, spotifyAuth, friend } : { you: any, spotifyAuth: any,
     }
 
     async function showFullQueue() {
-        let accessToken = await spotifyAuth.getAccessToken();
+        let accessToken = await friendSpotifyAuth.getAccessToken();
         if (!accessToken) return;
         const response = await fetch('/api/spotify/queue?access_token=' + accessToken);
         const data = await response.json();

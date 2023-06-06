@@ -15,10 +15,10 @@ const RequestPage = () => {
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(false);
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeUser, setActiveUser] = useState(null);
+    const [currentFriend, setCurrentFriend] = useState(null);
 
     async function displayFriends() {
-        if (activeUser) return;
+        if (currentFriend) return;
         const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
         let data = await response.json();
         // Show users who have functionality enabled first
@@ -33,7 +33,7 @@ const RequestPage = () => {
 
     useEffect(() => {
         async function fn() {
-            if (activeUser) return;
+            if (currentFriend) return;
             const response = await fetch('/api/database/unattendedqueues?UserID=' + (user.sub ?? user.user_id) as string);
             const data = await response.json();
             if (data) {
@@ -63,7 +63,7 @@ const RequestPage = () => {
     return (
         <div>
             {
-                isMobile && !activeUser &&
+                isMobile && !currentFriend &&
                 <div className="text-center">
                     <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues from Others"}</button>
                     <h3>OR</h3>
@@ -79,7 +79,7 @@ const RequestPage = () => {
                     <h3>No friends found. Add some through the friends menu.</h3>
                 }
                 {
-                    !activeUser && !loading && friendsList.length > 0 &&
+                    !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
                         <div className="d-flex flex-row align-items-center">
                             <h3 className="me-3">Choose a friend to request a song from:</h3>
@@ -89,7 +89,7 @@ const RequestPage = () => {
                             {
                                 friendsList.map((friend: any, index: number) => {
                                     return (
-                                        <button key={index} onClick={() => setActiveUser(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-success' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
+                                        <button key={index} onClick={() => setCurrentFriend(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-success' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
                                     )
                                 })
                             }
@@ -97,8 +97,8 @@ const RequestPage = () => {
                     </div>
                 }
                 {
-                    activeUser &&
-                    <UserRequest user={activeUser} setUser={setActiveUser} />
+                    currentFriend &&
+                    <UserRequest currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} />
                 }
             </div>
         </div>

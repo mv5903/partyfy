@@ -22,13 +22,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return;
     }
     if (req.method === 'POST') {
-        let accessToken = await SpotifyAuth_Backend.getAnAccessToken(req.body.refresh_token as string);
         let response = await fetch('https://api.spotify.com/v1/me/player/queue?uri=' + encodeURIComponent(req.body.uri as string), {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": "Bearer " + accessToken,
+                "Authorization": "Bearer " + req.body.access_token as string,
             }
         });
         if (response.ok) {
