@@ -1,12 +1,7 @@
 import { createLogger, transports, format } from "winston";
-import { createWriteStream, writeFile } from "fs";
 
 export const winston = createLogger({
-    transports: [
-        new transports.Stream({
-            stream: createWriteStream('./log.log'),
-        }),
-    ],
+    transports: [new transports.Console()],
     format: format.combine(
         format.colorize(),
         format.splat(),
