@@ -26,12 +26,8 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
 
     async function loadFriendSpotifyAuth() {
-        const response = await fetch('/api/database/friends?UserID=' + currentFriend.UserID);
-        const data = await response.json();
-        if (data.length > 0 && data[0] && data[0].RefreshToken) {
-            let friendRefreshToken = data[0].RefreshToken;
-            console.log(friendRefreshToken);
-            let friendSpotifyAuth = new SpotifyAuth(friendRefreshToken);
+        if (currentFriend && currentFriend.RefreshToken) {
+            let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
             setFriendSpotifyAuth(friendSpotifyAuth);
         }
     }
@@ -424,7 +420,6 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                             {
                                 activePlaylist.map((item: any, key: number) => {
                                     if (!item || !item.track) return;
-                                    console.log(item);
                                     let result = item.track;
                                     if (!result) return;
                                     if (!result.album.images[2]) return;
