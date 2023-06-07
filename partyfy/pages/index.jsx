@@ -164,13 +164,13 @@ export default function Home() {
       { 
         !user && <main className={styles.main}>
           <h2 className='text-center mb-4 ms-4 me-4'>Welcome to Partyfy!</h2>
-          <p className={styles.description}>A controllable Spotify Party without the hassle of sharing a playlist.</p>
+          <p className={styles.description}>Add to your friend's Spotify queue without accessing their session directly.</p>
           <AnchorLink
             href="/api/auth/login"
             className="btn btn-primary btn-margin"
             tabIndex={0}
             testId="navbar-login-desktop" icon={null}>
-            Log in
+            Get Started
           </AnchorLink>
         </main> 
       }
