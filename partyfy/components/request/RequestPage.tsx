@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { TiRefresh } from "react-icons/ti";
 import { isMobile } from "react-device-detect";
+import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
@@ -19,7 +20,7 @@ const RequestPage = () => {
 
     async function displayFriends() {
         if (currentFriend) return;
-        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
+        const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
         let data = await response.json();
         // Show users who have functionality enabled first
         data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
@@ -34,7 +35,7 @@ const RequestPage = () => {
     useEffect(() => {
         async function fn() {
             if (currentFriend) return;
-            const response = await fetch('/api/database/unattendedqueues?UserID=' + (user.sub ?? user.user_id) as string);
+            const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
             const data = await response.json();
             if (data) {
                 setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
@@ -51,7 +52,7 @@ const RequestPage = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: user.sub ?? user.user_id,
+                UserID: getUserID(user),
                 enable: !isUnattendedQueuesEnabled
             })
         });

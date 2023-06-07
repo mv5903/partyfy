@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
+import { getUserID } from '@/helpers/Utils';
 
 import DataTable from './host/DataTable';
 import NowPlaying from './host/NowPlaying';
@@ -23,7 +24,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: user.sub ?? user.user_id,
+                    UserID: getUserID(user),
                     RefreshToken: spotifyAuth.refreshToken
                 })
             })

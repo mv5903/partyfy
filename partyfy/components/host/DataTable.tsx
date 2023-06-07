@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import e from '@/pages/assets/e.png';
 
@@ -16,7 +17,7 @@ const DataTable = ({ title } : { title: string }) => {
     if (user) {
         useEffect(() => {
             async function getRecents() {
-                let response = await fetch('/api/database/recents?UserID=' + (user.sub ?? user.user_id) as string); 
+                let response = await fetch('/api/database/recents?UserID=' + getUserID(user)); 
                 let data = await response.json();
                 let songs = data;
                 if (!songs) return;

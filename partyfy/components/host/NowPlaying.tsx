@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { fancyTimeFormat } from '@/helpers/Utils';
+import { getUserID } from '@/helpers/Utils';
 import e from '@/pages/assets/e.png';
 import UserContext from '@/providers/UserContext';
 
@@ -27,7 +28,7 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
             let currentSong = await res.json();
 
             // Get recent songs from database
-            res = await fetch('/api/database/recents?UserID=' + (user.sub ?? user.user_id) as string);
+            res = await fetch('/api/database/recents?UserID=' + getUserID(user));
             let data = (await res.json());
             if (data) {
                 // Get first song in recent songs, see if it matches current song. If not, add to database
@@ -44,7 +45,7 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
                         },
                         body: JSON.stringify({
                             SongID: currentSong.item.id,
-                            UserID: user.sub ?? user.user_id,
+                            UserID: getUserID(user),
                             SongName: currentSong.item.name,
                             SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                             SongAlbum: currentSong.item.album.name,
@@ -61,7 +62,7 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
                     },
                     body: JSON.stringify({
                         SongID: currentSong.item.id,
-                        UserID: user.sub ?? user.user_id,
+                        UserID: getUserID(user),
                         SongName: currentSong.item.name,
                         SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                         SongAlbum: currentSong.item.album.name,

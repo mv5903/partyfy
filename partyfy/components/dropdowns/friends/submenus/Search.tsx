@@ -1,6 +1,7 @@
 import { FaPaperPlane } from 'react-icons/fa';
 import { useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
+import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2';
 
 const Search = ({ user } : { user : UserProfile } ) => {
@@ -11,12 +12,12 @@ const Search = ({ user } : { user : UserProfile } ) => {
             setUsersReturned([]);
             return;
         }
-        const response = await fetch('/api/database/friends?Query=' + query + '&action=search&UserID=' + (user.sub ?? user.user_id));
+        const response = await fetch('/api/database/friends?Query=' + query + '&action=search&UserID=' + getUserID(user));
         let data = await response.json();
 
         // Don't show yourself in search result
         if (data.length > 0) {
-            data = data.filter((users : any) => users.UserID != (user.sub ?? user.user_id));
+            data = data.filter((users : any) => users.UserID != getUserID(user));
             setUsersReturned(data);
         }
     }
@@ -39,7 +40,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: user.sub ?? user.user_id,
+                    UserID: getUserID(user),
                     FriendUserID: FriendUserID,
                     action: 'SendFriendReqest'
                 })

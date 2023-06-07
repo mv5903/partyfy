@@ -3,6 +3,7 @@ import { isMobile } from 'react-device-detect';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { SpotifyAuth } from '@/helpers/SpotifyAuth';
 import { CONSTANTS } from '@/assets/Constants';
+import { getUserID } from '@/helpers/Utils';
 
 import Head from 'next/head'
 import Swal from 'sweetalert2';
@@ -27,7 +28,7 @@ export default function Home() {
   // Handles spotify authentication
   async function handleSpotifyAuth() {
     // Refresh token already in database
-    const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id));
+    const response = await fetch('/api/database/users?UserID=' + getUserID(user));
     const data = await response.json();
     if (data && data.RefreshToken && data.RefreshToken.length > 0) {
       if (spotifyAuth.current && spotifyAuth.current.RefreshToken && spotifyAuth.current?.RefreshToken != null) return true;
@@ -102,7 +103,7 @@ export default function Home() {
   LoadAndGetUsername: useEffect(() => {
     async function f() {
       if (user && user.sub) {
-        const response = await fetch('/api/database/users?UserID=' + (user.sub ?? user.user_id), {
+        const response = await fetch('/api/database/users?UserID=' + getUserID(user), {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json'

@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import Swal from 'sweetalert2';
 import UserContext from '@/providers/UserContext';
+import { getUserID } from '@/helpers/Utils';
 
 const ClearTable = ({ table } : { table: string }) => {
 
@@ -27,7 +28,7 @@ const ClearTable = ({ table } : { table: string }) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    OwnerUserID: user.sub ?? user.user_id
+                    OwnerUserID: getUserID(user)
                 })
             });
 

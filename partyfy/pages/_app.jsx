@@ -1,14 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/globals.scss'
-import { UserProvider } from '@auth0/nextjs-auth0/client'
-import { StrictMode } from 'react';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 export default function App({ Component, pageProps }) {
   return (
   <UserProvider>
-    <StrictMode>
-      <Component {...pageProps} />
-    </StrictMode>
+    <Component {...pageProps} />
   </UserProvider>
   );
 }

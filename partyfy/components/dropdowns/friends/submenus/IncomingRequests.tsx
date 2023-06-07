@@ -2,6 +2,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { GiCancel } from 'react-icons/gi';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
+import { getUserID } from '@/helpers/Utils';
 
 import Swal from 'sweetalert2';
 import Loading from '@/components/misc/Loading';
@@ -11,7 +12,7 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
     const [loading, setLoading] = useState(true);
 
     async function fetchRequests() {
-        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=requests')
+        const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=requests')
         const data = await response.json();
         if (data) {
             setLoading(false);
@@ -42,7 +43,7 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: user.sub ?? user.user_id,
+                    UserID: getUserID(user),
                     FriendID: FriendUserID,
                     action: 'DeleteFriendRequest'
                 })
@@ -68,7 +69,7 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: user.sub ?? user.user_id,
+                    UserID: getUserID(user),
                     FriendID: FriendUserID,
                     action: 'AcceptFriendRequest'
                 })

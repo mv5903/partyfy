@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import ClearTable from './ClearTable';
 import UserContext from '@/providers/UserContext';
+import { getUserID } from '@/helpers/Utils';
 
 import styles from '@/styles/Options.module.css';
 
@@ -15,7 +16,7 @@ const Options = () => {
 
     useEffect(() => {
         async function fn() {
-            const response = await fetch('/api/database/unattendedqueues?UserID=' + (user.sub ?? user.user_id) as string);
+            const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
             const data = await response.json();
             if (data) {
                 setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
@@ -32,7 +33,7 @@ const Options = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: user.sub ?? user.user_id,
+                UserID: getUserID(user),
                 enable: !isUnattendedQueuesEnabled
             })
         });

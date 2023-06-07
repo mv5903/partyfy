@@ -1,6 +1,7 @@
 import { FaTrash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
+import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2';
 
 const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVisible: boolean } ) => {
@@ -9,7 +10,7 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
     useEffect(() => {
         async function fn() {
             if (!isComponentVisible) return;
-            const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id))
+            const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
             const data = await response.json();
             setFriends(data);
         }
@@ -35,7 +36,7 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        UserID: user.sub ?? user.user_id,
+                        UserID: getUserID(user),
                         FriendUserID: FriendUserID,
                         action: 'DeleteFriend'
                     }) 

@@ -1,6 +1,7 @@
 import { GiCancel } from 'react-icons/gi';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
+import { getUserID } from '@/helpers/Utils';
 
 import Swal from 'sweetalert2';
 import Loading from '@/components/misc/Loading';
@@ -10,7 +11,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
     const [loading, setLoading] = useState(true);
 
     async function loadSentFriendRequests() {
-        const response = await fetch('/api/database/friends?UserID=' + (user.sub ?? user.user_id) + '&action=sent')
+        const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=sent')
         const data = await response.json();
         if (data) {
             setLoading(false);
@@ -40,7 +41,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: user.sub ?? user.user_id,
+                    UserID: getUserID(user),
                     FriendID: FriendUserID,
                     action: 'DeleteFriendRequest'
                 })
