@@ -43,6 +43,7 @@ export default function Home() {
     if (code) {
       spotifyAuth.current = new SpotifyAuth();
       let data = await spotifyAuth.current.getRefreshToken(code);
+      console.log(data);
       if (data && data.access_token && data.refresh_token) {
         spotifyAuth.current.accessToken = data.access_token;
         spotifyAuth.current.refreshToken = data.refresh_token;
@@ -56,13 +57,14 @@ export default function Home() {
               RefreshToken: data.refresh_token
           })
         });
+        window.location.href = window.location.origin;
       }
       return true;
     }
     return false;
   }
 
-  LoadSpotify: useEffect(() => {
+  useEffect(() => {
     if (user) {
       fetch('/api/database/users', {
           method: 'POST',
@@ -77,7 +79,7 @@ export default function Home() {
         setSpotifyAuthenticated(result || result === undefined);
       });  
     } 
-  }), [];
+  });
 
   async function checkUsername(username) {
     if (username.length < 1 || username.length > 16) return false;

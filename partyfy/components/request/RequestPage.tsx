@@ -98,7 +98,7 @@ const RequestPage = () => {
                     </div>
                 }
                 {
-                    currentFriend &&
+                    currentFriend != null &&
                     <UserRequest currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} />
                 }
             </div>

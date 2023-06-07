@@ -35,11 +35,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 "Authorization": "Bearer " + req.body.access_token as string,
             }
         });
+        console.log(response);
         if (response.ok) {
             res.status(200).json({name: 'OK'});
             return;
+        } else {
+            res.status(response.status).json({name: response.statusText});
+            return;
         }
-        res.status(500);
-        return;
     }
 }

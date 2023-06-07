@@ -26,9 +26,17 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
 
     async function loadFriendSpotifyAuth() {
+        console.log(JSON.stringify(currentFriend));
         if (currentFriend && currentFriend.RefreshToken) {
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
             setFriendSpotifyAuth(friendSpotifyAuth);
+        } else {
+            Swal.fire({
+                title: 'No Spotify account linked',
+                html: `Your friend <strong>${currentFriend.Username}</strong> needs to link their Spotify account to account before you can request songs.`,
+                icon: 'error',
+            });
+            setCurrentFriend(null);
         }
     }
 

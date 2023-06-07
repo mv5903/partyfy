@@ -4,9 +4,9 @@ export class SpotifyAuth {
     lastRefresh: Date;
 
     constructor(refreshToken: string) {
+        this.lastRefresh = new Date();
         if (refreshToken === '' || refreshToken === undefined) return;
         this.refreshToken = refreshToken;
-        this.lastRefresh = new Date();
     }
 
     async refreshAccessToken() {
