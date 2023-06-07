@@ -19,5 +19,5 @@ These items will be implemented as soon as I hear back from Spotify and have acc
 Have both of your friends sign into the app, set up a username, authenticate with Spotify, then add your friends through the friends icon on the top right. Be sure to enable "unattended queues", which will allow your friends to search Spotify for a song and add it to your queue.
 
 ## Why can't I queue anything?
-The page to get my app into production mode on Spotify's Developer Dashboard is currently broken, so the app may not work as intended. I aplogogize and will get that working as soon as I can.
+The page to get my app into production mode on Spotify's Developer Dashboard is currently broken, so the app may not work as intended. I aplogize and will get that working as soon as I can.
 
