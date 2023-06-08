@@ -36,7 +36,7 @@ I created Partyfy to solve all of these issues to the best of my ability. It is 
     <img src="./readmeImages/playlists.png" width="200" style="text-align: center" />
     <img src="./readmeImages/songsfromplaylist.png" width="200" style="text-align: center; margin-left: 5px" />
     <br>
-    If I can't quite remember the name of song I want added, I can click on the "Your Playlists" tab which will bring me to this screen. Here I can see all of my playlists and add songs from them to the queue by clikcing on View next to one of them.
+    If I can't quite remember the name of song I want added, I can click on the "Your Playlists" tab which will bring me to this screen. Here I can see all of my playlists and add songs from them to the queue by clicking on View next to one of them.
 </p>
 
 <br>
@@ -60,7 +60,7 @@ These items will be implemented as soon as I hear back from Spotify and have acc
 For those who are curious, here is a general overview of the stack used to create this application:
 - Frontend: React with Typescript
 - Backend: Node.js with Express using the Next.js framework
-- Database: Vercel's PostrgreSQL database
+- Database: Vercel's PostrgreSQL database with Prisma ORM
 - Authentication: Auth0
 - Hosting: Vercel
 
