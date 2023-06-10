@@ -7,7 +7,6 @@ export const winston = createLogger({
         format.splat(),
         format.printf(({ timestamp, level, message }) => {
             let str = `[${new Date().toISOString()}] ${level}: ${message}`;
-            console.log(str);
             return str;
         })
     ),
