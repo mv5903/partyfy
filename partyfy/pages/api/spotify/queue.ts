@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { SpotifyAuth } from '@/helpers/SpotifyAuth';
-import SpotifyAuth_Backend from '../helpers/SpotifyAuth';
 
 type Data = {
   name: string
@@ -9,7 +7,6 @@ type Data = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     if (req.method === 'GET') {
         let access_token = req.query.access_token as string;
-        console.log('access_token: ' + access_token);
         let response = await fetch('https://api.spotify.com/v1/me/player/queue', {  
             method: 'GET',
             headers: {
@@ -35,7 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 "Authorization": "Bearer " + req.body.access_token as string,
             }
         });
-        console.log(response);
         if (response.ok) {
             res.status(200).json({name: 'OK'});
             return;
