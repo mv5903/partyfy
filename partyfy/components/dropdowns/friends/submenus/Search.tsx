@@ -3,12 +3,16 @@ import { useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2';
+import Loading from '@/components/misc/Loading';
 
 const Search = ({ user } : { user : UserProfile } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     async function searchUsers(query : string) {
+        setLoading(true);
         if (query === '') {
+            setLoading(false);
             setUsersReturned([]);
             return;
         }
@@ -20,6 +24,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
             data = data.filter((users : any) => users.UserID != getUserID(user));
             setUsersReturned(data);
         }
+        setLoading(false);
     }
 
     async function sendFriendRequest(FriendUserID: string, FriendUsername: string) {
@@ -59,7 +64,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
         <div>
             <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="form-control me-2"/>
             <div>
-                {usersReturned.map((user, index) => {
+                {!loading && usersReturned.map((user, index) => {
                     return (
                         <div key={index} className="card bg-dark p-2 mt-3">
                             <div className="d-flex flex-row align-items-center justify-content-between">
@@ -69,6 +74,9 @@ const Search = ({ user } : { user : UserProfile } ) => {
                         </div>
                     );
                 })}
+                {
+                    loading && <Loading />
+                }
             </div>
         </div>
     )

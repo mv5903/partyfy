@@ -156,25 +156,24 @@ export default class Database {
     }
 
     async searchForUsers(UserID: string, Query: string) {
-        // Ignore all users that are either friends with [UserID] or have an outgoing friend request already
+        // Ignore all users that are already friends, or have a pending friend request
         winston.info(`[Database] Searching for users with query ${Query} for ${UserID}`);
-        const userFriendRelations = await prisma.friends.findMany({
-            where: {
-                UserID: UserID
-            },
-            select: {
-                FriendUserID: true
-            }
-        });
-        let friends = userFriendRelations.map(u => u.FriendUserID);
-
+        const userFriends = await this.getFriends(UserID);
+        const outgoingFriendRequests = await this.getSentFriendRequests(UserID);
+        const incomingFriendRequests = await this.getIncomingFriendRequests(UserID);
+        let friendIDS = userFriends.map(u => u.UserID);
+        friendIDS = friendIDS.concat(outgoingFriendRequests.map(u => u.UserID));
+        friendIDS = friendIDS.concat(incomingFriendRequests.map(u => u.UserID));
+        friendIDS = friendIDS.filter((v,i,a)=>a.indexOf(v)==i);
+        console.log(friendIDS);
         const data = await prisma.users.findMany({
             where: {
                 Username: {
                     contains: Query,
+                    mode: 'insensitive'
                 },
                 UserID: {
-                    notIn: friends
+                    notIn: friendIDS
                 }
             }
         });
@@ -233,13 +232,15 @@ export default class Database {
         });
         
         let friendUsernames: any = [];
+
+        
         data.forEach(user => {
             if (user.UserID == UserID) {
                 friendUsernames.push(user.FriendUserID);
             } else {
                 friendUsernames.push(user.UserID);
             }
-        })
+        });
         
         const friends = await prisma.users.findMany({
             where: {
