@@ -125,7 +125,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                         </div>
                         :
                         <>
-                            <h3 className="text-center mt-4">No songs in queue.</h3>
+                            <h3 className="text-center mt-4">No active session.</h3>
                         </>
                     }
                 </>
