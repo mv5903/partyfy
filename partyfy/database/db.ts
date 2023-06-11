@@ -170,6 +170,7 @@ export default class Database {
             where: {
                 Username: {
                     contains: Query,
+                    mode: 'insensitive'
                 },
                 UserID: {
                     notIn: friendIDS
