@@ -15,7 +15,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
 
     enum RequestPageView {
         Search,
-        TheirQueue,
+        TheirSession,
         YourPlaylists
     }
 
@@ -49,7 +49,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         switch (requestPageView) {
             case RequestPageView.Search:
                 return <Search you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
-            case RequestPageView.TheirQueue:
+            case RequestPageView.TheirSession:
                 return <TheirQueue you={user} friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
             case RequestPageView.YourPlaylists:
                 return <YourPlaylists you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
@@ -96,26 +96,16 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         switch (requestPageView) {
             case RequestPageView.Search:
                 return "Search";
-            case RequestPageView.TheirQueue:
+            case RequestPageView.TheirSession:
                 return "Their Queue";
             case RequestPageView.YourPlaylists:
                 return "Your Playlists";
         }
     }
 
-    function setPageViewHelper(e: string) {
+    function setPageViewHelper(e: RequestPageView) {
         document.querySelector('.active')?.classList.remove('active');
-        switch (e) {
-            case "Search":
-                setRequestPageView(RequestPageView.Search);
-                break;
-            case "Their Queue":
-                setRequestPageView(RequestPageView.TheirQueue);
-                break;
-            case "Your Playlists":
-                setRequestPageView(RequestPageView.YourPlaylists);
-                break;
-        }
+        setRequestPageView(e);
     }
 
     return (
@@ -124,19 +114,19 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
                 !friendSpotifyAuth ? <Loading /> :
                 <>
                     <div className="d-flex flex-row align-items-center justify-content-between card bg-dark p-2">
-                        <h3 className="text-center me-2 pt-2">{`Controlling: ${currentFriend.Username}`}</h3>
+                        <h3 className="text-center me-2 pt-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
                         <button className="btn btn-danger" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
                     </div>
                     <div>
                         <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
                             <label className="btn btn-dark active">
-                                <Radio value="Search" style={{ visibility: "hidden"}} />Search
+                                <Radio value={RequestPageView.Search} style={{ display: "none" }} />Search
                             </label>
                             <label className="btn btn-dark">
-                                <Radio value="Your Playlists" style={{ visibility: "hidden"}} />Your Playlists
+                                <Radio value={RequestPageView.YourPlaylists} style={{ display: "none" }} />Your Playlists
                             </label>
                             <label className="btn btn-dark">
-                                <Radio value="Their Queue" style={{ visibility: "hidden"}} />Their Session
+                                <Radio value={RequestPageView.TheirSession} style={{ display: "none" }} />Their Session
                             </label>
                         </RadioGroup>
                         { currentView() }

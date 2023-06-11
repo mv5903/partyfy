@@ -12,6 +12,7 @@ import List from './submenus/List';
 import IncomingRequests from './submenus/IncomingRequests';
 import SentRequests from './submenus/SentRequests';
 import Search from './submenus/Search';
+import { Radio, RadioGroup } from 'react-radio-group';
 
 const Friends = () => {
 
@@ -54,6 +55,11 @@ const Friends = () => {
         setFriendListScreen(DEFAULT_SCREEN);
     }
 
+    function setFriendListScreenHelper(e: FriendListScreen) {
+        document.querySelector('.active')?.classList.remove('active');
+        setFriendListScreen(e);
+    }
+
     return (
         <div className="me-2" ref={ref}>
             <div className={styles.friendsMenuButton} onClick={() => setIsComponentVisible(!isComponentVisible)}>
@@ -63,11 +69,20 @@ const Friends = () => {
             {
                 isComponentVisible && 
                 <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '4vh' }}>
-                    <select onChange={e => setFriendListScreen(FriendListScreen[e.target.value as keyof typeof FriendListScreen])}>
-                        {Object.values(FriendListScreen).filter(i => !isNumeric(i)).map((header, index) => {
-                            return <option key={index} value={header}>{header}</option>
-                        })}
-                    </select>
+                    <RadioGroup data-toggle="buttons" className="d-flex flex-row justify-content-between btn-group btn-group-toggle" name="friends" selectedValue={friendListScreen} onChange={e => setFriendListScreenHelper(e)}>
+                        <label className="btn btn-dark active">
+                            <Radio value={FriendListScreen.Friends} style={{ display: "none" }} />Friends
+                        </label>
+                        <label className="btn btn-dark">
+                            <Radio value={FriendListScreen.Requests} style={{ display: "none" }} />Requests
+                        </label>
+                        <label className="btn btn-dark">
+                            <Radio value={FriendListScreen.Sent} style={{ display: "none" }} />Sent
+                        </label>
+                        <label className="btn btn-dark">
+                            <Radio value={FriendListScreen.Search}  style={{ display: "none" }} />Search
+                        </label>
+                    </RadioGroup>
                     { isComponentVisible && currentFriendListScreen() }
                 </div>
             }
