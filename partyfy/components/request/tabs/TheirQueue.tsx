@@ -16,7 +16,13 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
 
     async function showQueueDisclaimer() {
         await Swal.fire({
-            html: `The queue you see here may contain songs that are not in the queue. This usually happens when the user is listening to a song from a playlist, but it may arise from other circumstances. Because of a limitation with the Spotify API, it is currently impossible to decipher the source of each song in the queue.`
+            html: 
+            `
+            You may come across songs that are not <i>actually</i> in your friend's queue. This is because Spotify's API does not currently display 
+            strictly their queue; it also will consist of Spotify's recommended songs for them. I currently have no way of filtering out these songs. 
+            <br></br><br></br>
+            Rest assured however. The songs you request will be added to their queue in the order you added them, and they will always display at the top of this list.
+            `
         });
     }
 
@@ -86,7 +92,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                         </div>
                     </div>
                     <h4 className="mt-2">Up Next</h4>
-                    <h6 className="text-muted mt-2" onClick={() => showQueueDisclaimer()}>Why am I seeing more songs than the queue?</h6>
+                    <h6 className="text-muted mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
                     <table className="table table-dark mt-3" style={{ fontSize: '.5em'}}>
                         <thead>
                             <tr>
