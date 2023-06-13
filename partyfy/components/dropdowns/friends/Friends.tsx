@@ -71,16 +71,16 @@ const Friends = () => {
                 <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '4vh' }}>
                     <RadioGroup data-toggle="buttons" className="d-flex flex-row justify-content-between btn-group btn-group-toggle" name="friends" selectedValue={friendListScreen} onChange={e => setFriendListScreenHelper(e)}>
                         <label className="btn btn-dark active">
-                            <Radio value={FriendListScreen.Friends} style={{ display: "none" }} />Friends
+                            <Radio value={FriendListScreen.Friends} className="d-none" />Friends
                         </label>
                         <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Requests} style={{ display: "none" }} />Requests
+                            <Radio value={FriendListScreen.Requests} className="d-none" />Requests
                         </label>
                         <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Sent} style={{ display: "none" }} />Sent
+                            <Radio value={FriendListScreen.Sent} className="d-none" />Sent
                         </label>
                         <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Search}  style={{ display: "none" }} />Search
+                            <Radio value={FriendListScreen.Search} className="d-none" />Search
                         </label>
                     </RadioGroup>
                     { isComponentVisible && currentFriendListScreen() }
