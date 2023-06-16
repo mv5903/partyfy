@@ -23,13 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             'redirect_uri': process.env.SPOTIFY_REDIRECT_URL as string
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            res.status(response.status).json({name: response.statusText});
-            return;
-        }
-        return response;
-    })
+    .then(response => response.json())
     .then((data: any) => {
         res.status(200).json(data);
     })

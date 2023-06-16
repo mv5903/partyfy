@@ -34,12 +34,10 @@ export class SpotifyAuth {
                 }
             })
             .catch(err => {
-                console.error(err);
                 return;
             });
         if (returnedData) {
             this.lastRefresh = new Date();
-            console.log(returnedData);
             return returnedData;
         }
     }
