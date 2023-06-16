@@ -10,7 +10,7 @@ $body-font: 'Montserrat', sans-serif;
                    (-.5+(random()) * 3) + em
                    (-.5+(random()) * 3) + em
                    7px
-                   hsla(random() * 360, 100%, 50%, .1);
+                   hsla(random() * 360, 100%, 50%, .15);
     }
     text-shadow: $text-shadow;
 }
