@@ -4,6 +4,7 @@ import { BsExplicitFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
 import Loading from "@/components/misc/Loading";
+import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 
 const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any, addToQueue: Function }) => {
     
@@ -50,6 +51,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                 setActivePlaylistId(playlist_id);
                 setActivePlaylistNext(data.next);
                 setNextURL(data.next);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 setActivePlaylist(activePlaylist && activePlaylist.length > 0 ? activePlaylist.concat(data.items) : data.items);
             }
         }
@@ -70,7 +72,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
     }, []);
 
     if (loading) return <Loading />;
-    
+
     return (
         <>
             <h3 className="text-center mt-4">Your Playlists</h3>
@@ -97,6 +99,9 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                                 </div>
                                                 <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
                                             </div>
+                                            <button className="btn btn-dark">
+                                                <SpotifyLinkBack link={playlist.external_urls.spotify} />
+                                            </button>
                                             <button className="btn btn-success" onClick={() => { setLoading(true); getPlaylistSongs(playlist.id, playlist.name); }}>View</button>
                                         </div>
                                     </div>
@@ -140,7 +145,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                             <div className="d-flex flex-row align-items-center justify-content-between">
                                                 <div className="d-flex flex-row justify-content-start">
                                                     <img src={result.album.images[2].url} className="mt-3" style={{ width: '50px', height: '50px' }} />
-                                                    <div style={{ textAlign: 'left'}} className="d-flex flex-column ms-2">
+                                                    <div style={{ textAlign: 'left', maxWidth: '40vw'}} className="d-flex flex-column ms-2">
                                                         <div className="d-flex flex-row">
                                                             <h6 className="p-2"><strong className="me-2">{key + 1}.</strong>{result.name}</h6>
                                                             {
@@ -151,13 +156,22 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                                         <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
                                                     </div>
                                                 </div>
-                                                <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
+                                                <div className="d-flex flex-row align-items-center justify-content-end">
+                                                    <button className="btn btn-dark">
+                                                       <SpotifyLinkBack link={result.external_urls.spotify} />
+                                                     </button>
+                                                    <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
+                                                </div>
                                             </div>
                                         </div>
                                     )
                                 })
                             }
                         </div>
+                        {
+                            (activePlaylist.length === 0 || activePlaylist.every((song: any) => song.is_local === true)) &&
+                            <h3 className="text-center mt-4 mb-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
+                        }
                         {
                             loadingMore
                             ?
