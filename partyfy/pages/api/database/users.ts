@@ -29,4 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         res.status(200).json(data);
         return;
     }
+    // Delete a user's profile
+    if (req.method === 'DELETE') {
+        let data = await database.deleteUser(req.query.UserID as string) as any;
+        res.status(200).json(data);
+        return;
+    }
 }
