@@ -183,7 +183,7 @@ export default function Home() {
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
               <div className="d-flex flex-row" style={{ marginTop: `${isMobile ? '-3.5vh' : '-2vh'}`}}>
                 <FriendsList />
-                <UserQuickAction isAHost={isAHost} setIsAHost={setIsAHost} />
+                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} />
               </div>
             </UserContext.Provider>
           </nav>

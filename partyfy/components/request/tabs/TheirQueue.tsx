@@ -38,13 +38,15 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
     }
 
     async function showNowPlaying() {
-        let accessToken = await friendSpotifyAuth.getAccessToken();
-        if (!accessToken) return;
-        const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
-        const data = await response.json();
-        if (data && data.item) {
-            setNowPlaying(data);
-        }
+        try {
+            let accessToken = await friendSpotifyAuth.getAccessToken();
+            if (!accessToken) return;
+            const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
+            const data = await response.json();
+            if (data && data.item) {
+                setNowPlaying(data);
+            }
+        } catch (e) {}
     }
 
     useEffect(() => {

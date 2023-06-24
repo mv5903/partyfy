@@ -336,4 +336,27 @@ export default class Database {
         await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted friendship between ${UserID} and ${FriendUserID}`);
     }
+
+    async deleteUser(UserID: string) {
+        winston.info(`[Database] Deleting user ${UserID}`);
+        await prisma.users.delete({
+            where: {
+                UserID: UserID
+            }
+        });
+        await prisma.friends.deleteMany({
+            where: {
+                OR: [
+                    {
+                        UserID: UserID
+                    },
+                    {
+                        FriendUserID: UserID
+                    }
+                ]
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully deleted user ${UserID}`);
+    }
 }
