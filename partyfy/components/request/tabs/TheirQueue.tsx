@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Loading from "@/components/misc/Loading";
 import { fancyTimeFormat } from "@/helpers/Utils";
+import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import styles from "@/styles/Queue.module.css";
 import { FaArrowDown } from "react-icons/fa";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
@@ -71,19 +72,20 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                         <div className="d-flex flex-row justify-content-center align-items-center">
                            <h6>Now Playing</h6>
                         </div>
-                        <div className="mt-2 card bg-dark p-2">
+                        <div className="mt-2 card bg-dark p-2 d-flex flex-row justify-content-center">
                             { 
                                 nowPlaying 
                                 ?
                                 <div className="d-flex flex-column justify-content-center align-items-center">
-                                    <div className="d-flex flex-row align-items-center w-75">
+                                    <div className="d-flex flex-row align-items-center w-100">
                                         <img className="me-4 rounded" src={nowPlaying.item.album.images[2].url} style={{ width: '75px', height: '75px' }} />
-                                        <div>
-                                            <div className="w-100" style={{ textAlign: 'left'}}>
+                                        <div className="d-flex flex-row justify-content-center">
+                                            <div style={{ textAlign: 'left'}}>
                                                 <h6><strong>{nowPlaying.item.name}</strong> {nowPlaying.item.explicit === true ? <BsExplicitFill/> : ''}</h6>
                                                 <h6><i>{nowPlaying.item.artists[0].name}</i></h6>
                                                 <h6 className="text-small" style={{ textAlign: 'left' }}>{fancyTimeFormat(nowPlaying.progress_ms)} / {fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
                                             </div>
+                                            <SpotifyLinkBack link={nowPlaying.item.external_urls.spotify} />
                                         </div>
                                     </div>
                                 </div>
@@ -109,11 +111,12 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                                         <tr key={index}>
                                             <th scope="row">{index + 1}</th>
                                             <td>
-                                                <div className="d-flex flex-row">
+                                                <div className="d-flex flex-row align-items-center justify-content-between">
                                                     <img className="me-2 rounded" src={item.album.images[2].url} style={{ width: '50px', height: '50px' }} />    
-                                                    <h6 style={{ textAlign: 'left' }}>
+                                                    <h6 style={{ textAlign: 'left', minWidth: '50vw' }}>
                                                         <strong>{item.name}</strong> {item.explicit === true ? <BsExplicitFill/> : ''}<br></br><i>{item.artists[0].name}</i>
                                                     </h6>
+                                                    <SpotifyLinkBack link={item.external_urls.spotify} />
                                                 </div>
                                             </td>
                                         </tr>
