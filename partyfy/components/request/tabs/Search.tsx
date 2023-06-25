@@ -3,6 +3,7 @@ import { BsExplicitFill } from "react-icons/bs";
 import {  useState } from "react";
 
 import Swal from "sweetalert2";
+import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 
 const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any, addToQueue: Function }) => {
 
@@ -50,7 +51,12 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
                                             </div>
                                             <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
                                         </div>
-                                        <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
+                                        <div className="d-flex flex-row align-items-center justify-content-end">
+                                            <button className="btn btn-dark">
+                                                <SpotifyLinkBack link={result.external_urls.spotify} />
+                                            </button>
+                                            <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
+                                        </div>
                                     </div>
                                 </div>
                             )
