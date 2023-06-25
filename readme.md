@@ -42,7 +42,7 @@ I created Partyfy to solve all of these issues to the best of my ability. It is 
 <br>
 <p align="center">
     <strong>Viewing Their Queue</strong><br><br>
-    <img src="./readmeImages/queue.png" width="200" style="text-align: center" />
+    <img src="./readmeImages/theirsession.png" width="200" style="text-align: center" />
     <br>
     Once I am happy with my additions, I can click on "Their Queue" to view the host's Spotify queue. This is directly mirrored from the Spotify API, so it will always be up to date give or take a few seconds. You may notice that there are songs that are not on their queue but are still populating this screen. See the next section for more details on this.
 </p>
