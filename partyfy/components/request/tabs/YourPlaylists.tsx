@@ -1,6 +1,6 @@
 import { TiArrowBack } from "react-icons/ti";
-import { FaArrowDown, FaArrowUp, FaPlusCircle } from "react-icons/fa";
-import { BsExplicitFill } from "react-icons/bs";
+import { FaArrowDown, FaArrowUp, FaGlobe, FaPlusCircle } from "react-icons/fa";
+import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
 import Loading from "@/components/misc/Loading";
@@ -94,8 +94,10 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                                 <img src="https://www.freeiconspng.com/uploads/spotify-icon-2.png" style={{ width: '50px', height: '50px' }} />
                                             }
                                             <div className="d-flex flex-column w-75 ps-2">
-                                                <div className="d-flex">
+                                                <div className="d-flex flex-row">
                                                     <h6 className="p-2">{playlist.name}</h6>
+                                                    { playlist.collaborative && <h6 className="mt-2"><BsPeopleFill/></h6> }
+                                                    { playlist.public && <h6 className="mt-2"><BsGlobe/></h6> }
                                                 </div>
                                                 <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
                                             </div>

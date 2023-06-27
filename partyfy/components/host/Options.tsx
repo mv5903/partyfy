@@ -13,7 +13,7 @@ const Options = () => {
 
     const [showOptions, setShowOptions] = useState(false);
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(false);
-
+    
     useEffect(() => {
         async function fn() {
             const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));

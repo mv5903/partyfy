@@ -13,7 +13,7 @@ const RequestPage = () => {
         user
     } = useContext(UserContext);
 
-    const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(false);
+    const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentFriend, setCurrentFriend] = useState(null);
@@ -38,7 +38,11 @@ const RequestPage = () => {
             const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
             const data = await response.json();
             if (data) {
-                setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
+                if (data.UnattendedQueues === null) {
+                    setIsUnattendedQueuesEnabled(false);
+                } else {
+                    setIsUnattendedQueuesEnabled(data.UnattendedQueues);
+                }
             }
         }
 
@@ -66,7 +70,13 @@ const RequestPage = () => {
             {
                 isMobile && !currentFriend &&
                 <div className="text-center">
-                    <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues from Others"}</button>
+                    {
+                        isUnattendedQueuesEnabled === null 
+                        ?
+                        <Loading />
+                        :
+                        <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues from Others"}</button>
+                    }
                     <h3>OR</h3>
                 </div>
             }
