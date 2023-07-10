@@ -39,7 +39,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
         }
     }
 
-    async function getPlaylistSongs(playlist_id: string, name: string, offset: number = 0) {
+    async function getPlaylistSongs(isFirstLoad: boolean, playlist_id: string, name: string, offset: number = 0) {
         setLoadingMore(true);
         if (playlist_id) {
             let accessToken = await spotifyAuth.getAccessToken();
@@ -51,12 +51,12 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                 setActivePlaylistId(playlist_id);
                 setActivePlaylistNext(data.next);
                 setNextURL(data.next);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 setActivePlaylist(activePlaylist && activePlaylist.length > 0 ? activePlaylist.concat(data.items) : data.items);
             }
         }
         setLoadingMore(false);
         setLoading(false);
+        if (isFirstLoad) window.scrollTo(0, 0);
     }
     
     useEffect(() => {
@@ -104,7 +104,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                             <button className="btn btn-dark">
                                                 <SpotifyLinkBack link={playlist.external_urls.spotify} />
                                             </button>
-                                            <button className="btn btn-success" onClick={() => { setLoading(true); getPlaylistSongs(playlist.id, playlist.name); }}>View</button>
+                                            <button className="btn btn-success" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}>View</button>
                                         </div>
                                     </div>
                                 );
@@ -187,7 +187,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                 {
                                     nextURL &&
                                     <div className='d-flex flex-row justify-content-center align-items-center'>
-                                        <h4 className='me-2' onClick={() => getPlaylistSongs(activePlaylistId, activePlaylistName, parseInt(new URL(activePlaylistNext).searchParams.get('offset')))}>Show more</h4>
+                                        <h4 className='me-2' onClick={() => getPlaylistSongs(false, activePlaylistId, activePlaylistName, parseInt(new URL(activePlaylistNext).searchParams.get('offset')))}>Show more</h4>
                                         <FaArrowDown size={30} />
                                     </div>
                                 }
