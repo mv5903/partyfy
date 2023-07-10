@@ -111,7 +111,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                             })
                         }
                         </div>
-                        <div className="d-flex flex-row justify-content-between align-items-center ms-2 me-2">
+                        <div className="d-flex flex-row justify-content-between align-items-center ms-2 me-2 mb-4">
                             <div className='d-flex flex-row justify-content-center align-items-center'>
                                 <FaArrowUp size={30} />
                                 <h4 className='ms-2' onClick={() => window.scrollTo(0, 0)}>Back to Top</h4>
@@ -179,7 +179,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                             ?
                             <Loading />
                             :
-                            <div className='d-flex flex-row justify-content-between align-items-center ms-2 me-2'>
+                            <div className='d-flex flex-row justify-content-between align-items-center ms-2 me-2 mb-4'>
                                 <div className='d-flex flex-row justify-content-center align-items-center'>
                                     <FaArrowUp size={30} />
                                     <h4 className='ms-2' onClick={() => window.scrollTo(0, 0)}>Back to Top</h4>
