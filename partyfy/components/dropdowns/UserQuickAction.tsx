@@ -32,7 +32,24 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
                 window.location.href = '/api/auth/logout';
             }
         }
+    }
 
+    const unlinkSpotify = async () => {
+        let confirmation = await Swal.fire({
+            title: 'Are you sure you want to unlink your Spotify Account?',
+            text: "This action CANNOT be undone!",
+            icon: 'warning',
+            showCancelButton: true
+        })
+        if (confirmation.isConfirmed) {
+            const res = await fetch('/api/database/users?action=unlink&UserID=' + getUserID(user), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            window.location.href = '/api/auth/logout';
+        }
     }
 
     return (
@@ -53,6 +70,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
                         <button className="btn btn-primary" onClick={() => { setIsComponentVisible(!isComponentVisible); setIsAHost(null); }}>Return to Mode Selection</button>
                     }
                     <button className="btn btn-danger" onClick={() => deleteAccount()}>Delete my account</button>
+                    <button className="btn btn-danger" onClick={() => unlinkSpotify()}>Unlink Spotify</button>
                     <a href="/api/auth/logout" className="btn btn-primary" onClick={() => setIsComponentVisible(!isComponentVisible)}>Log Out</a>
                 </div>
             }

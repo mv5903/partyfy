@@ -359,4 +359,18 @@ export default class Database {
         await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted user ${UserID}`);
     }
+
+    async unlinkUser(UserID: string) {
+        winston.info(`[Database] Unlinking user ${UserID}'s Spotify account`);
+        await prisma.users.update({
+            where: {
+                UserID: UserID
+            },
+            data: {
+                RefreshToken: null
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully unlinked user ${UserID}`);
+    }
 }
