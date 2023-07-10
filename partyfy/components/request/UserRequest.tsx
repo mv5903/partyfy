@@ -67,6 +67,14 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         });
 
         if (result.isConfirmed) {
+            // Show loading dialog while we add the song to the queue
+            Swal.fire({
+                title: 'Sending to queue...',
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
             const uri = song.uri;
             let friendAccessToken = await friendSpotifyAuth.getAccessToken();
             const response = await fetch('/api/spotify/queue', {
@@ -85,7 +93,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
                 Swal.fire({
                     title: song.name + ' added to queue!',
                     icon: 'success',
-                    timer: 2000,
+                    timer: 800,
                     showConfirmButton: false
                 })
             }

@@ -78,7 +78,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                                 ?
                                 <div className="d-flex flex-column justify-content-center align-items-center">
                                     <div className="d-flex flex-row align-items-center w-100">
-                                        <img className="me-4 rounded" src={nowPlaying.item.album.images[2].url} style={{ width: '75px', height: '75px' }} />
+                                        <img className="me-4" src={nowPlaying.item.album.images[2].url} style={{ width: '75px', height: '75px' }} />
                                         <div className="d-flex flex-row justify-content-center">
                                             <div style={{ textAlign: 'left'}}>
                                                 <h6><strong>{nowPlaying.item.name}</strong> {nowPlaying.item.explicit === true ? <BsExplicitFill/> : ''}</h6>
@@ -112,7 +112,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                                             <th scope="row">{index + 1}</th>
                                             <td>
                                                 <div className="d-flex flex-row align-items-center justify-content-between">
-                                                    <img className="me-2 rounded" src={item.album.images[2].url} style={{ width: '50px', height: '50px' }} />    
+                                                    <img className="me-2" src={item.album.images[2].url} style={{ width: '50px', height: '50px' }} />    
                                                     <h6 style={{ textAlign: 'left', minWidth: '50vw' }}>
                                                         <strong>{item.name}</strong> {item.explicit === true ? <BsExplicitFill/> : ''}<br></br><i>{item.artists[0].name}</i>
                                                     </h6>
