@@ -1,5 +1,10 @@
 # Partyfy
 
+## Update 7/12/23: Partyfy is now public! 🎉
+After several weeks of tuning Partyfy to Spotify's design guidelines, anyone can now log into the app and take advantage of Partyfy's full suite of features. I am so excited to finally be able to share this with the world, and I hope you enjoy it as much as I do. 
+<br><br>
+With that however, as Partyfy is very new, it is very likely that there are bugs and design issues that exist. If you do find any bugs or have any design recommendations, please feel free to open an issue on this repository and I will get to it as soon as I can. Thank you!
+
 ### Why did I create this?
 
 #### Backstory
@@ -60,11 +65,6 @@ These items will be implemented as soon as I hear back from Spotify and have acc
 For those who are curious, here is a general overview of the stack used to create this application:
 - Frontend: React with Typescript
 - Backend: Node.js with Express using the Next.js framework
-- Database: Vercel's PostrgreSQL database with Prisma ORM
+- Database: Vercel's PostrgreSQL database with Prisma ORM for Typescript
 - Authentication: Auth0
 - Hosting: Vercel
-
-
-# Important Note
-This application is not guranteed to work publicly, as my app is still pending extended quota mode from Spotify's review team. This means that in order for the app to work for you, I must add you to my list of approved users. If you would like to be added or be shown a live demo for the time being, please send me an email at **mv5903@gmail.com** and we can discuss futher.
-
