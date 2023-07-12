@@ -19,6 +19,7 @@ const RequestPage = () => {
     const [currentFriend, setCurrentFriend] = useState(null);
 
     async function displayFriends() {
+        setLoading(true);
         if (currentFriend) return;
         const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
         let data = await response.json();

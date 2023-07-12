@@ -89,6 +89,15 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
                 })
             });
             const data = await response.json();
+            // User attempts to queue when friend does not have an active Spotify session
+            if (data && data.name && data.name === 'Not Found') {
+                Swal.fire({
+                    title: 'Error',
+                    html: `We couldn't add this song to the queue because your friend does not currently have an active Spotify session.`,
+                    icon: 'error'
+                })   
+            }
+            // User can susccessfully queue
             if (data && data.name && data.name === 'OK') {
                 Swal.fire({
                     title: song.name + ' added to queue!',

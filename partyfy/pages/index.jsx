@@ -127,8 +127,9 @@ export default function Home() {
           let usernameOK = false;
           while (!usernameOK) {
             if (!(await checkUsername(enteredUsername))) {
+              let alertTitle = enteredUsername.length > 16 ? 'Your username is too long.' : `${enteredUsername} is already taken. Please try another.`;
               let { value: userName } = await Swal.fire({
-                title: `${enteredUsername} is already taken. Please try another.`,
+                title: alertTitle,
                 input: 'text',
                 inputLabel: 'Your username. Choose up to 16 characters.',
                 inputPlaceholder: 'johndoe24',
