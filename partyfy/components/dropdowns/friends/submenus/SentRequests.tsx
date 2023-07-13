@@ -60,7 +60,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     usersReturned.length === 0 || !usersReturned
                     ?
                     <div>
-                        <h5 className="text-center">You have no sent friend requests.</h5>
+                        <h5 className="text-center">You have not sent any friend requests.</h5>
                     </div>
                     :
                     usersReturned.map((user, index) => {
