@@ -1,13 +1,10 @@
 import { BsExplicitFill } from "react-icons/bs";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Swal from "sweetalert2";
 import Loading from "@/components/misc/Loading";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
-import styles from "@/styles/Queue.module.css";
-import { FaArrowDown } from "react-icons/fa";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpotifyAuth: any, friend: any }) => {
 

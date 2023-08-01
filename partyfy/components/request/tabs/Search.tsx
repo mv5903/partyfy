@@ -1,8 +1,7 @@
 import { FaPlusCircle } from "react-icons/fa";
 import { BsExplicitFill } from "react-icons/bs";
-import {  useState } from "react";
+import { useState } from "react";
 
-import Swal from "sweetalert2";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 
 const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any, addToQueue: Function }) => {
