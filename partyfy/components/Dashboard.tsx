@@ -56,7 +56,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
             (isAHost === false || isMobile) &&
             <>
                 <div className={styles.dashboard}>
-                    <h3 className="text-center mb-4"><i>Dashboard</i></h3>
+                    <h3 className="text-center mb-4" style={{ overflowX: 'hidden'}}><i>Dashboard</i></h3>
                     <RequestPage />
                 </div>
              </>
