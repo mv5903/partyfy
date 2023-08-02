@@ -43,3 +43,7 @@
 .tableBody {
     min-height: 80vh;
 }
+
+.dashboard {
+    width: 100% !important;
+}
