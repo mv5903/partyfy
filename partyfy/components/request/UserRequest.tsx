@@ -109,6 +109,27 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         }
     }
 
+    async function unattendedQueuesAllowed() {
+        const response = await fetch('/api/database/unattendedqueues?UserID=' + currentFriend.UserID);
+        const data = await response.json();
+
+        if (data) {
+            if (!data.UnattendedQueues)  {
+                Swal.fire({
+                    title: 'Notice',
+                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled unattended queues. You will no longer be able to request songs until it has been turned back on.`,
+                    icon: 'warning'
+                })
+                setCurrentFriend(null);
+            }
+        }
+    }
+
+    useEffect(() => {
+        const interval = setInterval(unattendedQueuesAllowed, 2000);
+        return () => clearInterval(interval);
+    }, [currentFriend]);
+
     function getPageViewHelper() {
         switch (requestPageView) {
             case RequestPageView.Search:

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import { TiRefresh } from "react-icons/ti";
 import { isMobile } from "react-device-detect";
 import { getUserID } from '@/helpers/Utils';
@@ -19,18 +19,18 @@ const RequestPage = () => {
     const [currentFriend, setCurrentFriend] = useState(null);
 
     async function displayFriends() {
-        setLoading(true);
         if (currentFriend) return;
         const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
         let data = await response.json();
         // Show users who have functionality enabled first
         data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
-        setFriendsList(data);
         setLoading(false);
+        setFriendsList(data);
     }
 
     useEffect(() => {
-       displayFriends();
+        setLoading(true);
+        displayFriends();
     }, [user]);
 
     useEffect(() => {
@@ -65,6 +65,11 @@ const RequestPage = () => {
             setIsUnattendedQueuesEnabled(!isUnattendedQueuesEnabled);
         }
     }
+
+    useEffect(() => {
+        const interval = setInterval(displayFriends, 1000);
+        return () => clearInterval(interval);
+    });
 
     return (
         <div>
