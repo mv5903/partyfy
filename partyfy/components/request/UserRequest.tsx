@@ -156,7 +156,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
                         <button className="btn btn-danger" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
                     </div>
                     <div>
-                        <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" style={{ width: '98vw' }} name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
+                        <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" style={{ width: '100%' }} name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
                             <label className="btn btn-dark active">
                                 <Radio value={RequestPageView.Search} className="d-none" />Search
                             </label>
