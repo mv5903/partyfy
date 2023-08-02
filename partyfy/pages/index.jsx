@@ -16,6 +16,7 @@ import UserContext from '@/providers/UserContext';
 
 import styles from '@/styles/Home.module.css'
 
+import logo from '@/public/logo.png';
 
 export default function Home() {
   const { user, error, isLoading } = useUser();
@@ -166,7 +167,8 @@ export default function Home() {
       </Head>
       { 
         !user && <main className={styles.main}>
-          <h2 className='text-center mb-4 ms-4 me-4'>Welcome to Partyfy!</h2>
+          <img src='/logo.png' width="200px" />
+          <h2 className='text-center m-4'>Welcome!</h2>
           <p className={styles.description}>Add to your friend's Spotify queue without accessing their session directly.</p>
           <AnchorLink
             href="/api/auth/login"
