@@ -16,10 +16,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
         await Swal.fire({
             html: 
             `
-            You may come across songs that are not <i>actually</i> in your friend's queue. This is because Spotify's API does not currently display 
-            strictly their queue; it also will consist of Spotify's recommended songs for them. I currently have no way of filtering out these songs. 
-            <br></br><br></br>
-            Rest assured however. The songs you request will be added to their queue in the order you added them, and they will always display at the top of this list.
+            <small>Please be aware that Partyfy uses Spotify's "Get The User's Queue" API, which currently does not differentiate between your manually curated queue and Spotify's 'Next From' recommendations. This limitation prevents us from distinguishing the tracks you've personally queued from those recommended by Spotify. However, your friend's queue will always appear first, despite this limitation. We appreciate your understanding as we continue to provide the best possible Partyfy experience within these constraints.</small>
             `
         });
     }

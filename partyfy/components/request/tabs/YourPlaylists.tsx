@@ -92,7 +92,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                 next={() => getMorePlaylists()}
                                 hasMore={nextURL}
                                 loader={<Loading />}
-                                endMessage={<h6 className="text-center">No more playlists.</h6>}
+                                endMessage={<h6 className="text-center">You've reached the end.</h6>}
                             >
                                 {
                                     playlists.map((playlist: any, key: number) => {
@@ -143,7 +143,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                 next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
                                 hasMore={activePlaylist.next != null}
                                 loader={<Loading />}
-                                endMessage={<h6 className="text-center">No more songs.</h6>}
+                                endMessage={<h6 className="text-center">You've reached the end.</h6>}
                             >
                                 {
                                     activePlaylist.items.map((item: any, key: number) => {
@@ -152,7 +152,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                         if (!result) return;
                                         if (!result.album.images[2]) return;
                                         return (
-                                            <div key={key} className="card p-2 me-2 mb-2 ms-2 bg-dark w-100">
+                                            <div key={key} className="card p-2 me-2 mb-2 ms-2 bg-dark">
                                                 <div className="d-flex flex-row align-items-center justify-content-between">
                                                     <div className="d-flex flex-row justify-content-start">
                                                         <img src={result.album.images[2].url} className="mt-3" style={{ width: '50px', height: '50px' }} />
