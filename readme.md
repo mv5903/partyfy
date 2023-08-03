@@ -2,10 +2,12 @@
 
 ## Update 7/12/23: Partyfy is now public! 🎉
 After several weeks of tuning Partyfy to Spotify's design guidelines, anyone can now log into the app and take advantage of Partyfy's full suite of features. I am so excited to finally be able to share this with the world, and I hope you enjoy it as much as I do. 
-
-## Now installable as a [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) app! To install, navigate to my app, click the share icon at the bottom of Safari or your preferred mobile web browser, and click "Add to Home Screen". This way you no longer need to navigate to my app in your browser anymore as it will live on your home screen. Just like the web version, it will automatically update as I release new changes.
 <br><br>
 With that however, as Partyfy is very new, it is very likely that there are bugs and design issues that exist. If you do find any bugs or have any design recommendations, please feel free to open an issue on this repository and I will get to it as soon as I can. Thank you!
+
+## Now installable as a [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) app! 
+To install, navigate to my app, click the share icon at the bottom of Safari or your preferred mobile web browser, and click "Add to Home Screen". This way you no longer need to navigate to my app in your browser anymore as it will live on your home screen. Just like the web version, it will automatically update as I release new changes.
+
 
 ### Why did I create this?
 
