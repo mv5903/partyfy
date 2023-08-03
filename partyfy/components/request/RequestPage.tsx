@@ -74,7 +74,7 @@ const RequestPage = () => {
     return (
         <div>
             {
-                isMobile && !currentFriend &&
+                !currentFriend &&
                 <div className="text-center">
                     {
                         isUnattendedQueuesEnabled === null 
@@ -98,10 +98,8 @@ const RequestPage = () => {
                 {
                     !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
-                        <div className="d-flex flex-row align-items-center">
-                            <h3 className="me-3">Choose a friend to request a song from:</h3>
-                            <button className="btn btn-primary" onClick={() => displayFriends()}><TiRefresh size={30} /></button>
-                        </div>
+                        <h3 className="me-3">Choose a friend to request a song from:</h3>
+                        <h6 className="text-muted"><i>Refreshes every 2 seconds</i></h6>
                         <div className="d-flex flex-wrap flex-column justify-content-center mt-4">
                             {
                                 friendsList.map((friend: any, index: number) => {
