@@ -373,4 +373,28 @@ export default class Database {
         await prisma.$disconnect();
         winston.info(`[Database] Successfully unlinked user ${UserID}`);
     }
+
+    async isFriend(UserID: string, FriendUserID: string) {
+        winston.info(`[Database] Checking if ${UserID} is friends with ${FriendUserID}`);
+        const data = await prisma.friends.findFirst({
+            where: {
+                OR: [
+                    {
+                        UserID: UserID,
+                        FriendUserID: FriendUserID,
+                        IsFriendRequest: false
+                    },
+                    {
+                        UserID: FriendUserID,
+                        FriendUserID: UserID,
+                        IsFriendRequest: false
+                    }
+                ]
+            }
+        });
+        await prisma.$disconnect();
+        if (data) winston.info(`[Database] ${UserID} is friends with ${FriendUserID}`);
+        else winston.info(`[Database] ${UserID} is not friends with ${FriendUserID}`);
+        return data;
+    }
 }

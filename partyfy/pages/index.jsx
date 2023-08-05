@@ -14,9 +14,7 @@ import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import FriendsList from '@/components/dropdowns/friends/Friends';
 import UserContext from '@/providers/UserContext';
 
-import styles from '@/styles/Home.module.css'
-
-import logo from '@/public/logo.png';
+import styles from '@/styles/Home.module.css';
 
 export default function Home() {
   const { user, error, isLoading } = useUser();

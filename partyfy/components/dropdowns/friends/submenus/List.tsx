@@ -3,15 +3,18 @@ import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2';
+import Loading from '@/components/misc/Loading';
 
 const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVisible: boolean } ) => {
     const [friends, setFriends] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fn() {
             if (!isComponentVisible) return;
             const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
             const data = await response.json();
+            setLoading(false);
             setFriends(data);
         }
 
@@ -57,6 +60,10 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                 });
             }
         });
+    }
+
+    if (loading) {
+        return (<Loading/>);
     }
 
     return (

@@ -39,6 +39,13 @@ const Search = ({ user } : { user : UserProfile } ) => {
         });
 
         if (choice.isConfirmed) {
+            Swal.fire({
+                title: 'Sending friend request...',
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
             const response = await fetch('/api/database/friends', {
                 method: 'PATCH',
                 headers: {
@@ -47,7 +54,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
                 body: JSON.stringify({
                     UserID: getUserID(user),
                     FriendUserID: FriendUserID,
-                    action: 'SendFriendReqest'
+                    action: 'SendFriendRequest'
                 })
             });
             if (response.ok) {

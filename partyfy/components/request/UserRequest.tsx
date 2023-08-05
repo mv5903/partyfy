@@ -6,6 +6,7 @@ import UserContext from '@/providers/UserContext';
 import Swal from "sweetalert2";
 import Loading from "../misc/Loading";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import { getUserID } from '@/helpers/Utils';
 
 import Search from "./tabs/Search";
 import TheirQueue from "./tabs/TheirQueue";
@@ -125,8 +126,27 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         }
     }
 
+    async function isStillFriends() {
+        if (!currentFriend) return;
+        const response = await fetch(`/api/database/friends?action=isFriend&UserID=${getUserID(user)}&FriendUserID=${currentFriend.UserID}`);
+        const data = await response.json();
+        
+        if (!data) {
+            Swal.fire({
+                title: 'Notice',
+                html: `Your friend <strong>${currentFriend.Username}</strong> has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
+                icon: 'warning'
+            })
+            setCurrentFriend(null);
+        }
+    }
+
     useEffect(() => {
-        const interval = setInterval(unattendedQueuesAllowed, 2000);
+        const interval = setInterval(() => {
+            if (!currentFriend) return;
+            unattendedQueuesAllowed();
+            isStillFriends();
+        }, 2000);
         return () => clearInterval(interval);
     }, [currentFriend]);
 

@@ -27,6 +27,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 res.status(200).json(data as any);
                 return;
             }
+            if (action === 'isFriend') {
+                let data = await database.isFriend(req.query.UserID as string, req.query.FriendUserID as string);
+                res.status(200).json(data as any);
+            }
         } else {
             let data = await database.getFriends(req.query.UserID as string) as any;
             res.status(200).json(data);
@@ -36,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     if (req.method === 'PATCH') {
         let body = req.body;
         let action = body.action;
-        if (action == 'SendFriendReqest') {
+        if (action == 'SendFriendRequest') {
             let data = await database.addFriendRequest(body.UserID as string, body.FriendUserID as string) as any;
             res.status(200).json(data);
             return;

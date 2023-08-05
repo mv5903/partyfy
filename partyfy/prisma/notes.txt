@@ -1,0 +1,3 @@
+Adding friends requests, if unique id fails constraint error comes up, run:
+
+SELECT setval(pg_get_serial_sequence('"Friends"', 'id'), coalesce(max(id)+1, 1), false) FROM "Friends";
