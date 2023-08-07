@@ -61,14 +61,14 @@ const Friends = () => {
     }
 
     return (
-        <div className="me-2" ref={ref}>
-            <div className={styles.friendsMenuButton} onClick={() => setIsComponentVisible(!isComponentVisible)}>
-                <FaUserFriends size={45} className="mb-1" />
-                <IoMdArrowDropdown size={25} className="mb-1 ms-1" />
+        <div ref={ref}>
+            <div className={`d-flex flex-row align-items-center me-2 ${isComponentVisible ? 'bg-secondary' : 'bg-dark'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+                <FaUserFriends size={40} />
+                <IoMdArrowDropdown size={25}/>
             </div>
             {
                 isComponentVisible && 
-                <div className={styles.friendsMenu} style={{ top: isMobile ? '7vh' : '4vh' }}>
+                <div className={styles.friendsMenu}>
                     <RadioGroup data-toggle="buttons" className="d-flex flex-row justify-content-between btn-group btn-group-toggle" name="friends" selectedValue={friendListScreen} onChange={e => setFriendListScreenHelper(e)}>
                         <label className="btn btn-dark active">
                             <Radio value={FriendListScreen.Friends} className="d-none" />Friends

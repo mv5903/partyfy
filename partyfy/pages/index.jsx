@@ -180,9 +180,9 @@ export default function Home() {
       {
         user && <main className={`${styles.main_loggedin} `}>
           <nav className='d-flex flex-row justify-content-between'>
-            <h4 className={`${styles.title} ms-2 mt-3`}>{`${username ?? ''}`}</h4>
+            <h4 className={`ms-3 mt-3`}>{`${username ?? ''}`}</h4>
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
-              <div className="d-flex flex-row" style={{ marginTop: `${isMobile ? '-3.5vh' : '-2vh'}`}}>
+              <div className="d-flex flex-row align-items-start">
                 <FriendsList />
                 <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} />
               </div>

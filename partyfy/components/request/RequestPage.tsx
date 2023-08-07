@@ -5,6 +5,7 @@ import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
+import Swal from "sweetalert2";
 
 const RequestPage = () => {
 
@@ -17,6 +18,8 @@ const RequestPage = () => {
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentFriend, setCurrentFriend] = useState(null);
+
+    const [uqLoading, setUQLoading] = useState(false);
 
     async function displayFriends() {
         if (currentFriend) return;
@@ -51,6 +54,7 @@ const RequestPage = () => {
     }, [user]);
 
     async function unattendedQueues() {
+        setUQLoading(true);
         const response = await fetch('/api/database/unattendedqueues', {
             method: "PATCH",
             headers: {
@@ -61,6 +65,7 @@ const RequestPage = () => {
                 enable: !isUnattendedQueuesEnabled
             })
         });
+        setUQLoading(false);
         if (response.ok) {
             setIsUnattendedQueuesEnabled(!isUnattendedQueuesEnabled);
         }
@@ -77,7 +82,7 @@ const RequestPage = () => {
                 !currentFriend &&
                 <div className="text-center">
                     {
-                        isUnattendedQueuesEnabled === null 
+                        isUnattendedQueuesEnabled === null || uqLoading
                         ?
                         <Loading />
                         :
