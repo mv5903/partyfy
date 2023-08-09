@@ -22,26 +22,26 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
         setSearchResults(data.tracks.items);
     }
 
-
     return (
         <>
-            <div>
-                <h4 className="text-center mt-4">Add Song</h4>
-                <div className="d-flex flex-row justify-content-center">
-                    <input className="form-control w-75" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
-                </div>
+            <div className="w-full flex flex-col items-center">
+                <h4 className="text-2xl mt-4">Add Song</h4>
+                <input className="input w-3/4 p-2 mt-2" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
             </div>
             {
                 searchResults.length > 0 &&
-                <div className="d-flex flex-column justify-content-center align-items-center mt-4">
+                <div className="mt-4 w-full">
                     {
                         searchResults.map((result: any, key: number) => {
                             return (
-                                <div key={key} className="card p-2 m-2 bg-dark w-100">
-                                    <div className="d-flex flex-row align-items-center justify-content-between">
-                                        <img src={result.album.images[2].url} />
-                                        <div className="d-flex flex-column justify-content-start">
-                                            <div className="d-flex">
+                                <div key={key} className="card p-2 my-2 bg-zinc-900 w-full">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex w-16 flex-col">
+                                            <img src={result.album.images[2].url} />
+                                            <SpotifyLinkBack link={result.external_urls.spotify} />
+                                        </div>
+                                        <div className="flex flex-col justify-start">
+                                            <div className="flex">
                                                 <h6 className="p-2">{result.name}</h6>
                                                 {
                                                     result.explicit &&
@@ -50,10 +50,7 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
                                             </div>
                                             <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
                                         </div>
-                                        <div className="d-flex flex-row align-items-center justify-content-end">
-                                            <button className="btn btn-dark">
-                                                <SpotifyLinkBack link={result.external_urls.spotify} />
-                                            </button>
+                                        <div className="flex items-center justify-end">
                                             <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
                                         </div>
                                     </div>
