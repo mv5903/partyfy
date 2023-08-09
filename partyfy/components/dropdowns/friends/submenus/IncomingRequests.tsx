@@ -88,17 +88,17 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
                 usersReturned.length === 0 || !usersReturned
                 ?
                 <div>
-                    <h5 className="text-center">You have no incoming friend requests.</h5>
+                    <h5 className="text-xl text-center">You have no incoming friend requests.</h5>
                 </div>
                 :
                 usersReturned.map((user, index) => {
                     return (
-                        <div key={index} className="card bg-dark p-2 mt-3">
-                            <div className="d-flex flex-row align-items-center justify-content-between">
-                                <h5 className="me-4 mt-2">{user.Username}</h5>
-                                <div className="d-flex flex-row align-items-center">
-                                    <button className="btn btn-small btn-success me-2" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
-                                    <button className="btn btn-small btn-danger" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                        <div key={index} className="card bg-gray-800 p-2 mt-3">
+                            <div className="flex align-center justify-between">
+                                <h5 className="text-xl mr-4 mt-2">{user.Username}</h5>
+                                <div className="flex align-center">
+                                    <button className="btn btn-small bg-green-8 me-2" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
+                                    <button className="btn btn-small bg-red-8" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
                                 </div>
                             </div>
                         </div>

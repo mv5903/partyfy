@@ -60,15 +60,15 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     usersReturned.length === 0 || !usersReturned
                     ?
                     <div>
-                        <h5 className="text-center">You have not sent any friend requests.</h5>
+                        <h5 className="text-xl text-center">You have not sent any friend requests.</h5>
                     </div>
                     :
                     usersReturned.map((user, index) => {
                         return (
-                            <div key={index} className="card bg-dark p-2 mt-3">
-                                <div className="d-flex flex-row align-items-center justify-content-between">
-                                    <h5 className="me-4 mt-2">{user.Username}</h5>
-                                    <button className="btn btn-small btn-danger" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel className="me-1 mb-1"/>Cancel</button>
+                            <div key={index} className="card bg-gray-800 p-2 mt-3">
+                                <div className="flex align-center justify-between">
+                                    <h5 className="text-xl me-4 mt-2">{user.Username}</h5>
+                                    <button className="btn btn-small bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel className="me-1 mb-1"/>Cancel</button>
                                 </div>
                             </div>
                         );

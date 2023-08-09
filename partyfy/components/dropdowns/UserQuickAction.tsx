@@ -54,9 +54,9 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
 
     return (
         <div ref={ref}>
-            <div className={`d-flex flex-row align-items-center me-2 ${isComponentVisible ? 'bg-secondary' : 'bg-dark'} p-1 rounded mt-2 ${styles.quickMenu}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center me-2 ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ${styles.quickMenu}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
-                <IoMdArrowDropdown size={25} />
+                <IoMdArrowDropdown className='mt-2' size={25} />
             </div>
             {
                 isComponentVisible &&

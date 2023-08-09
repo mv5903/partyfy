@@ -165,7 +165,9 @@ export default function Home() {
       </Head>
       { 
         !user && <main className={styles.main}>
-          <img src='/logo.png' width="200px" />
+          <div className='flex justify-center'>
+            <img className='object-center' src='/logo.png' width="200px" />
+          </div>
           <h2 className='text-center m-4'>Welcome!</h2>
           <p className={styles.description}>Add to your friend's Spotify queue without accessing their session directly.</p>
           <AnchorLink
@@ -179,10 +181,10 @@ export default function Home() {
       }
       {
         user && <main className={`${styles.main_loggedin} `}>
-          <nav className='d-flex flex-row justify-content-between'>
-            <h4 className={`ms-3 mt-3`}>{`${username ?? ''}`}</h4>
+          <nav className='flex justify-between'>
+            <h2 className={`text-2xl m-3`}>{`${username ?? ''}`}</h2>
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
-              <div className="d-flex flex-row align-items-start">
+              <div className="flex align-start">
                 <FriendsList />
                 <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} />
               </div>

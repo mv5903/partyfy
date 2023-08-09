@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin&family=Montserrat&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 $title-font: 'Libre Franklin', sans-serif;
 $body-font: 'Montserrat', sans-serif;
@@ -30,7 +33,6 @@ body {
 
 body, head {
   display: block;
-  font-size: 4em;
   color: transparent;
 }
 

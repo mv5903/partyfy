@@ -77,7 +77,7 @@ const RequestPage = () => {
     });
 
     return (
-        <div>
+        <div className="my-12">
             {
                 !currentFriend &&
                 <div className="text-center">
@@ -88,7 +88,7 @@ const RequestPage = () => {
                         :
                         <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues from Others"}</button>
                     }
-                    <h3>OR</h3>
+                    <h3 className="mt-10">OR</h3>
                 </div>
             }
             <div className="text-center mt-4 ms-2 me-2">
@@ -104,12 +104,12 @@ const RequestPage = () => {
                     !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
                         <h3 className="me-3">Choose a friend to request a song from:</h3>
-                        <h6 className="text-muted"><i>Refreshes every 2 seconds</i></h6>
-                        <div className="d-flex flex-wrap flex-column justify-content-center mt-4">
+                        <h6 className="text-gray-600 mt-3"><i>Refreshes every 2 seconds</i></h6>
+                        <div className="flex flex-col justify-center mt-4">
                             {
                                 friendsList.map((friend: any, index: number) => {
                                     return (
-                                        <button key={index} onClick={() => setCurrentFriend(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-success' : 'btn-secondary'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
+                                        <button key={index} onClick={() => setCurrentFriend(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-primary' : 'bg-slate-6'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
                                     )
                                 })
                             }

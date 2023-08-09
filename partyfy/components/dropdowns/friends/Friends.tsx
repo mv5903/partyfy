@@ -55,34 +55,21 @@ const Friends = () => {
         setFriendListScreen(DEFAULT_SCREEN);
     }
 
-    function setFriendListScreenHelper(e: FriendListScreen) {
-        document.querySelector('.active')?.classList.remove('active');
-        setFriendListScreen(e);
-    }
-
     return (
         <div ref={ref}>
-            <div className={`d-flex flex-row align-items-center me-2 ${isComponentVisible ? 'bg-secondary' : 'bg-dark'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={40} />
-                <IoMdArrowDropdown size={25}/>
+                <IoMdArrowDropdown className='mt-2' size={25}/>
             </div>
             {
                 isComponentVisible && 
                 <div className={styles.friendsMenu}>
-                    <RadioGroup data-toggle="buttons" className="d-flex flex-row justify-content-between btn-group btn-group-toggle" name="friends" selectedValue={friendListScreen} onChange={e => setFriendListScreenHelper(e)}>
-                        <label className="btn btn-dark active">
-                            <Radio value={FriendListScreen.Friends} className="d-none" />Friends
-                        </label>
-                        <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Requests} className="d-none" />Requests
-                        </label>
-                        <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Sent} className="d-none" />Sent
-                        </label>
-                        <label className="btn btn-dark">
-                            <Radio value={FriendListScreen.Search} className="d-none" />Search
-                        </label>
-                    </RadioGroup>
+                    <div className="btn-group flex-nowrap justify-center w-full">
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}>Requests</button>
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Sent ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}>Sent</button>
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Search ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}>Search</button>
+                    </div>
                     { isComponentVisible && currentFriendListScreen() }
                 </div>
             }
