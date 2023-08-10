@@ -25,22 +25,22 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any,
     return (
         <>
             <div className="w-full flex flex-col items-center">
-                <h4 className="text-2xl mt-4">Add Song</h4>
+                <h4 className="text-2xl my-4">Add Song</h4>
                 <input className="input w-3/4 p-2 mt-2" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
             </div>
             {
                 searchResults.length > 0 &&
-                <div className="mt-4 w-full">
+                <div className="mt-4 w-full flex flex-col items-center">
                     {
                         searchResults.map((result: any, key: number) => {
                             return (
                                 <div key={key} className="card p-2 my-2 bg-zinc-900 w-full">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex w-16 flex-col">
-                                            <img src={result.album.images[2].url} />
+                                    <div className="flex items-center justify-between text-left">
+                                        <div className="flex flex-col">
+                                            <img className="mt-2" src={result.album.images[2].url} />
                                             <SpotifyLinkBack link={result.external_urls.spotify} />
                                         </div>
-                                        <div className="flex flex-col justify-start">
+                                        <div className="flex flex-col justify-start w-2/3">
                                             <div className="flex">
                                                 <h6 className="p-2">{result.name}</h6>
                                                 {

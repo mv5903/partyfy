@@ -97,8 +97,8 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
                             <div className="flex align-center justify-between">
                                 <h5 className="text-xl mr-4 mt-2">{user.Username}</h5>
                                 <div className="flex align-center">
-                                    <button className="btn btn-small bg-green-8 me-2" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
-                                    <button className="btn btn-small bg-red-8" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                    <button className="btn btn-small bg-green-8 me-2 mt-1" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
+                                    <button className="btn btn-small bg-red-8 mt-1" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
                                 </div>
                             </div>
                         </div>

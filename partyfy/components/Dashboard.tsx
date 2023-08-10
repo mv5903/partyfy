@@ -8,6 +8,7 @@ import UserContext from '@/providers/UserContext';
 import RequestPage from './request/RequestPage';
 
 import styles from '@/styles/Dashboard.module.css';
+import Swal from 'sweetalert2';
 
 const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
     const {
@@ -34,6 +35,21 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
             storeRefreshToken();
         }
     }, []);
+
+    useEffect(() => {
+        if (!isMobile) {
+            console.log('test');
+            if (localStorage.getItem('betterOnMobileNotification') === null) {
+                Swal.fire({
+                    title: 'Better on Mobile',
+                    text: 'This site is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience.',
+                    icon: 'info',
+                    confirmButtonText: 'Ok'
+                });
+                localStorage.setItem('betterOnMobileNotification', "true");
+            }
+        }
+    }, [])
 
     return (
         <>

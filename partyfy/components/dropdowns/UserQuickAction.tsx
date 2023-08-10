@@ -54,7 +54,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center me-2 ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ${styles.quickMenu}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center me-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ${styles.quickMenu}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25} />
             </div>
@@ -69,8 +69,8 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
                         !isMobile && isAHost != null &&
                         <button className="btn btn-primary" onClick={() => { setIsComponentVisible(!isComponentVisible); setIsAHost(null); }}>Return to Mode Selection</button>
                     }
-                    <button className="btn btn-danger" onClick={() => deleteAccount()}>Delete my account</button>
-                    <button className="btn btn-danger" onClick={() => unlinkSpotify()}>Unlink Spotify</button>
+                    <button className="btn btn-error" onClick={() => deleteAccount()}>Delete my account</button>
+                    <button className="btn btn-warning" onClick={() => unlinkSpotify()}>Unlink Spotify</button>
                     <a href="/api/auth/logout" className="btn btn-primary" onClick={() => setIsComponentVisible(!isComponentVisible)}>Log Out</a>
                 </div>
             }

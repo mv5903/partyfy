@@ -57,7 +57,7 @@ const Friends = () => {
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25}/>
             </div>

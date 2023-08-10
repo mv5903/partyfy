@@ -165,7 +165,9 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
                             <button className={`btn ${requestPageView == RequestPageView.YourPlaylists ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}>Your Playlists</button>
                             <button className={`btn ${requestPageView == RequestPageView.TheirSession ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}>Their Session</button>
                         </div>
-                        { currentView() }
+                        <div className="w-full">
+                            { currentView() }
+                        </div>
                     </div>
                 </>
             }

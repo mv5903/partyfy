@@ -86,7 +86,7 @@ const RequestPage = () => {
                         ?
                         <Loading />
                         :
-                        <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues from Others"}</button>
+                        <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
                     }
                     <h3 className="mt-10">OR</h3>
                 </div>
@@ -103,7 +103,7 @@ const RequestPage = () => {
                 {
                     !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
-                        <h3 className="me-3">Choose a friend to request a song from:</h3>
+                        <h3 className="text-3xl me-3">Add to:</h3>
                         <h6 className="text-gray-600 mt-3"><i>Refreshes every 2 seconds</i></h6>
                         <div className="flex flex-col justify-center mt-4">
                             {

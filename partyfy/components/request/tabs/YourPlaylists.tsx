@@ -81,8 +81,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
 
     return (
         <>
-            <h3 className="text-center mt-4">Your Playlists</h3>
-            <div className="d-flex flex-column justify-content-center align-items-center w-100">
+            <h3 className="text-2xl text-center my-4">Your Playlists</h3>
+            <div className="flex flex-col justify-center items-center w-full">
                 {
                     !activePlaylist && playlists.length > 0 &&
                     <div>
@@ -97,27 +97,27 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                 {
                                     playlists.map((playlist: any, key: number) => {
                                         return (
-                                            <div key={key} className="card mb-2 p-2 bg-dark w-100">
-                                                <div style={{ textAlign: 'left'}} className="d-flex flex-row align-items-center justify-content-between">
-                                                    {
-                                                        playlist.images.length > 0
-                                                        ?
-                                                        <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
-                                                        :
-                                                        <img src="https://www.freeiconspng.com/uploads/spotify-icon-2.png" style={{ width: '50px', height: '50px' }} />
-                                                    }
-                                                    <div className="d-flex flex-column w-75 ps-2">
-                                                        <div className="d-flex flex-row">
+                                            <div key={key} className="card mb-2 p-2 bg-zinc-900 opacity-80 w-full">
+                                                <div style={{ textAlign: 'left'}} className="flex items-center justify-between">
+                                                    <div className="flex flex-col">
+                                                        {
+                                                            playlist.images.length > 0
+                                                            ?
+                                                            <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
+                                                            :
+                                                            <img src="https://www.freeiconspng.com/uploads/spotify-icon-2.png" style={{ width: '50px', height: '50px' }} />
+                                                        }
+                                                        <SpotifyLinkBack link={playlist.external_urls.spotify} />
+                                                    </div>
+                                                    <div className="flex flex-col w-3/4 ps-2">
+                                                        <div className="flex">
                                                             <h6 className="p-2">{playlist.name}</h6>
                                                             { playlist.collaborative && <h6 className="mt-2"><BsPeopleFill/></h6> }
                                                             { playlist.public && <h6 className="mt-2"><BsGlobe/></h6> }
                                                         </div>
                                                         <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
                                                     </div>
-                                                    <button className="btn btn-dark">
-                                                        <SpotifyLinkBack link={playlist.external_urls.spotify} />
-                                                    </button>
-                                                    <button className="btn btn-success" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}>View</button>
+                                                    <button className="btn btn-primary" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}>View</button>
                                                 </div>
                                             </div>
                                         );
@@ -130,56 +130,54 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                 }
                 {
                     activePlaylist &&
-                    <div>
-                        <div className="">
-                            <div className="d-flex justify-content-center align-items-center">
-                                <h3 className="text-center mt-2 me-4"><strong>{activePlaylist.name}</strong></h3>
-                                <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack/></button>
-                            </div>
+                    <div className="w-full">
+                        <div className="flex justify-center items-center">
+                            <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
+                            <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack/></button>
                         </div>
-                        <div className="d-flex flex-column justify-content-center align-items-center mt-4">
-                            <InfiniteScroll
-                                dataLength={activePlaylist.items.length}
-                                next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
-                                hasMore={activePlaylist.next != null}
-                                loader={<Loading />}
-                                endMessage={<h6 className="text-center">You've reached the end.</h6>}
-                            >
-                                {
-                                    activePlaylist.items.map((item: any, key: number) => {
-                                        if (!item || !item.track) return;
-                                        let result = item.track;
-                                        if (!result) return;
-                                        if (!result.album.images[2]) return;
-                                        return (
-                                            <div key={key} className="card p-2 me-2 mb-2 ms-2 bg-dark">
-                                                <div className="d-flex flex-row align-items-center justify-content-between">
-                                                    <div className="d-flex flex-row justify-content-start">
-                                                        <img src={result.album.images[2].url} className="mt-3" style={{ width: '50px', height: '50px' }} />
-                                                        <div style={{ textAlign: 'left', maxWidth: '40vw'}} className="d-flex flex-column ms-2">
-                                                            <div className="d-flex flex-row">
-                                                                <h6 className="p-2"><strong className="me-2">{key + 1}.</strong>{result.name}</h6>
-                                                                {
-                                                                    result.explicit &&
-                                                                    <h6 className="mt-2"><BsExplicitFill/></h6>
-                                                                }
+                        {
+                            activePlaylist.items.length > 0 &&
+                            <div>
+                                <InfiniteScroll
+                                    dataLength={activePlaylist.items.length}
+                                    next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
+                                    hasMore={activePlaylist.next != null}
+                                    loader={<Loading />} 
+                                    endMessage={<h6 className="text-center">You've reached the end.</h6>}
+                                >
+                                    {
+                                        activePlaylist.items.map((item: any, key: number) => {
+                                            if (!item || !item.track) return;
+                                            let result = item.track;
+                                            if (!result) return;
+                                            if (!result.album.images[2]) return;
+                                            return (
+                                                <div key={key} className="card p-2 my-2 bg-dark w-full">
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <div className="flex justify-start w-full">
+                                                            <div className="flex flex-col">
+                                                                <img src={result.album.images[2].url} className="mt-3" style={{ width: '50px', height: '50px' }} />
+                                                                <SpotifyLinkBack link={result.external_urls.spotify} />
                                                             </div>
-                                                            <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
+                                                            <div className="text-left w-3/4">
+                                                                <div className="flex justify-start">
+                                                                    <h6 className="p-2 w-10/12"><strong className="me-2">{key + 1}.</strong>{result.name}</h6>
+                                                                    { result.explicit && <BsExplicitFill className="mt-3"/> }
+                                                                </div>
+                                                                <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center justify-end">
+                                                            <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
                                                         </div>
                                                     </div>
-                                                    <div className="d-flex flex-row align-items-center justify-content-end">
-                                                        <button className="btn btn-dark">
-                                                        <SpotifyLinkBack link={result.external_urls.spotify} />
-                                                        </button>
-                                                        <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
-                                                    </div>
                                                 </div>
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </InfiniteScroll>
-                        </div>
+                                            )
+                                        })
+                                    }
+                                </InfiniteScroll>
+                            </div>
+                        }
                         {
                             (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
                             <h3 className="text-center mt-4 mb-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
