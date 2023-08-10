@@ -13,7 +13,7 @@ $body-font: 'Montserrat', sans-serif;
                    (-.5+(random()) * 3) + em
                    (-.5+(random()) * 3) + em
                    7px
-                   hsla(random() * 360, 100%, 50%, .65);
+                   hsla(random() * 360, 100%, 50%, .6);
     }
     text-shadow: $text-shadow;
 }
@@ -135,6 +135,6 @@ h5 {
   text-align: center;
 }
 
- *:not(:has(:not(:empty))) {
+div:not(nav *) {
   opacity: .99 !important;
 }
