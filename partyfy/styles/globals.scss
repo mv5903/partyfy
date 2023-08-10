@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin&family=Montserrat&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 $title-font: 'Libre Franklin', sans-serif;
 $body-font: 'Montserrat', sans-serif;
@@ -10,7 +13,7 @@ $body-font: 'Montserrat', sans-serif;
                    (-.5+(random()) * 3) + em
                    (-.5+(random()) * 3) + em
                    7px
-                   hsla(random() * 360, 100%, 50%, .15);
+                   hsla(random() * 360, 100%, 50%, .65);
     }
     text-shadow: $text-shadow;
 }
@@ -30,7 +33,6 @@ body {
 
 body, head {
   display: block;
-  font-size: 4em;
   color: transparent;
 }
 
@@ -131,4 +133,8 @@ h5 {
 
 .swal2-input-label {
   text-align: center;
+}
+
+ *:not(:has(:not(:empty))) {
+  opacity: .99 !important;
 }

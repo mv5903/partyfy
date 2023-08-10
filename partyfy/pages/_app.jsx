@@ -1,4 +1,3 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Head from 'next/head';
 import '../styles/globals.scss'
 import { UserProvider } from '@auth0/nextjs-auth0/client';

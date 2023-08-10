@@ -150,44 +150,24 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any,
         return () => clearInterval(interval);
     }, [currentFriend]);
 
-    function getPageViewHelper() {
-        switch (requestPageView) {
-            case RequestPageView.Search:
-                return "Search";
-            case RequestPageView.TheirSession:
-                return "Their Queue";
-            case RequestPageView.YourPlaylists:
-                return "Your Playlists";
-        }
-    }
-
-    function setPageViewHelper(e: RequestPageView) {
-        document.querySelector('.active')?.classList.remove('active');
-        setRequestPageView(e);
-    }
-
     return (
         <div>
             {
                 !friendSpotifyAuth ? <Loading /> :
                 <>
-                    <div className="d-flex flex-row align-items-center justify-content-between p-2">
-                        <h3 className="text-center me-2 pt-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
-                        <button className="btn btn-danger" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                    <div className="flex items-center justify-between p-2 mb-6">
+                        <h3 className="text-xl me-2 pt-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
+                        <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
                     </div>
-                    <div>
-                        <RadioGroup data-toggle="buttons" className="mt-3 d-flex flex-row justify-content-between btn-group btn-group-toggle" style={{ width: '100%' }} name="fruit" selectedValue={getPageViewHelper()} onChange={e => setPageViewHelper(e)}>
-                            <label className="btn btn-dark active">
-                                <Radio value={RequestPageView.Search} className="d-none" />Search
-                            </label>
-                            <label className="btn btn-dark">
-                                <Radio value={RequestPageView.YourPlaylists} className="d-none" />Your Playlists
-                            </label>
-                            <label className="btn btn-dark">
-                                <Radio value={RequestPageView.TheirSession} className="d-none" />Their Session
-                            </label>
-                        </RadioGroup>
-                        { currentView() }
+                    <div className="flex flex-col items-center">
+                        <div className="btn-group">
+                            <button className={`btn ${requestPageView == RequestPageView.Search ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.Search)}>Search</button>
+                            <button className={`btn ${requestPageView == RequestPageView.YourPlaylists ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}>Your Playlists</button>
+                            <button className={`btn ${requestPageView == RequestPageView.TheirSession ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}>Their Session</button>
+                        </div>
+                        <div className="w-full">
+                            { currentView() }
+                        </div>
                     </div>
                 </>
             }

@@ -77,10 +77,10 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                 :
                 friends.map((user, index) => {
                     return (
-                        <div key={index} className="card bg-dark p-2 mt-3">
-                            <div className="d-flex flex-row align-items-center justify-content-between">
-                                <h5 className="me-4 mt-2">{user.Username}</h5>
-                                <button className="btn btn-small btn-danger" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash className="me-1 mb-1"/></button>
+                        <div key={index} className="card bg-gray-800 p-2 mt-3">
+                            <div className="flex align-center justify-between">
+                                <h3 className="text-xl mr-4 mt-2">{user.Username}</h3>
+                                <button className="btn btn-small bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash className="me-1 mb-1"/></button>
                             </div>
                         </div>
                     );
