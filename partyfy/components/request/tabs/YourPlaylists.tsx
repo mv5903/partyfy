@@ -130,14 +130,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                 }
                 {
                     activePlaylist &&
-                    <div className="w-full">
+                    <div className="w-full flex flex-col items-center">
                         <div className="flex justify-center items-center">
                             <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
                             <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack/></button>
                         </div>
                         {
                             activePlaylist.items.length > 0 &&
-                            <div>
+                            <div className="">
                                 <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
@@ -152,7 +152,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                             if (!result) return;
                                             if (!result.album.images[2]) return;
                                             return (
-                                                <div key={key} className="card p-2 my-2 bg-dark w-full">
+                                                <div key={key} className="card p-2 my-2 bg-zinc-900 w-full">
                                                     <div className="flex items-center justify-between w-full">
                                                         <div className="flex justify-start w-full">
                                                             <div className="flex flex-col">
