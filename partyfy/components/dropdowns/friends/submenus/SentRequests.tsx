@@ -20,6 +20,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
     }
     
     useEffect(() => { 
+        loadSentFriendRequests();
         const interval = setInterval(loadSentFriendRequests, 2000);
         return () => clearInterval(interval);
     }, [user]);
