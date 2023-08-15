@@ -11,8 +11,11 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
     const [loading, setLoading] = useState(true);
 
     async function loadSentFriendRequests() {
+        let start = performance.now();
         const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=sent')
         const data = await response.json();
+        let end = performance.now();
+        console.log(`Sent requests took ${end - start} milliseconds.`);
         if (data) {
             setLoading(false);
             setUsersReturned(data);
@@ -20,6 +23,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
     }
     
     useEffect(() => { 
+        loadSentFriendRequests();
         const interval = setInterval(loadSentFriendRequests, 2000);
         return () => clearInterval(interval);
     }, [user]);
