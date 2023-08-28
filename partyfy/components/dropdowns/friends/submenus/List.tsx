@@ -72,7 +72,7 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                 friends.length === 0 || !friends
                 ?
                 <div>
-                    <h5 className="text-center">You have no friends yet.</h5>
+                    <h5 className="text-xl text-center">You have no friends yet.</h5>
                 </div>
                 :
                 friends.map((user, index) => {

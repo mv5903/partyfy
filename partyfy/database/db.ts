@@ -175,7 +175,8 @@ export default class Database {
                 UserID: {
                     notIn: friendIDS
                 }
-            }
+            },
+            take: 5
         });
         await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully searched for users with query ${Query} for ${UserID}`);
