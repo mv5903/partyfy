@@ -1,33 +1,28 @@
 # Partyfy
 
-## Update 7/12/23: Partyfy is now public! 🎉
-After several weeks of tuning Partyfy to Spotify's design guidelines, anyone can now log into the app and take advantage of Partyfy's full suite of features. I am so excited to finally be able to share this with the world, and I hope you enjoy it as much as I do. 
-<br><br>
-With that however, as Partyfy is very new, it is very likely that there are bugs and design issues that exist. If you do find any bugs or have any design recommendations, please feel free to open an issue on this repository and I will get to it as soon as I can. Thank you!
-
-## Now installable as a [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) app! 
-To install, navigate to my app, click the share icon at the bottom of Safari or your preferred mobile web browser, and click "Add to Home Screen". This way you no longer need to navigate to my app in your browser anymore as it will live on your home screen. Just like the web version, it will automatically update as I release new changes.
-
+## Update 8/30/21: Partyfy is now available on the iOS App Store! 🎉
+[Partyfy - Queue Management](https://apps.apple.com/us/app/partyfy-queue-management/id6463042237) is now available on the iOS App Store, available for iPhone and iPad.
+<br><br><br>
 
 ### Why did I create this?
 
 #### Backstory
 
-One of my favorite activities when I am with my friends is to go on a long drive and talk, but most importantly we listen to music. With the release of Spotify's Group Session functionality, we thought that was a great solution so that my friends could easily add to my queue while I was driving and had my phone connected to Apple CarPlay. However, we quickly realized that this was not the best solution as there were several drawbacks using the included functionality:
+One of my favorite activities when I am with my friends is to go on a long drive and talk, but most importantly we listen to music. With the release of Spotify's Group Session functionality, we thought that was a great solution so that my friends could easily add to my queue while I was driving and had my phone connected to Apple CarPlay. However, we quickly realized that this was not the best solution as several drawbacks were using the included functionality:
 <br>
 1. The group session would randomly disband, and I would have to use my phone to invite everyone back to the session again (sometimes this was almost every hour).
 2. The queue desyncs between phones sometimes, outright not showing the same queue on everyone's phone.
-3. The content plays back on everyone's phone, so they have to turn their volume all the way down to not hear the music twice. This is especially annoying to them because they cannot freely use other apps that have sound while the group session is active.
+3. The content plays back on everyone's phone, so they have to turn their volume down to not hear the music twice. This is especially annoying to them because they cannot freely use other apps that have sound while the group session is active.
 
 #### So what does Partyfy solve?
 
-I created Partyfy to solve all of these issues to the best of my ability. It is an application with a friends system, which allows everyone to be linked up together. When the person playing the music (like me, the driver) turns on what I call **unattended queues**, my friends are freely able to search for songs and add them to my playback queue, without me needed to take any action whatsover. Here are some more details:
+I created Partyfy to solve all of these issues to the best of my ability. It is an application with a friends system, which allows everyone to be linked up together. When the person playing the music (like me, the driver) turns on what I call **unattended queues**, my friends are freely able to search for songs and add them to my playback queue, without me having to take action. Here are some more details:
 <br><br>
 <p align="center">
     <strong>The Friend Screen</strong><br><br>
     <img src="./readmeImages/friendscreen.png" width="200" style="text-align: center" />
     <br>
-    Here you can see a list of all of your friends that you have added from the friend icon on the top right of this screen. I have the option to disabled unattended queues, which will immediately remove the functionality for any of my friends to add to my queue. <i><strong>By default, this option is Disabled and yellow in color.</strong></i> Any of my friends who also have that functionality enabled will appear in green, while those that do not will appear in grey. I can reload the status with the blue refresh button on the right.
+    Here you can see a list of all of your friends that you have added from the friend icon on the top right of this screen. I have the option to disable unattended queues, which will immediately remove the functionality for any of my friends to add to my queue. <i><strong>By default, this option is disabled and yellow.</strong></i> Any of my friends who also have that functionality enabled will appear in green, while those who do not will appear in grey. I can reload the status with the blue refresh button on the right.
 </p>
 
 <br>
@@ -36,7 +31,7 @@ I created Partyfy to solve all of these issues to the best of my ability. It is 
     <img src="./readmeImages/search.png" width="200" style="text-align: center" />
         <img src="./readmeImages/queueconfirm.png" width="200" style="text-align: center; margin-left: 5px" />
     <br>
-    Once I click on one of my friends, I am presented with this screen. I can search for songs and add them to the queue. The search results are populated directly from the Spotify API using the logged in user's access token.
+    Once I click on one of my friends, I am presented with this screen. I can search for songs and add them to the queue. The search results are populated directly from the Spotify API using the logged-in user's access token.
 </p>
 
 <br>
@@ -45,7 +40,7 @@ I created Partyfy to solve all of these issues to the best of my ability. It is 
     <img src="./readmeImages/playlists.png" width="200" style="text-align: center" />
     <img src="./readmeImages/songsfromplaylist.png" width="200" style="text-align: center; margin-left: 5px" />
     <br>
-    If I can't quite remember the name of song I want added, I can click on the "Your Playlists" tab which will bring me to this screen. Here I can see all of my playlists and add songs from them to the queue by clicking on View next to one of them.
+    If I can't quite remember the name of the song I want added, I can click on the "Your Playlists" tab which will bring me to this screen. Here I can see all of my playlists and add songs from them to the queue by clicking on View next to one of them.
 </p>
 
 <br>
@@ -58,17 +53,17 @@ I created Partyfy to solve all of these issues to the best of my ability. It is 
 
 
 ### Limitations
-Sadly some of the most requested features are currently impossible due to the current version of Spotify's API. They currently do not provide endpoints for the following actions:
+Unfortunately, some of the most requested features are currently impossible due to the current version of Spotify's API. They currently do not provide endpoints for the following actions:
 1. Deleting an item from the queue
 2. Rearranging items in the queue
 3. Keeping the queue just the queue, not a combination of the queue (which is always at the top, luckily) and items that will play next based on the playlist content is being streamed from.
 
-These items will be implemented as soon as I hear back from Spotify and have access to this. Thank you for understanding.
+These items will be implemented as soon as I hear back from Spotify and have access to them. Thank you for understanding.
 
 ### Stack
 For those who are curious, here is a general overview of the stack used to create this application:
 - Frontend: React with Typescript
 - Backend: Node.js with Express using the Next.js framework
-- Database: Vercel's PostrgreSQL database with Prisma ORM for Typescript
+- Database: Vercel's PostgreSQL database with Prisma ORM for Typescript
 - Authentication: Auth0
 - Hosting: Vercel
