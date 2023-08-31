@@ -1,12 +1,15 @@
 import { BsExplicitFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 import Loading from "@/components/misc/Loading";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import { Users } from "@prisma/client";
+import { UserProfile } from "@auth0/nextjs-auth0/client";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
-const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpotifyAuth: any, friend: any }) => {
+const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
     const [queue, setQueue] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -130,7 +133,8 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: any, friendSpoti
                         </div>
                         :
                         <>
-                            <h3 className="text-center mt-4">No active session.</h3>
+                            <h3 className="text-center mt-4">No active Spotify session.</h3>
+                            <h3 className="text-center mt-4">{`If ${friend.Username} is listening to a local file, their session will not appear here.`}</h3>
                         </>
                     }
                 </>

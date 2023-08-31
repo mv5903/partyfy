@@ -3,8 +3,11 @@ import { BsExplicitFill } from "react-icons/bs";
 import { useState } from "react";
 
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import { Users } from "@prisma/client";
+import { UserProfile } from "@auth0/nextjs-auth0/client";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
-const Search = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any, addToQueue: Function }) => {
+const Search = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
 
     const [searchResults, setSearchResults] = useState([]);
 

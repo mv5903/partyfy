@@ -8,6 +8,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import ScrollToTopButton from "./utils/ScrollToTopButton";
+import { UserProfile } from "@auth0/nextjs-auth0/client";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
 interface IActivePlaylist {
     name?: string;
@@ -16,7 +18,7 @@ interface IActivePlaylist {
     items?: any[];
 }
 
-const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAuth: any, addToQueue: Function }) => {
+const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
     
     const [playlists, setPlaylists] = useState([]);
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
@@ -112,8 +114,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                                                     <div className="flex flex-col w-3/4 ps-2">
                                                         <div className="flex">
                                                             <h6 className="p-2">{playlist.name}</h6>
-                                                            { playlist.collaborative && <h6 className="mt-2"><BsPeopleFill/></h6> }
-                                                            { playlist.public && <h6 className="mt-2"><BsGlobe/></h6> }
+                                                            { playlist.collaborative && <h6 className="mt-3"><BsPeopleFill/></h6> }
+                                                            { playlist.public && <h6 className="mt-3"><BsGlobe/></h6> }
                                                         </div>
                                                         <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
                                                     </div>
@@ -180,7 +182,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: any, spotifyAut
                         }
                         {
                             (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
-                            <h3 className="text-center mt-4 mb-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
+                            <h3 className="text-center m-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
                         }
                         <ScrollToTopButton />
                     </div>
