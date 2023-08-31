@@ -3,7 +3,7 @@ import {  useContext, useEffect, useState } from "react";
 import { RadioGroup, Radio } from "react-radio-group";
 
 import UserContext from '@/providers/UserContext';
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 import Loading from "../misc/Loading";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getUserID } from '@/helpers/Utils';
@@ -11,8 +11,9 @@ import { getUserID } from '@/helpers/Utils';
 import Search from "./tabs/Search";
 import TheirQueue from "./tabs/TheirQueue";
 import YourPlaylists from "./tabs/YourPlaylists";
+import { Users } from "@prisma/client";
 
-const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: any, setCurrentFriend: Function }) => {
+const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: Users, setCurrentFriend: Function }) => {
 
     enum RequestPageView {
         Search,

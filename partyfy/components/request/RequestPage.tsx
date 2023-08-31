@@ -5,7 +5,8 @@ import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import { Users } from "@prisma/client";
 
 const RequestPage = () => {
 
@@ -17,7 +18,7 @@ const RequestPage = () => {
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentFriend, setCurrentFriend] = useState(null);
+    const [currentFriend, setCurrentFriend] = useState<Users>(null);
 
     const [uqLoading, setUQLoading] = useState(false);
 

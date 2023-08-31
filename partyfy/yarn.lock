@@ -1743,6 +1743,11 @@
   resolved "https://registry.npmjs.org/@sweetalert2/theme-dark/-/theme-dark-5.0.15.tgz"
   integrity sha512-g1QCwQVOkiAz5hIEBOIvvu0580lubu4KuQlod+48QetYzGIEXNlHEH36QihCDnGVgE6vx48iO48w9q0WrZWyHQ==
 
+"@sweetalert2/themes@^5.0.15":
+  version "5.0.15"
+  resolved "https://registry.npmjs.org/@sweetalert2/themes/-/themes-5.0.15.tgz"
+  integrity sha512-uGU7CynpjRc3cllTqZEvXiZTpfQ6MN4faG+Tf0VFW81bLysCQm00iHS3NJLZx5STRfxpM5SzqeVXpAzJyTG/WA==
+
 "@tediousjs/connection-string@^0.4.1":
   version "0.4.2"
   resolved "https://registry.npmjs.org/@tediousjs/connection-string/-/connection-string-0.4.2.tgz"
@@ -2111,6 +2116,11 @@
   version "2.3.3"
   resolved "https://registry.npmjs.org/@types/sizzle/-/sizzle-2.3.3.tgz"
   integrity sha512-JYM8x9EGF163bEyhdJBpR2QX1R5naCJHC8ucJylJ3w9/CVBaskdQ8WqBf8MmQrd1kRvp/a4TS8HJ+bxzR7ZJYQ==
+
+"@types/spotify-api@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.npmjs.org/@types/spotify-api/-/spotify-api-0.0.22.tgz"
+  integrity sha512-oZLKiI6Fck/BGd0QdmIdJCY351xQfRkfpx2Q23jIntL3YQx85vScYuFJMK81/NoSK9m7HYOl2DW4A9WomDuJOA==
 
 "@types/stack-utils@^2.0.0":
   version "2.0.1"
@@ -7967,7 +7977,7 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-sweetalert2@^11.7.3:
+sweetalert2@^11.0.0, sweetalert2@^11.7.3:
   version "11.7.3"
   resolved "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.7.3.tgz"
   integrity sha512-fUN/fyVSBZNtY4Rr/Qtxn7tNNnlRAbUhQxTQ9uOo0xVMIHBmqq4/9pau5N9dB2pvkB353XL/ywRAycscLoYU3w==
