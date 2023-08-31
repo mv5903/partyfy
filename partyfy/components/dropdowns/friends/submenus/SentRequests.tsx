@@ -5,25 +5,34 @@ import { getUserID } from '@/helpers/Utils';
 
 import Swal from 'sweetalert2';
 import Loading from '@/components/misc/Loading';
+import { Supabase } from '@/helpers/SupabaseHelper';
 
 const SentRequests = ({ user } : { user : UserProfile } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    async function loadSentFriendRequests() {
-        const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=sent')
-        const data = await response.json();
-        if (data) {
-            setLoading(false);
-            setUsersReturned(data);
+    useEffect(() => {
+        async function loadSentFriendRequests() {
+            const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=sent')
+            const data = await response.json();
+            if (data) {
+                setLoading(false);
+                setUsersReturned(data);
+            }
         }
-    }
-    
-    useEffect(() => { 
+        
         loadSentFriendRequests();
-        const interval = setInterval(loadSentFriendRequests, 2000);
-        return () => clearInterval(interval);
-    }, [user]);
+        Supabase
+            .channel('any')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+                loadSentFriendRequests();
+            })
+            .subscribe();
+
+        return () => {
+            Supabase.channel('any').unsubscribe();
+        }
+    }, []);
 
     async function cancelFriendRequest(FriendUserID: string, FriendUsername: string) {
         let result = await Swal.fire({
@@ -47,7 +56,6 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     action: 'DeleteFriendRequest'
                 })
             });
-            loadSentFriendRequests();
         }
     }
 
