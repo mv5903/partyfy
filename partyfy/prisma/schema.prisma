@@ -10,35 +10,40 @@ datasource db {
 }
 
 model AskedQueues {
-  id          Int      @id @default(autoincrement())
-  OwnerUserID String   @db.VarChar(255)
-  RequestedAt DateTime
-  SongID      String   @db.VarChar(255)
+  id          Int    @id @default(autoincrement())
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  OwnerUserID String?   @db.VarChar
+  RequestedAt DateTime? @db.Timestamp(6)
+  SongID      String?   @db.VarChar
 }
 
 model Recents {
-  id           Int      @id @default(autoincrement())
-  OwnerUserID  String   @db.VarChar(255)
-  PlayedAt     DateTime
-  SongID       String   @db.VarChar(255)
-  SongName     String?  @db.VarChar(255)
-  SongArtist   String?  @db.VarChar(255)
-  SongAlbum    String?  @db.VarChar(255)
-  SongArt      String?  @db.VarChar(255)
+  id           Int    @id @default(autoincrement())
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  OwnerUserID  String?   @db.VarChar
+  PlayedAt     DateTime? @db.Timestamp(6)
+  SongID       String?   @db.VarChar
+  SongName     String?   @db.VarChar
+  SongArtist   String?   @db.VarChar
+  SongAlbum    String?   @db.VarChar
+  SongArt      String?   @db.VarChar
   SongExplicit Boolean?
 }
 
 model Users {
-  id               Int      @id @default(autoincrement())
-  UserID           String?  @unique @db.VarChar(255)
-  RefreshToken     String?  @db.VarChar(512)
+  id               Int    @id @default(autoincrement())
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  UserID           String?   @db.VarChar
+  RefreshToken     String?   @db.VarChar
   UnattendedQueues Boolean?
-  Username         String?  @unique @db.VarChar(32)
+  Username         String?   @db.VarChar
+  disableuqdate    DateTime?
 }
 
 model Friends {
-  id              Int      @id @default(autoincrement())
-  UserID          String?  @db.VarChar(255)
-  FriendUserID    String?  @db.VarChar(255)
+  id              Int   @id @default(autoincrement())
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  UserID          String?  @db.VarChar
+  FriendUserID    String?  @db.VarChar
   IsFriendRequest Boolean?
 }

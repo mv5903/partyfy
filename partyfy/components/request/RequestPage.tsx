@@ -1,11 +1,8 @@
-import { use, useContext, useEffect, useState } from "react";
-import { TiRefresh } from "react-icons/ti";
-import { isMobile } from "react-device-detect";
+import { useContext, useEffect, useState } from "react";
 import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
-import Swal from 'sweetalert2';
 import { Users } from "@prisma/client";
 
 const RequestPage = () => {
