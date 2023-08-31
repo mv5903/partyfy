@@ -6,6 +6,7 @@ import { getUserID } from '@/helpers/Utils';
 
 import Swal from 'sweetalert2';
 import Loading from '@/components/misc/Loading';
+import { Supabase } from '@/helpers/SupabaseHelper';
 
 const IncomingRequests = ({ user } : { user : UserProfile } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
@@ -22,9 +23,17 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
 
     useEffect(() => {
         fetchRequests();
-        const interval = setInterval(fetchRequests, 2000);
-        return () => clearInterval(interval);
-    }, [user]);
+        Supabase
+            .channel('any')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+                fetchRequests();
+            })
+            .subscribe();
+
+        return () => {
+            Supabase.channel('any').unsubscribe();
+        }
+    }, []);
 
     async function deleteIncomingRequest(FriendUserID: string, FriendUsername: string) {
         let result = await Swal.fire({

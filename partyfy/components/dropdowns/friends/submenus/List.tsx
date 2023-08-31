@@ -4,13 +4,14 @@ import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2';
 import Loading from '@/components/misc/Loading';
+import { Supabase } from '@/helpers/SupabaseHelper';
 
 const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVisible: boolean } ) => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fn() {
+        async function fetchFriends() {
             if (!isComponentVisible) return;
             const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
             const data = await response.json();
@@ -18,10 +19,18 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
             setFriends(data);
         }
 
-        fn();
-        const interval = setInterval(fn, 2000);
-        return () => clearInterval(interval);
-    }, [user]);
+        fetchFriends();
+        Supabase
+            .channel('any')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+                fetchFriends();
+            })
+            .subscribe();
+
+        return () => {
+            Supabase.channel('any').unsubscribe();
+        }
+    }, []);
 
     function removeFriend(FriendUserID: string, FriendUsername: string) {
         Swal.fire({

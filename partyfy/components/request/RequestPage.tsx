@@ -4,6 +4,7 @@ import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
 import { Users } from "@prisma/client";
+import { Supabase } from "@/helpers/SupabaseHelper";
 
 const RequestPage = () => {
 
@@ -16,26 +17,19 @@ const RequestPage = () => {
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentFriend, setCurrentFriend] = useState<Users>(null);
-
     const [uqLoading, setUQLoading] = useState(false);
 
-    async function displayFriends() {
-        if (currentFriend) return;
-        const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
-        let data = await response.json();
-        // Show users who have functionality enabled first
-        data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
-        setLoading(false);
-        setFriendsList(data);
-    }
-
     useEffect(() => {
-        setLoading(true);
-        displayFriends();
-    }, [user]);
-
-    useEffect(() => {
-        async function fn() {
+        async function fetchFriends() {
+            if (currentFriend) return;
+            const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
+            let data = await response.json();
+            // Show users who have functionality enabled first
+            data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
+            setLoading(false);
+            setFriendsList(data);
+        }
+        async function fetchUQStatus() {
             if (currentFriend) return;
             const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
             const data = await response.json();
@@ -47,9 +41,21 @@ const RequestPage = () => {
                 }
             }
         }
+        fetchFriends();
+        fetchUQStatus();
 
-        fn();
-    }, [user]);
+        Supabase
+            .channel('any')
+            .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+                fetchFriends();
+                fetchUQStatus();
+            })
+            .subscribe();
+
+        return () => {
+            Supabase.channel('any').unsubscribe();
+        }
+    }, []);
 
     async function unattendedQueues() {
         setUQLoading(true);
@@ -68,11 +74,6 @@ const RequestPage = () => {
             setIsUnattendedQueuesEnabled(!isUnattendedQueuesEnabled);
         }
     }
-
-    useEffect(() => {
-        const interval = setInterval(displayFriends, 1000);
-        return () => clearInterval(interval);
-    });
 
     return (
         <div className="my-12">
@@ -102,7 +103,7 @@ const RequestPage = () => {
                     !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
                         <h3 className="text-3xl me-3">Add to:</h3>
-                        <h6 className="text-gray-600 mt-3"><i>Refreshes every 2 seconds</i></h6>
+                        <h6 className="text-gray-600 mt-3"><i>Refreshes instantly</i></h6>
                         <div className="flex flex-col justify-center mt-4">
                             {
                                 friendsList.map((friend: any, index: number) => {
