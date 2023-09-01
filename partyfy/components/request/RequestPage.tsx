@@ -48,7 +48,10 @@ const RequestPage = () => {
         Supabase
             .channel('RequestPage')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                console.log('test')
+                fetchFriends();
+                fetchUQStatus();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
                 fetchFriends();
                 fetchUQStatus();
             })

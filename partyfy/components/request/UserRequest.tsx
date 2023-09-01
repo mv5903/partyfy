@@ -30,6 +30,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
 
+
     async function loadFriendSpotifyAuth() {
         if (currentFriend && currentFriend.RefreshToken) {
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
@@ -97,58 +98,62 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
         }
     }
 
-    useEffect(() => {
-        async function unattendedQueuesAllowed() {
-            if (requestPageView == 0 || !currentFriend) return;
-            const response = await fetch('/api/database/unattendedqueues?UserID=' + currentFriend.UserID);
-            const data = await response.json();
+    async function unattendedQueuesAllowed() {
+        if (!currentFriend) return;
+        const response = await fetch('/api/database/unattendedqueues?UserID=' + currentFriend.UserID);
+        const data = await response.json();
 
-            console.log({
-                requestPageView,
-                currentFriend
-            })
-    
-            if (data) {
-                if (!data.UnattendedQueues)  {
-                    setCurrentFriend(null);
-                    Swal.fire({
-                        title: 'Notice',
-                        html: `Your friend <strong>${currentFriend.Username}</strong> has disabled unattended queues. You will no longer be able to request songs until it has been turned back on.`,
-                        icon: 'warning'
-                    })
-                }
-            }
-        }
-    
-        async function isStillFriends() {
-            if (requestPageView == 0 || !currentFriend) return;
-            const response = await fetch(`/api/database/friends?action=isFriend&UserID=${getUserID(user)}&FriendUserID=${currentFriend.UserID}`);
-            const data = await response.json();
-            
-            if (!data) {
+        console.log({
+            requestPageView,
+            currentFriend
+        })
+
+        if (data) {
+            if (!data.UnattendedQueues)  {
                 setCurrentFriend(null);
                 Swal.fire({
                     title: 'Notice',
-                    html: `Your friend <strong>${currentFriend.Username}</strong> has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
+                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled unattended queues. You will no longer be able to request songs until it has been turned back on.`,
                     icon: 'warning'
                 })
             }
         }
+    }
 
+    async function isStillFriends() {
+        if (!currentFriend) return;
+        const response = await fetch(`/api/database/friends?action=isFriend&UserID=${getUserID(user)}&FriendUserID=${currentFriend.UserID}`);
+        const data = await response.json();
+        
+        if (!data) {
+            setCurrentFriend(null);
+            Swal.fire({
+                title: 'Notice',
+                html: `Your friend <strong>${currentFriend.Username}</strong> has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
+                icon: 'warning'
+            })
+        }
+    }
+
+    useEffect(() => {
         loadFriendSpotifyAuth();
         unattendedQueuesAllowed();
         isStillFriends();
 
-        Supabase
+        const subscription = Supabase
             .channel('UserRequest')
-            .on('postgres_changes', { event: '*', schema: '*' }, (payload: any) => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
+                unattendedQueuesAllowed();
+                isStillFriends();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 unattendedQueuesAllowed();
                 isStillFriends();
             })
             .subscribe();
 
         return () => {
-            Supabase.channel('UserRequest').unsubscribe();
+            subscription.unsubscribe();
         }
     }, []);
 
