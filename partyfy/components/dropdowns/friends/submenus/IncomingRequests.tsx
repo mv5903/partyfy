@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import { Supabase } from '@/helpers/SupabaseHelper';
 
@@ -24,14 +24,14 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
     useEffect(() => {
         fetchRequests();
         Supabase
-            .channel('any')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+            .channel('IncomingRequests')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 fetchRequests();
             })
             .subscribe();
 
         return () => {
-            Supabase.channel('any').unsubscribe();
+            Supabase.channel('IncomingRequests').unsubscribe();
         }
     }, []);
 

@@ -2,7 +2,7 @@ import { FaPaperPlane } from 'react-icons/fa';
 import { useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 
 const Search = ({ user } : { user : UserProfile } ) => {
@@ -69,7 +69,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
 
     return (
         <div>
-            <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="form-control me-2 w-full p-2"/>
+            <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="textarea textarea-primary textarea me-2 w-full p-2"/>
             <div>
                 {!loading && usersReturned.map((user, index) => {
                     return (

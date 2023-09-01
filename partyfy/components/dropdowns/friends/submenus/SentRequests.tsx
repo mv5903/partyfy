@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import { Supabase } from '@/helpers/SupabaseHelper';
 
@@ -23,14 +23,14 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
         
         loadSentFriendRequests();
         Supabase
-            .channel('any')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+            .channel('SentRequests')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 loadSentFriendRequests();
             })
             .subscribe();
 
         return () => {
-            Supabase.channel('any').unsubscribe();
+            Supabase.channel('SentRequests').unsubscribe();
         }
     }, []);
 
@@ -77,7 +77,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                             <div key={index} className="card bg-gray-800 p-2 mt-3">
                                 <div className="flex align-center justify-between">
                                     <h5 className="text-xl me-4 mt-2">{user.Username}</h5>
-                                    <button className="btn btn-small bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel className="me-1 mb-1 mt-1"/>Cancel</button>
+                                    <button className="btn btn-small bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
                                 </div>
                             </div>
                         );

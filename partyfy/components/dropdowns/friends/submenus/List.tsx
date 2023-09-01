@@ -2,11 +2,12 @@ import { FaTrash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import { Supabase } from '@/helpers/SupabaseHelper';
+import { FriendListScreen } from '@/helpers/FriendListScreen';
 
-const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVisible: boolean } ) => {
+const List = ({ user, isComponentVisible, setFriendListScreen } : { user : UserProfile, isComponentVisible: boolean, setFriendListScreen: Function } ) => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -21,14 +22,14 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
 
         fetchFriends();
         Supabase
-            .channel('any')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, payload => {
+            .channel('List')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 fetchFriends();
             })
             .subscribe();
 
         return () => {
-            Supabase.channel('any').unsubscribe();
+            Supabase.channel('List').unsubscribe();
         }
     }, []);
 
@@ -82,6 +83,9 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                 ?
                 <div>
                     <h5 className="text-xl text-center">You have no friends yet.</h5>
+                    <div className='flex justify-center'>
+                        <button className='btn btn-primary mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}>Add a Friend</button>
+                    </div>
                 </div>
                 :
                 friends.map((user, index) => {
@@ -89,7 +93,7 @@ const List = ({ user, isComponentVisible } : { user : UserProfile, isComponentVi
                         <div key={index} className="card bg-gray-800 p-2 mt-3">
                             <div className="flex align-center justify-between">
                                 <h3 className="text-xl mr-4 mt-2">{user.Username}</h3>
-                                <button className="btn btn-small bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash className="me-1 mb-1"/></button>
+                                <button className="btn btn-small bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
                             </div>
                         </div>
                     );

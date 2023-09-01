@@ -1,15 +1,16 @@
 import { BsExplicitFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "@/components/misc/Loading";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { Users } from "@prisma/client";
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import LoadingDots from "@/components/misc/LoadingDots";
 
-const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
+const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
     const [queue, setQueue] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -91,7 +92,7 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, fri
                                 </div>
                             </div>
                             :
-                            <Loading />
+                            <LoadingDots className="m-16" />
                         }
                     </div>
                     <h4 className="mt-2 text-2xl">Up Next</h4>
@@ -143,4 +144,4 @@ const TheirQueue = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, fri
     );
 }
 
-export default TheirQueue;
+export default TheirSession;
