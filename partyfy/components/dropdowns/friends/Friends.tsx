@@ -12,18 +12,13 @@ import List from './submenus/List';
 import IncomingRequests from './submenus/IncomingRequests';
 import SentRequests from './submenus/SentRequests';
 import Search from './submenus/Search';
+import IncomingCount from './submenus/utils/IncomingCount';
 import { Radio, RadioGroup } from 'react-radio-group';
+import { FriendListScreen } from '@/helpers/FriendListScreen';
 
 const Friends = () => {
 
     const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
-
-    enum FriendListScreen {
-        Friends,
-        Requests,
-        Sent,
-        Search
-    }
 
     const [friendListScreen, setFriendListScreen] = useState(FriendListScreen.Friends);
 
@@ -41,7 +36,7 @@ const Friends = () => {
     const currentFriendListScreen = () => {
         switch (friendListScreen) {
             case FriendListScreen.Friends:
-                return <List user={user} isComponentVisible={isComponentVisible}/>
+                return <List user={user} isComponentVisible={isComponentVisible} setFriendListScreen={setFriendListScreen} />
             case FriendListScreen.Requests:
                 return <IncomingRequests user={user} />
             case FriendListScreen.Sent:
@@ -66,7 +61,7 @@ const Friends = () => {
                 <div className={styles.friendsMenu}>
                     <div className="btn-group flex-nowrap justify-center w-full">
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}>Requests</button>
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount user={user}/>&nbsp;Requests</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Sent ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}>Sent</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Search ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}>Search</button>
                     </div>

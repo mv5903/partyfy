@@ -5,6 +5,7 @@ import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
 import { Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
+import LoadingDots from "../misc/LoadingDots";
 
 const RequestPage = () => {
 
@@ -45,15 +46,16 @@ const RequestPage = () => {
         fetchUQStatus();
 
         Supabase
-            .channel('any')
-            .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+            .channel('RequestPage')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
+                console.log('test')
                 fetchFriends();
                 fetchUQStatus();
             })
             .subscribe();
 
         return () => {
-            Supabase.channel('any').unsubscribe();
+            Supabase.channel('RequestPage').unsubscribe();
         }
     }, []);
 
@@ -79,16 +81,20 @@ const RequestPage = () => {
         <div className="my-12">
             {
                 !currentFriend &&
-                <div className="text-center">
-                    {
-                        isUnattendedQueuesEnabled === null || uqLoading
-                        ?
-                        <Loading />
-                        :
-                        <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
-                    }
-                    <h3 className="mt-10">OR</h3>
-                </div>
+                <>
+                    <div className="text-center" style={{ height: '10vh' }}>
+                        {
+                            isUnattendedQueuesEnabled === null || uqLoading
+                            ?
+                            <div>
+                                <LoadingDots className="mt-4" />
+                            </div>
+                            :
+                            <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
+                        }
+                    </div>
+                    <div className="divider divider-horizontal mx-2">OR</div>
+                </>
             }
             <div className="text-center mt-4 ms-2 me-2">
                 {

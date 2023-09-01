@@ -8,7 +8,7 @@ import UserContext from '@/providers/UserContext';
 import RequestPage from './request/RequestPage';
 
 import styles from '@/styles/Dashboard.module.css';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
     const {

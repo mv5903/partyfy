@@ -6,7 +6,7 @@ import { CONSTANTS } from '@/assets/Constants';
 import { getUserID } from '@/helpers/Utils';
 
 import Head from 'next/head'
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import AnchorLink from '@/components/misc/AnchorLink'
 import Loading from '@/components/misc/Loading';
 import Dashboard from '@/components/Dashboard';

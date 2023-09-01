@@ -54,7 +54,6 @@
     "reactstrap": "^9.1.5",
     "rippleui": "^1.12.1",
     "sass": "^1.59.2",
-    "sweetalert2": "^11.7.3",
     "winston": "^3.9.0",
     "yarn": "^1.22.19"
   },

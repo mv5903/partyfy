@@ -8,7 +8,7 @@ import useComponentVisible from '@/hooks/useComponentVisible';
 import styles from '@/styles/Options.module.css';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, isAHost: boolean, setIsAHost: Function }) =>  {
 
