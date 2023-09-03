@@ -9,6 +9,7 @@ import Head from 'next/head'
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import AnchorLink from '@/components/misc/AnchorLink'
 import Loading from '@/components/misc/Loading';
+import CurrentAlert from '@/components/misc/CurrentAlert';
 import Dashboard from '@/components/Dashboard';
 import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import FriendsList from '@/components/dropdowns/friends/Friends';
@@ -165,20 +166,26 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       { 
-        !user && <main className={styles.main}>
-          <div className='flex justify-center'>
-            <img className='object-center' src='/logo.png' width="200px" />
-          </div>
-          <h2 className='text-center m-4'>Welcome!</h2>
-          <p className={styles.description}>Add to your friend's Spotify queue without accessing their session directly.</p>
-          <AnchorLink
-            href="/api/auth/login"
-            className="btn btn-primary btn-margin"
-            tabIndex={0}
-            testId="navbar-login-desktop" icon={null}>
-            Get Started
-          </AnchorLink>
-        </main> 
+        !user && 
+        <>
+          <CurrentAlert />
+          <main>
+            <div className='flex justify-center'>
+              <img className='object-center' src='/logo.png' width="200px" />
+            </div>
+            <h2 className='text-center m-4 text-4xl'>Welcome!</h2>
+            <p className={`${styles.description} text-center`}>Add to your friend's Spotify queue without accessing their session directly.</p>
+            <div className='flex justify-center mt-8'>
+              <AnchorLink
+                href="/api/auth/login"
+                className="btn btn-primary btn-margin text-center"
+                tabIndex={0}
+                testId="navbar-login-desktop" icon={null}>
+                Get Started
+              </AnchorLink>
+            </div>
+          </main> 
+        </>
       }
       {
         user && <main className={`${styles.main_loggedin} `}>
