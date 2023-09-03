@@ -46,8 +46,8 @@ export class SpotifyAuth {
         if (this.lastRefresh === undefined) this.lastRefresh = new Date();
         if (this.accessToken == null || this.accessToken == undefined) await this.refreshAccessToken();
         var hoursDifference = Math.abs(new Date().getTime() - this.lastRefresh.getTime()) / 36e5;
-        // If time difference is greater than 1 hour, refresh the access token
-        if (hoursDifference > 1) {
+        // If time difference is approaching 1 hour, refresh the access token
+        if (hoursDifference >= 0.9) {
             await this.refreshAccessToken();
         }
         return this.accessToken;
