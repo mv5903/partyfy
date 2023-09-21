@@ -20,28 +20,29 @@ const RequestPage = () => {
     const [currentFriend, setCurrentFriend] = useState<Users>(null);
     const [uqLoading, setUQLoading] = useState(false);
 
-    useEffect(() => {
-        async function fetchFriends() {
-            if (currentFriend) return;
-            const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
-            let data = await response.json();
-            // Show users who have functionality enabled first
-            data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
-            setLoading(false);
-            setFriendsList(data);
-        }
-        async function fetchUQStatus() {
-            if (currentFriend) return;
-            const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
-            const data = await response.json();
-            if (data) {
-                if (data.UnattendedQueues === null) {
-                    setIsUnattendedQueuesEnabled(false);
-                } else {
-                    setIsUnattendedQueuesEnabled(data.UnattendedQueues);
-                }
+    async function fetchFriends() {
+        if (currentFriend) return;
+        const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
+        let data = await response.json();
+        // Show users who have functionality enabled first
+        data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
+        setLoading(false);
+        setFriendsList(data);
+    }
+    async function fetchUQStatus() {
+        if (currentFriend) return;
+        const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
+        const data = await response.json();
+        if (data) {
+            if (data.UnattendedQueues === null) {
+                setIsUnattendedQueuesEnabled(false);
+            } else {
+                setIsUnattendedQueuesEnabled(data.UnattendedQueues);
             }
         }
+    }
+
+    useEffect(() => {
         fetchFriends();
         fetchUQStatus();
 
@@ -112,7 +113,7 @@ const RequestPage = () => {
                     !currentFriend && !loading && friendsList.length > 0 &&
                     <div>
                         <h3 className="text-3xl me-3">Add to:</h3>
-                        <h6 className="text-gray-600 mt-3"><i>Refreshes instantly</i></h6>
+                        <h6 className="text-gray-600 mt-3" onClick={() => fetchFriends()}><i>Tap here to refresh</i></h6>
                         <div className="flex flex-col justify-center mt-4">
                             {
                                 friendsList.map((friend: any, index: number) => {
