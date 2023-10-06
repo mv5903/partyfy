@@ -1,5 +1,6 @@
 import { BsExplicitFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "@/components/misc/Loading";
@@ -15,6 +16,9 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
     const [queue, setQueue] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [nowPlaying, setNowPlaying] = useState(null);
+
+    // Show end time of progress bar as total rather than remaining
+    const [showEndTimeAsTotal, setShowEndTimeAsTotal] = useLocalStorage('showEndTimeAsTotal', false);
 
     async function showQueueDisclaimer() {
         await Swal.fire({
@@ -123,7 +127,15 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                                             {
                                                 nowPlaying.item
                                                 ?
-                                                <h6>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
+                                                <>
+                                                {
+                                                    showEndTimeAsTotal
+                                                    ?
+                                                    <h6 onClick={() => setShowEndTimeAsTotal(false)}>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
+                                                    :
+                                                    <h6 onClick={() => setShowEndTimeAsTotal(true)}>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
+                                                }
+                                                </>
                                                 :
                                                 <h6>?</h6>
                                             }
