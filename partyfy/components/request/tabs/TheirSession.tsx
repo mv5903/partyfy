@@ -123,7 +123,7 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                                             {
                                                 nowPlaying.item
                                                 ?
-                                                <h6>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
+                                                <h6>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
                                                 :
                                                 <h6>?</h6>
                                             }
