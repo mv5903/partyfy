@@ -42,14 +42,27 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
             if (localStorage.getItem('betterOnMobileNotification') === null) {
                 Swal.fire({
                     title: 'Better on Mobile',
-                    text: 'This site is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience.',
+                    text: 'Partyfy is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience.',
                     icon: 'info',
                     confirmButtonText: 'Ok'
                 });
                 localStorage.setItem('betterOnMobileNotification', "true");
             }
         }
-    }, [])
+        // Update last_login column in database
+        fetch('/api/database/users', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                UserID: getUserID(user),
+                last_login: true
+            })
+        })
+            .then(res => res.json())
+            .catch(err => console.log(err));
+    }, []);
 
     return (
         <>

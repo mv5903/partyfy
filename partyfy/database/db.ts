@@ -2,6 +2,20 @@ import { prisma } from '@/./db'
 import { winston } from '@/logs/winston';
 
 export default class Database {
+    async updateUserLastLoginNow(UserID: string) {
+        winston.info(`[Database] Setting last_login of users for ${UserID} to now`);
+        const data = await prisma.users.update({
+            where: {
+                UserID: UserID
+            },
+            data: {
+                last_login: new Date()
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully Set last_login of users for ${UserID} to now`);
+        return data;
+    }
 
     async getRecentSongs(OwnerUserID: string) {
         winston.info(`[Database] Getting recent songs for ${OwnerUserID}`);
@@ -164,9 +178,8 @@ export default class Database {
         let friendIDS = userFriends.map(u => u.UserID);
         friendIDS = friendIDS.concat(outgoingFriendRequests.map(u => u.UserID));
         friendIDS = friendIDS.concat(incomingFriendRequests.map(u => u.UserID));
-        friendIDS = friendIDS.filter((v,i,a)=>a.indexOf(v)==i);
-        console.log(friendIDS);
-        const data = await prisma.users.findMany({
+        friendIDS = friendIDS.filter((v, i, a) => a.indexOf(v) === i);
+        const data = (await prisma.users.findMany({
             where: {
                 Username: {
                     contains: Query,
@@ -177,7 +190,7 @@ export default class Database {
                 }
             },
             take: 5
-        });
+        })).filter((user, index, array) => array.findIndex(u => u.UserID === user.UserID) === index && user.Username !== UserID);
         await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully searched for users with query ${Query} for ${UserID}`);
         else winston.info(`[Database] User ${UserID}'s search for users with query ${Query} returned no results`);

@@ -38,6 +38,8 @@ model Users {
   UnattendedQueues Boolean?
   Username         String?   @db.VarChar
   disableuqdate    DateTime?
+  options          Json?     @db.Json
+  last_login       DateTime? @db.Timestamptz(6)
 }
 
 model Friends {
@@ -47,3 +49,8 @@ model Friends {
   FriendUserID    String?  @db.VarChar
   IsFriendRequest Boolean?
 }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// model Announcements {
+// }

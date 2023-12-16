@@ -86,7 +86,7 @@ const RequestPage = () => {
             {
                 !currentFriend &&
                 <>
-                    <div className="text-center" style={{ height: '10vh' }}>
+                    <div className="text-center">
                         {
                             isUnattendedQueuesEnabled === null || uqLoading
                             ?
@@ -100,7 +100,7 @@ const RequestPage = () => {
                             </div>
                         }
                     </div>
-                    <div className="divider divider-horizontal mx-2">OR</div>
+                    <div className="divider divider-horizontal m-4">OR</div>
                 </>
             }
             <div className="text-center mt-4 ms-2 me-2">

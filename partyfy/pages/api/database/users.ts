@@ -19,8 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
     // Update user by adding in refresh token
     if (req.method === 'PATCH') {
-        let data = await database.addUserRefreshToken(req.body.UserID as string, req.body.RefreshToken as string) as any;
-        res.status(200).json(data);
+        if (req.body.last_login) {
+            let data = await database.updateUserLastLoginNow(req.body.UserID as string) as any;
+            res.status(200).json(data);
+        } else {
+            let data = await database.addUserRefreshToken(req.body.UserID as string, req.body.RefreshToken as string) as any;
+            res.status(200).json(data);
+        }
         return;
     }
     // Get a user's profile

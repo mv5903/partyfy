@@ -178,7 +178,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
                         <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
                     </div>
                     <div className="flex flex-col items-center">
-                        <div className="btn-group">
+                        <div className="btn-group flex-nowrap">
                             <button className={`btn ${requestPageView == RequestPageView.Search ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.Search)}>Search</button>
                             <button className={`btn ${requestPageView == RequestPageView.YourPlaylists ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}>Your Playlists</button>
                             <button className={`btn ${requestPageView == RequestPageView.TheirSession ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}>Their Session</button>

@@ -167,9 +167,9 @@ export default function Home() {
       </Head>
       { 
         !user && 
-        <>
-          <CurrentAlert />
-          <main>
+        <div className='mt-[25%]'>
+          {/* <CurrentAlert /> */}
+          <main className=''>
             <div className='flex justify-center'>
               <img className='object-center' src='/logo.png' width="200px" />
             </div>
@@ -185,7 +185,7 @@ export default function Home() {
               </AnchorLink>
             </div>
           </main> 
-        </>
+        </div>
       }
       {
         user && <main className={`${styles.main_loggedin} `}>
