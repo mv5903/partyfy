@@ -178,6 +178,7 @@ const RequestPage = () => {
                                     const friendIsActive = spotifyStatuses && spotifyStatuses.some(status => status.UserID === friend.UserID);
                                     const friendNowPlayingStatus = spotifyStatuses && spotifyStatuses.find(status => status.UserID === friend.UserID);
                                     const isQueueEnabled = friend.UnattendedQueues === true;
+                                    const isPodcast = friendIsActive && isQueueEnabled && friendNowPlayingStatus.data.currently_playing_type && friendNowPlayingStatus.data.currently_playing_type === "episode";
                                     return (
                                         <button
                                             key={index}
@@ -191,8 +192,16 @@ const RequestPage = () => {
                                                 <span className="max-w-[50%] truncate">{friend.Username}</span>
                                                 {friendIsActive && isQueueEnabled && (
                                                     <div className="flex items-center max-w-[50%]">
-                                                        <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                                        <span className="text-xs text-gray-300 max-w-[87%] truncate">{friendNowPlayingStatus.data.item.name} - {friendNowPlayingStatus.data.item.artists[0].name}</span>
+                                                        <span className={`inline-block w-2 h-2 ${isPodcast ? 'bg-yellow-500' : 'bg-green-500'} rounded-full mr-2`}></span>
+                                                        <span className="text-xs text-gray-300 max-w-[87%] truncate">
+                                                            {
+                                                                isPodcast
+                                                                ?
+                                                                'Podcast Episode'
+                                                                :
+                                                                `${friendNowPlayingStatus.data.item.name} - ${friendNowPlayingStatus.data.item.artists[0].name}`
+                                                            }
+                                                        </span>
                                                     </div>
                                                 )}
                                                 {!isQueueEnabled && (
