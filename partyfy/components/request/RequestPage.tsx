@@ -6,9 +6,9 @@ import UserRequest from "./UserRequest";
 import { Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import LoadingDots from "../misc/LoadingDots";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
 const RequestPage = () => {
-
     const {
         spotifyAuth,
         user
@@ -19,6 +19,7 @@ const RequestPage = () => {
     const [loading, setLoading] = useState(true);
     const [currentFriend, setCurrentFriend] = useState<Users>(null);
     const [uqLoading, setUQLoading] = useState(false);
+    const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
 
     async function fetchFriends() {
         if (currentFriend) return;
@@ -41,6 +42,38 @@ const RequestPage = () => {
             }
         }
     }
+
+    async function getFriendPlayingStatus() {
+        try {
+            // Fetch the status for each friend
+            const statusPromises = friendsList.map(async friend => {
+                let spotifyAuth = new SpotifyAuth(friend.RefreshToken);
+                let accessToken = await spotifyAuth.getAccessToken();
+                if (!accessToken) return null;
+    
+                const response = await fetch(`/api/spotify/nowplaying?access_token=${accessToken}`);
+                if (response.status === 204) return null;
+    
+                const data = await response.json();
+                return data && data.is_playing ? { isActive: true, data, UserID: friend.UserID } : null;
+            });
+    
+            // Wait for all promises to resolve and filter out nulls
+            const results = (await Promise.all(statusPromises)).filter(status => status !== null);
+    
+            // Update the state with the new statuses
+            setSpotifyStatuses(results);
+        } catch (error) {
+            console.error('Error fetching playing statuses:', error);
+        }
+    }
+
+    useEffect(() => {
+        getFriendPlayingStatus();
+        const interval = setInterval(getFriendPlayingStatus, 10000);
+        return () => clearInterval(interval);
+    }, [currentFriend, friendsList]);
+    
 
     useEffect(() => {
         fetchFriends();
@@ -114,19 +147,68 @@ const RequestPage = () => {
                 }
                 {
                     !currentFriend && !loading && friendsList.length > 0 &&
-                    <div>
-                        <h3 className="text-3xl me-3">Add to:</h3>
-                        <h6 className="text-gray-600 mt-3" onClick={() => fetchFriends()}><i>Tap here to refresh</i></h6>
-                        <div className="flex flex-col justify-center mt-4">
+                    <div className="p-2">
+                        <h3 className="text-2xl font-semibold text-white mb-3">Add to:</h3>
+                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
+                            <i>Tap here to refresh</i>
+                        </h6>
+                        <div className="space-y-3">
                             {
-                                friendsList.map((friend: any, index: number) => {
+                                [...friendsList] 
+                                .sort((a, b) => {
+                                    const aIsActive = spotifyStatuses?.some(status => status.UserID === a.UserID);
+                                    const bIsActive = spotifyStatuses?.some(status => status.UserID === b.UserID);
+                                    const aIsQueueEnabled = a.UnattendedQueues === true;
+                                    const bIsQueueEnabled = b.UnattendedQueues === true;
+                    
+                                    // Sort active users with enabled queue to the top
+                                    if (aIsActive && aIsQueueEnabled && (!bIsActive || !bIsQueueEnabled)) return -1;
+                                    if (bIsActive && bIsQueueEnabled && (!aIsActive || !aIsQueueEnabled)) return 1;
+                    
+                                    // Among the remaining, sort active users to the top
+                                    if (aIsActive && !bIsActive) return -1;
+                                    if (bIsActive && !aIsActive) return 1;
+                    
+                                    // Lastly, sort users with enabled queue above those without
+                                    if (aIsQueueEnabled && !bIsQueueEnabled) return -1;
+                                    if (bIsQueueEnabled && !aIsQueueEnabled) return 1;
+                    
+                                    return a.Username.localeCompare(b.Username); // If all conditions are same, keep original order
+                                }).map((friend, index) => {
+                                    const friendIsActive = spotifyStatuses && spotifyStatuses.some(status => status.UserID === friend.UserID);
+                                    const friendNowPlayingStatus = spotifyStatuses && spotifyStatuses.find(status => status.UserID === friend.UserID);
+                                    const isQueueEnabled = friend.UnattendedQueues === true;
                                     return (
-                                        <button key={index} onClick={() => setCurrentFriend(friend)} disabled={ friend.UnattendedQueues !== true } className={`btn text-center mt-3 ${friend.UnattendedQueues === true ? 'btn-primary' : 'bg-slate-6'}`} style={{ opacity: friend.UnattendedQueues === true ? '1' : '.35' }} >{friend.Username + `${friend.UnattendedQueues === true ? '' : ' (not enabled)'}`}</button>
-                                    )
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentFriend(friend)}
+                                            disabled={!isQueueEnabled || !friendIsActive}
+                                            className={`w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300
+                                                        ${isQueueEnabled && friendIsActive ? 'bg-blue-600 hover:bg-blue-600' : 'bg-gray-700'}
+                                                        ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <span className="max-w-[50%] truncate">{friend.Username}</span>
+                                                {friendIsActive && isQueueEnabled && (
+                                                    <div className="flex items-center max-w-[50%]">
+                                                        <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                                        <span className="text-xs text-gray-300 max-w-[87%] truncate">{friendNowPlayingStatus.data.item.name} - {friendNowPlayingStatus.data.item.artists[0].name}</span>
+                                                    </div>
+                                                )}
+                                                {!isQueueEnabled && (
+                                                    <span className="text-xs text-gray-400 italic">not enabled</span>
+                                                )}
+                                                {!friendIsActive && isQueueEnabled && (
+                                                    <span className="text-xs text-gray-400 italic">offline</span>
+                                                )}
+                                            </div>
+                                        </button>
+                                    );
                                 })
                             }
                         </div>
                     </div>
+
                 }
                 {
                     currentFriend != null &&
