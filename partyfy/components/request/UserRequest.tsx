@@ -82,7 +82,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
             if (data && data.name && data.name === 'Not Found') {
                 Swal.fire({
                     title: 'Error',
-                    html: `We couldn't add this song to the queue because your friend does not currently have an active Spotify session.`,
+                    html: `${song.name} may not have added to queue. <strong>${currentFriend.Username}</strong> may have temporarily lost their internet connection. Try again in a few minutes.`,
                     icon: 'error'
                 })   
             }
@@ -102,11 +102,6 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
         if (!currentFriend) return;
         const response = await fetch('/api/database/unattendedqueues?UserID=' + currentFriend.UserID);
         const data = await response.json();
-
-        console.log({
-            requestPageView,
-            currentFriend
-        })
 
         if (data) {
             if (!data.UnattendedQueues)  {
