@@ -112,6 +112,15 @@ export default function Home() {
               'Content-Type': 'application/json'
           }
         });
+        if (response.status === 500) {
+          Swal.fire({
+            title: 'We\'re sorry...',
+            text: 'Our database provider (Supabase) is currently experiencing issues. We apologize for any inconvenience. Please try again later.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
         let data = await response.json();
         if (data && data.recordset) data = data.recordset[0];
         if (!data || !data.Username) {
