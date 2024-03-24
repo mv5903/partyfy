@@ -81,6 +81,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
 
     if (loading) return <Loading />;
 
+    console.log(playlists);
+
     return (
         <>
             <h3 className="text-2xl text-center my-4">Your Playlists</h3>
@@ -103,7 +105,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                 <div style={{ textAlign: 'left'}} className="flex items-center justify-between">
                                                     <div className="flex flex-col">
                                                         {
-                                                            playlist.images.length > 0
+                                                            playlist.images && playlist.images.length > 0
                                                             ?
                                                             <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
                                                             :
