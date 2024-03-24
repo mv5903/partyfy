@@ -1,6 +1,6 @@
 import { TiArrowBack } from "react-icons/ti";
 import { FaPlusCircle } from "react-icons/fa";
-import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
+import { BsExplicitFill, BsGlobe, BsHeart, BsPeopleFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -16,6 +16,7 @@ interface IActivePlaylist {
     id?: string;
     next?: string;
     items?: any[];
+    tracks?: any;
 }
 
 const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
@@ -53,12 +54,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             if (!accessToken) return;
             const response = await fetch('/api/spotify/playlist?action=get&access_token=' + accessToken + '&playlist_id=' + playlist_id + '&offset=' + offset);
             const data = await response.json();
+            let selectedPlaylist = playlists.find((playlist: any) => playlist.id === playlist_id);
             if (data) {
                 setActivePlaylist({
                     name,
                     id: playlist_id,
                     next: data.next,
-                    items: (activePlaylist && activePlaylist.items && activePlaylist.items.length > 0 ? activePlaylist.items.concat(data.items) : data.items)
+                    items: (activePlaylist && activePlaylist.items && activePlaylist.items.length > 0 ? activePlaylist.items.concat(data.items) : data.items),
+                    tracks: playlist_id === "likedSongs" ? selectedPlaylist.count : selectedPlaylist.tracks.total
                 });
             }
         }
@@ -111,15 +114,20 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                             :
                                                             <img src="https://www.freeiconspng.com/uploads/spotify-icon-2.png" style={{ width: '50px', height: '50px' }} />
                                                         }
-                                                        <SpotifyLinkBack link={playlist.external_urls.spotify} />
+                                                        {
+                                                            playlist.id !== 'likedSongs' &&
+                                                            <SpotifyLinkBack link={playlist.external_urls.spotify} />
+                                                        }
                                                     </div>
                                                     <div className="flex flex-col w-3/4 ps-2">
                                                         <div className="flex">
+                                                            { playlist.id === 'likedSongs' && <div className="badge badge-secondary">New!</div> }
                                                             <h6 className="p-2">{playlist.name}</h6>
                                                             { playlist.collaborative && <h6 className="mt-3"><BsPeopleFill/></h6> }
                                                             { playlist.public && <h6 className="mt-3"><BsGlobe/></h6> }
+                                                            { playlist.id === 'likedSongs' && <h6 className="mt-3"><BsHeart/></h6> }
                                                         </div>
-                                                        <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
+                                                        <h6 className="p-2"><i>{playlist.id === 'likedSongs' ? "Your liked songs" : playlist.owner.display_name}</i></h6>
                                                     </div>
                                                     <button className="btn btn-primary" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}>View</button>
                                                 </div>
@@ -139,6 +147,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                             <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
                             <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack/></button>
                         </div>
+                        <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} songs</i></h6>
                         {
                             activePlaylist.items.length > 0 &&
                             <div className="">
