@@ -4,6 +4,7 @@ type Data = {
   name: string
 }
 
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     let access_token = req.query.access_token as string;
     let action = req.query.action as string;
