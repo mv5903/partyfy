@@ -203,7 +203,7 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                         <h4 className="text-center text-gray-400">[because of Spotify API Limitations]</h4>
                         <h3 className="text-center mt-8">{`${friend.Username} is listening to a local file`}</h3>
                         <div className="divider">AND / OR</div>
-                        <h4 className="text-center mt-4 font-extrabold">{`${friend.Username} has a Spotify free account`}</h4>
+                        <h3 className="text-center mt-4">{`${friend.Username} has a Spotify free account`}</h3>
                     </>
                 }
                 </>
