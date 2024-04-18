@@ -143,7 +143,12 @@ const RequestPage = () => {
                 }
                 {
                     !loading && friendsList.length === 0 &&
-                    <h3>No friends found. Add some through the friends menu.</h3>
+                    <div>
+                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
+                            <i>Tap here to refresh</i>
+                        </h6>
+                        <h3>No friends found. Add some through the friends menu.</h3>
+                    </div>
                 }
                 {
                     !currentFriend && !loading && friendsList.length > 0 &&

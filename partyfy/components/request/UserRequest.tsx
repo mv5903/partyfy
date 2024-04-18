@@ -78,6 +78,15 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
                 })
             });
             const data = await response.json();
+            // User attempts to queue to a free friend
+            if (data && data.name && data.name === "Player command failed: Premium required") {
+                Swal.fire({
+                    title: 'Error',
+                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
+                    icon: 'error'
+                })
+            }
+
             // User attempts to queue when friend does not have an active Spotify session
             if (data && data.name && data.name === 'Not Found') {
                 Swal.fire({

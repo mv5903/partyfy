@@ -199,7 +199,8 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                     queue.length == 0 &&
                     <>
                         <h3 className="text-center mt-4">No queue available.</h3>
-                        <h3 className="text-center mt-4">{`If ${friend.Username} is listening to a local file, their session may not completely appear here.`}</h3>
+                        <h3 className="text-center mt-4">{`If ${friend.Username} is listening to a local file, their session may not appear here.`}</h3>
+                        <h4 className="text-center mt-4 font-extrabold">{`Please note that if ${friend.Username} has a Spotify free account, their session will not appear here due to Spotify's API Policy.`}</h4>
                     </>
                 }
                 </>

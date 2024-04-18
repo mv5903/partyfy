@@ -36,17 +36,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             }
         });
         if (!response.ok) {
-            res.status(response.status).json({name: response.statusText});
-            return;
-        } else {
             let json = await response.json();
             if (json.error) {
                 res.status(json.error.status).json({name: json.error.message});
                 return;
             } else {
-                res.status(200).json({name: 'OK'});
+                res.status(response.status).json({name: response.statusText});
                 return;
             }
+        } else {
+            res.status(200).json({name: 'OK'});
+            return;
         }
     }
 }

@@ -80,9 +80,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     }, []);
 
     if (loading) return <Loading />;
-
-    console.log(playlists);
-
+    
     return (
         <>
             <h3 className="text-2xl text-center my-4">Your Playlists</h3>
