@@ -38,7 +38,6 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
 
     useEffect(() => {
         if (!isMobile) {
-            console.log('test');
             if (localStorage.getItem('betterOnMobileNotification') === null) {
                 Swal.fire({
                     title: 'Better on Mobile',

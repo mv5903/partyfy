@@ -13,8 +13,7 @@ import LoadingDots from "@/components/misc/LoadingDots";
 
 const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
-    const [queue, setQueue] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [queue, setQueue] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
 
     // Show end time of progress bar as total rather than remaining
@@ -33,9 +32,12 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
         let accessToken = await friendSpotifyAuth.getAccessToken();
         if (!accessToken) return;
         const response = await fetch('/api/spotify/queue?access_token=' + accessToken);
+        if (response.status == 403) { // free accounts
+            setQueue([]);
+            return;
+        }
         const data = await response.json();
         if (data && data.queue) {
-            setIsLoading(false);
             setQueue(data.queue);
         }
     }
@@ -48,7 +50,6 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
             if (response.status == 204) setNowPlaying(false);
             const data = await response.json();
             if (data) {
-                setIsLoading(false);
                 setNowPlaying(data);
             }
         } catch (e) {}
@@ -158,10 +159,14 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                     }
                 </div>
                 <h4 className="mt-2 text-2xl">Up Next</h4>
-                <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
+                {
+                    queue != null && Array.isArray(queue) && queue.length > 0 &&
+                    <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
+                }
                 <table className="table table-dark mt-3 w-full">
                     <tbody>
                         {
+                            queue != null && Array.isArray(queue) &&
                             queue.map((item: any, index: number) => {
                                 return (
                                     <tr key={index}>
@@ -188,22 +193,24 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                 </table>
             </div>
             {
-                isLoading
+                queue != null && nowPlaying != null
                 ?
-                <div className="mt-4">
-                    <Loading  />
-                </div>
-                :
                 <>
                 {
                     queue.length == 0 &&
                     <>
-                        <h3 className="text-center mt-4">No queue available.</h3>
-                        <h3 className="text-center mt-4">{`If ${friend.Username} is listening to a local file, their session may not appear here.`}</h3>
-                        <h4 className="text-center mt-4 font-extrabold">{`Please note that if ${friend.Username} has a Spotify free account, their session will not appear here due to Spotify's API Policy.`}</h4>
+                        <h3 className="text-center mt-4">No queue available. Potential Reasons: </h3>
+                        <h4 className="text-center text-gray-400">[because of Spotify API Limitations]</h4>
+                        <h3 className="text-center mt-8">{`${friend.Username} is listening to a local file`}</h3>
+                        <div className="divider">AND / OR</div>
+                        <h4 className="text-center mt-4 font-extrabold">{`${friend.Username} has a Spotify free account`}</h4>
                     </>
                 }
                 </>
+                :
+                <div className="mt-4">
+                    <Loading  />
+                </div>
             }
         </div>
     );
