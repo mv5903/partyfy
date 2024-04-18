@@ -10,7 +10,7 @@ import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, isAHost: boolean, setIsAHost: Function }) =>  {
+const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated } : { user: UserProfile, isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function }) =>  {
 
     const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
 
@@ -48,7 +48,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost } : { user: UserProfile, is
                     'Content-Type': 'application/json'
                 }
             });
-            window.location.href = '/api/auth/logout';
+            setSpotifyAuthenticated(false);
         }
     }
 

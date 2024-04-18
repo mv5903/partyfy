@@ -20,6 +20,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             return;
         }
         let json = await response.json();
+        if (json.error) {
+            res.status(json.error.status).json({name: json.error.message});
+        }
         res.status(200).json(json);
         return;
     }
@@ -32,12 +35,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 "Authorization": "Bearer " + req.body.access_token as string,
             }
         });
-        if (response.ok) {
-            res.status(200).json({name: 'OK'});
-            return;
-        } else {
+        if (!response.ok) {
             res.status(response.status).json({name: response.statusText});
             return;
+        } else {
+            let json = await response.json();
+            if (json.error) {
+                res.status(json.error.status).json({name: json.error.message});
+                return;
+            } else {
+                res.status(200).json({name: 'OK'});
+                return;
+            }
         }
     }
 }

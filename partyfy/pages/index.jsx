@@ -203,7 +203,7 @@ export default function Home() {
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
               <div className="flex align-start">
                 <FriendsList />
-                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} />
+                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} setSpotifyAuthenticated={setSpotifyAuthenticated} />
               </div>
             </UserContext.Provider>
           </nav>
@@ -227,6 +227,7 @@ export default function Home() {
                 <div className={`${styles.spotifylogin} flex flex-col justify-center items-center mt-10`}>
                   <h3 className="text-2xl m-4">You're almost ready to party!</h3>
                   <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to authenticate your Spotify account.</i></h2>
+                  <h4 className="text-1xl m-4 text-center">Please note that due to Spotify's API policy, friends will not be able to add to you queue if you link a free account. You can still queue to your friends, though.</h4>
                     <AnchorLink
                       href={spotifyAuthURL}
                       className="btn btn-success btn-margin m-4 decoration-none"
