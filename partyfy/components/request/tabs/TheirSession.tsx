@@ -68,7 +68,12 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
     }, []);
 
     if (nowPlaying === false) {
-        return <h3 className="text-center mt-4 text-2xl">No active session.</h3>
+        return (
+            <div className="h-full flex flex-col justify-center place-items-center mt-[40%]">
+                <h3 className="text-center mt-4 text-2xl">No active session.</h3>
+                <h4 className="text-center mt-4 text-gray-400">{`This page will automatically refresh when ${friend.Username} recreates an online session.`}</h4>
+            </div>
+        ) 
     }
 
     return (

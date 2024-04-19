@@ -6,7 +6,6 @@ import { isMobile } from 'react-device-detect';
 import UserContext from '@/providers/UserContext';
 import useComponentVisible from '@/hooks/useComponentVisible';
 
-import styles from '@/styles/FriendsList.module.css';
 
 import List from './submenus/List';
 import IncomingRequests from './submenus/IncomingRequests';
@@ -52,13 +51,13 @@ const Friends = () => {
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2 ${styles.friendsMenuButton}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25}/>
             </div>
             {
                 isComponentVisible && 
-                <div className={styles.friendsMenu}>
+                <div className='z-[3] px-3 py-4 w-[350px] absolute right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
                     <div className="btn-group flex-nowrap justify-center w-full">
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount user={user}/>&nbsp;Requests</button>

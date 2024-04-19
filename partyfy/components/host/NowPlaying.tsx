@@ -4,8 +4,6 @@ import { getUserID } from '@/helpers/Utils';
 import e from '@/pages/assets/e.png';
 import UserContext from '@/providers/UserContext';
 
-import styles from '@/styles/Dashboard.module.css';
-
 const timer = 1000;
 
 const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
@@ -93,28 +91,28 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
     }
 
     return (
-        <div className={styles.nowplaying}>
+        <div>
             <h3 className="text-center">Now Playing</h3>
             {
                 nowPlaying
                 ?
                 <div>
                     {/* Song Information */}
-                    <div className={styles.songinfo}>
+                    <div>
                         {
                             nowPlaying.item.explicit 
                             ?           
                             <div className="d-inline-flex flex-center">
-                                <h3 className={styles.songname}><strong>{songname}</strong></h3>
-                                <img className={`${styles.eicon} ms-3 mt-2`} src={e.src} alt="explicit"></img>
+                                <h3><strong>{songname}</strong></h3>
+                                <img className={`ms-3 mt-2`} src={e.src} alt="explicit"></img>
                             </div>
                             :
-                            <h3 className={styles.songname}><strong>{songname}</strong></h3>
+                            <h3><strong>{songname}</strong></h3>
                         }
                         <h4>{nowPlaying.item.artists.map((artist : any) => { return artist.name }).join(', ')}</h4>
                         <h5><i>{nowPlaying.item.album.name}</i></h5>
                         <div className="d-flex flex-row mt-2 mb-2">
-                            <img src={nowPlaying.item.album.images[0].url} alt="album art" className={styles.album}/>   
+                            <img src={nowPlaying.item.album.images[0].url} alt="album art"/>   
                         </div>
                     </div>
 

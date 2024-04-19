@@ -7,7 +7,6 @@ import NowPlaying from './host/NowPlaying';
 import UserContext from '@/providers/UserContext';
 import RequestPage from './request/RequestPage';
 
-import styles from '@/styles/Dashboard.module.css';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
@@ -68,10 +67,10 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
         {
              isAHost && !isMobile && 
              <>  
-                <div className={styles.dashboard}>
+                <div>
                     <h3 className="text-center mb-2"><i>Dashboard</i></h3>
                     <div className="flex flex-row justify-between">
-                        <div className={styles.tables}>
+                        <div className="flex flex-row justify-between">
                             <DataTable title="Queue"/>
                             <DataTable title="Recently Played" />
                         </div>
@@ -83,7 +82,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
         {
             (isAHost === false || isMobile) &&
             <>
-                <div className={styles.dashboard}>
+                <div>
                     <RequestPage />
                 </div>
              </>
@@ -91,7 +90,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
         {
             isAHost === null && !isMobile &&
             <>
-                <div className={styles.dashboard}>
+                <div>
                     <h3 className="text-center p-4" style={{ marginTop: '20vh' }}>What would you like to do next?</h3>
                     <div className="flex flex-row justify-center gap-4 m-4">
                         <button className="btn btn-secondary disable">Host a Party (coming soon)</button>

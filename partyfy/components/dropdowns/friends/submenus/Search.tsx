@@ -69,14 +69,14 @@ const Search = ({ user } : { user : UserProfile } ) => {
 
     return (
         <div>
-            <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="textarea textarea-primary textarea me-2 w-full p-2"/>
+            <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="textarea textarea-primary me-2 w-full p-2"/>
             <div>
                 {!loading && usersReturned.map((user, index) => {
                     return (
                         <div key={index} className="card bg-gray-800 p-2 mt-3">
-                            <div className="flex align-center justify-between">
-                                <h5 className="text-xl me-4 mt-2">{user.Username}</h5>
-                                <button className="btn btn-small btn-success" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane className="me-1"/> Send Request</button>
+                            <div className="flex place-items-center justify-between">
+                                <h5 className="text-lg">{user.Username}</h5>
+                                <button className="btn btn-sm btn-success" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane className="me-1"/> Send Request</button>
                             </div>
                         </div>
                     );

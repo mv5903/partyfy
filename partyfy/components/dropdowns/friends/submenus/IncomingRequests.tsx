@@ -103,11 +103,11 @@ const IncomingRequests = ({ user } : { user : UserProfile } ) => {
                 usersReturned.map((user, index) => {
                     return (
                         <div key={index} className="card bg-gray-800 p-2 mt-3">
-                            <div className="flex align-center justify-between">
-                                <h5 className="text-xl mr-4 mt-2">{user.Username}</h5>
+                            <div className="flex place-items-center justify-between">
+                                <h5 className="text-lg">{user.Username}</h5>
                                 <div className="flex align-center">
-                                    <button className="btn btn-small bg-green-8 me-2 mt-1" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
-                                    <button className="btn btn-small bg-red-8 mt-1" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                    <button className="btn btn-sm bg-green-8 me-2 mt-1" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
+                                    <button className="btn btn-sm bg-red-8 mt-1" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
                                 </div>
                             </div>
                         </div>

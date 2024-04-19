@@ -5,7 +5,6 @@ import { isMobile } from 'react-device-detect';
 import Options from '@/components/host/Options';
 import useComponentVisible from '@/hooks/useComponentVisible';
 
-import styles from '@/styles/Options.module.css';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
@@ -54,13 +53,13 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated } 
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center me-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ${styles.quickMenu}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center me-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25} />
             </div>
             {
                 isComponentVisible &&
-                <div className={styles.actionMenu}>
+                <div className='z-[2] px-3 py-4 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
                     {
                         !isMobile && isAHost &&
                         <Options />

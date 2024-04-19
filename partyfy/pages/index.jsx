@@ -14,8 +14,6 @@ import Dashboard from '@/components/Dashboard';
 import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import FriendsList from '@/components/dropdowns/friends/Friends';
 import UserContext from '@/providers/UserContext';
-
-import styles from '@/styles/Home.module.css';
 import { FaSpotify } from 'react-icons/fa';
 
 export default function Home() {
@@ -183,7 +181,7 @@ export default function Home() {
               <img className='object-center' src='/logo.png' width="200px" />
             </div>
             <h2 className='text-center m-4 text-4xl'>Welcome!</h2>
-            <p className={`${styles.description} text-center`}>Add to your friend's Spotify queue without accessing their session directly.</p>
+            <p className="text-center text-2xl m-3 leading-normal">Add to your friend's Spotify queue without accessing their session directly.</p>
             <div className='flex justify-center mt-8'>
               <AnchorLink
                 href="/api/auth/login"
@@ -197,7 +195,7 @@ export default function Home() {
         </div>
       }
       {
-        user && <main className={`${styles.main_loggedin} `}>
+        user && <main className="text-left z-[2]">
           <nav className='flex justify-between'>
             <h2 className={`text-2xl m-3`}>{`${username ?? ''}`}</h2>
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
@@ -224,10 +222,11 @@ export default function Home() {
             <>
               {
                 spotifyAuthenticated === false &&
-                <div className={`${styles.spotifylogin} flex flex-col justify-center items-center mt-10`}>
+                <div className={`flex flex-col justify-center items-center mt-10`}>
                   <h3 className="text-2xl m-4">You're almost ready to party!</h3>
-                  <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to authenticate your Spotify account.</i></h2>
-                  <h4 className="text-1xl m-4 text-center">Please note that due to Spotify's API policy, friends will not be able to add to you queue if you link a free account. You can still queue to your friends, though.</h4>
+                  <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to link your Spotify account.</i></h2>
+                  <h6 className=''>You'll only have to do this once.</h6>
+                  <h4 className="text-1xl m-4 text-center">Please note that due to Spotify's API policy, friends will not be able to add to your queue if you link a free account. You can still queue to your friends, though, if they have premium.</h4>
                     <AnchorLink
                       href={spotifyAuthURL}
                       className="btn btn-success btn-margin m-4 decoration-none"

@@ -43,12 +43,12 @@ const Search = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAu
                                             <img className="mt-2" src={result.album.images[2].url} />
                                             <SpotifyLinkBack link={result.external_urls.spotify} />
                                         </div>
-                                        <div className="flex flex-col justify-start w-2/3">
-                                            <div className="flex">
+                                        <div className="flex flex-col justify-start w-[60%]">
+                                            <div className="flex place-items-center">
                                                 <h6 className="p-2">{result.name}</h6>
                                                 {
                                                     result.explicit &&
-                                                    <h6 className="mt-2"><BsExplicitFill/></h6>
+                                                    <h6><BsExplicitFill/></h6>
                                                 }
                                             </div>
                                             <h6 className="p-2"><i>{result.artists[0].name}</i></h6>

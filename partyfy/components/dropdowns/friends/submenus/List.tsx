@@ -91,9 +91,9 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : UserP
                 friends.map((user, index) => {
                     return (
                         <div key={index} className="card bg-gray-800 p-2 mt-3">
-                            <div className="flex align-center justify-between">
-                                <h3 className="text-xl mr-4 mt-2">{user.Username}</h3>
-                                <button className="btn btn-small bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
+                            <div className="flex place-items-center justify-between">
+                                <h3 className="text-lg">{user.Username}</h3>
+                                <button className="btn btn-sm bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
                             </div>
                         </div>
                     );

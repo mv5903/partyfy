@@ -75,9 +75,9 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     usersReturned.map((user, index) => {
                         return (
                             <div key={index} className="card bg-gray-800 p-2 mt-3">
-                                <div className="flex align-center justify-between">
-                                    <h5 className="text-xl me-4 mt-2">{user.Username}</h5>
-                                    <button className="btn btn-small bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                <div className="flex place-items-center justify-between">
+                                    <h5 className="text-lg">{user.Username}</h5>
+                                    <button className="btn btn-sm bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
                                 </div>
                             </div>
                         );

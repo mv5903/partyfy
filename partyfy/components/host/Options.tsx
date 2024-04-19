@@ -3,8 +3,6 @@ import ClearTable from './ClearTable';
 import UserContext from '@/providers/UserContext';
 import { getUserID } from '@/helpers/Utils';
 
-import styles from '@/styles/Options.module.css';
-
 const Options = () => {
     const {
         spotifyAuth,
@@ -47,7 +45,7 @@ const Options = () => {
             <button className="btn btn-primary" onClick={() => setShowOptions(true)}>Options</button>
             {
                 showOptions &&
-                <div className={styles.options}>
+                <div>
                     <div>
                         <h3>Options</h3>
                         <div className="d-flex">

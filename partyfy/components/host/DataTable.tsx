@@ -3,8 +3,6 @@ import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import e from '@/pages/assets/e.png';
 
-import styles from '@/styles/Dashboard.module.css';
-
 const DataTable = ({ title } : { title: string }) => {
     const {
         spotifyAuth,
@@ -59,7 +57,7 @@ const DataTable = ({ title } : { title: string }) => {
     }
 
     return (
-    <div className={styles.datatable}>
+    <div>
         <h3 className="text-center">{title === "Queue" ? "Up Next" : title}</h3> 
         <table className='table table-dark'>
             <thead>
@@ -95,7 +93,7 @@ const DataTable = ({ title } : { title: string }) => {
                                         <h5>{song.SongName}</h5>
                                         {
                                             song.SongExplicit && 
-                                            <img className={`${styles.eicon} ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
+                                            <img className={`ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
                                         }
                                     </div>
                                 </td>
@@ -116,7 +114,7 @@ const DataTable = ({ title } : { title: string }) => {
                                         <h5>{song.name}</h5>
                                         {
                                             song.explicit && 
-                                            <img className={`${styles.eicon} ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
+                                            <img className={` ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
                                         }
                                     </div>
                                 </td>
