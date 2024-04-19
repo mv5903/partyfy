@@ -6,7 +6,7 @@ type Data = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     let access_token = req.query.access_token as string;
-    let response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+    let response = await fetch('https://api.spotify.com/v1/me/player', {
         method: 'GET',
         headers: {
             "Accept": "application/json",
