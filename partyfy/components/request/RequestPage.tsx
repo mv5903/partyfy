@@ -20,13 +20,16 @@ const RequestPage = () => {
     const [currentFriend, setCurrentFriend] = useState<Users>(null);
     const [uqLoading, setUQLoading] = useState(false);
     const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
+    const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
 
     async function fetchFriends() {
+        setRefreshingFriendsLoading(true);
         if (currentFriend) return;
         const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
         let data = await response.json();
         // Show users who have functionality enabled first
         data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
+        setRefreshingFriendsLoading(false);
         setLoading(false);
         setFriendsList(data);
     }
@@ -145,7 +148,15 @@ const RequestPage = () => {
                     !loading && friendsList.length === 0 &&
                     <div>
                         <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
-                            <i>Tap here to refresh</i>
+                            {
+                                refreshingFriendsLoading === true
+                                ?
+                                <div className="mt-5">
+                                    <LoadingDots />
+                                </div>
+                                :
+                                <i>Tap here to refresh</i>
+                            }
                         </h6>
                         <h3>No friends found. Add some through the friends menu.</h3>
                     </div>
@@ -155,7 +166,15 @@ const RequestPage = () => {
                     <div className="p-2">
                         <h3 className="text-2xl font-semibold text-white mb-3">Add to:</h3>
                         <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
-                            <i>Tap here to refresh</i>
+                            {
+                                refreshingFriendsLoading === true
+                                ?
+                                <div className="mt-5">
+                                    <LoadingDots />
+                                </div>
+                                :
+                                <i>Tap here to refresh</i>
+                            }
                         </h6>
                         <div className="space-y-3">
                             {
@@ -195,9 +214,9 @@ const RequestPage = () => {
                                         >
                                             <div className="flex justify-between items-center">
                                                 <span className="max-w-[50%] truncate">{friend.Username}</span>
-                                                {friendIsActive && isQueueEnabled && (
+                                                {friendIsActive && (
                                                     <div className="flex items-center max-w-[50%]">
-                                                        <span className={`inline-block w-2 h-2 ${isPodcast ? 'bg-yellow-500' : 'bg-green-500'} rounded-full mr-2`}></span>
+                                                        <span className={`inline-block w-2 h-2 ${!isQueueEnabled ? 'bg-red-500' : isPodcast ? 'bg-yellow-500' : 'bg-green-500'} rounded-full mr-2`}></span>
                                                         <span className="text-xs text-gray-300 max-w-[87%] truncate">
                                                             {
                                                                 isPodcast
@@ -209,7 +228,7 @@ const RequestPage = () => {
                                                         </span>
                                                     </div>
                                                 )}
-                                                {!isQueueEnabled && (
+                                                 {!friendIsActive && !isQueueEnabled && (
                                                     <span className="text-xs text-gray-400 italic">not enabled</span>
                                                 )}
                                                 {!friendIsActive && isQueueEnabled && (
