@@ -2,6 +2,20 @@ import { prisma } from '@/./db'
 import { winston } from '@/logs/winston';
 
 export default class Database {
+    async updateUsername(UserID: string, newUsername: string) {
+        winston.info(`[Database] Updating username for ${UserID} to ${newUsername}`);
+        const data = await prisma.users.update({
+            where: {
+                UserID: UserID
+            },
+            data: {
+                Username: newUsername
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully updated username for ${UserID} to ${newUsername}`);
+        return data;
+    }
     async updateUserLastLoginNow(UserID: string) {
         winston.info(`[Database] Setting last_login of users for ${UserID} to now`);
         const data = await prisma.users.update({
@@ -102,6 +116,18 @@ export default class Database {
 
     async addUsername(UserID: string, Username: string) {
         winston.info(`[Database] Adding username ${Username} for ${UserID}`);
+        // Attempt to get user with username first, to see if it exists
+        const user = await prisma.users.findFirst({
+            where: {
+                Username: Username
+            }
+        });
+        if (user) {
+            winston.warn(`[Database] Failed to add username ${Username} for ${UserID}, already exists`);
+            return {
+                duplicate: true
+            }
+        }
         try {
             const data = await prisma.users.update({
                 where: {

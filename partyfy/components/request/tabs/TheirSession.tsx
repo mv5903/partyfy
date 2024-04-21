@@ -52,7 +52,6 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
             const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
             if (response.status == 204) setNowPlaying(false);
             const data = await response.json();
-            console.log(data);
             if (data) {
                 setNowPlaying(data);
             }

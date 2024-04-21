@@ -42,7 +42,6 @@ export default function Home() {
     if (code) {
       spotifyAuth.current = new SpotifyAuth();
       let data = await spotifyAuth.current.getRefreshToken(code);
-      console.log(data);
       if (data && data.access_token && data.refresh_token) {
         spotifyAuth.current.accessToken = data.access_token;
         spotifyAuth.current.refreshToken = data.refresh_token;
@@ -100,66 +99,67 @@ export default function Home() {
     }
     return true;
   }
-
-  LoadAndGetUsername: useEffect(() => {
-    async function f() {
-      if (user && user.sub) {
-        const response = await fetch('/api/database/users?UserID=' + getUserID(user), {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json'
-          }
+  
+  async function getUser() {
+    if (user && user.sub) {
+      const response = await fetch('/api/database/users?UserID=' + getUserID(user), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+      });
+      if (response.status === 500) {
+        Swal.fire({
+          title: 'We\'re sorry...',
+          text: 'Our database provider (Supabase) is currently experiencing issues. We apologize for any inconvenience. Please try again later.',
+          icon: 'error',
+          confirmButtonText: 'OK'
         });
-        if (response.status === 500) {
-          Swal.fire({
-            title: 'We\'re sorry...',
-            text: 'Our database provider (Supabase) is currently experiencing issues. We apologize for any inconvenience. Please try again later.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-          return;
-        }
-        let data = await response.json();
-        if (data && data.recordset) data = data.recordset[0];
-        if (!data || !data.Username) {
-          let enteredUsername = null;
-          let { value: username } = await Swal.fire({
-            title: 'Welcome! Please enter a username to get started.',
-            input: 'text',
-            inputLabel: 'Your username. Choose up to 16 characters.',
-            inputPlaceholder: 'johndoe24',
-            allowOutsideClick: false,
-            allowEscapeKey: false
-          })
-          enteredUsername = username;
-          let usernameOK = false;
-          while (!usernameOK) {
-            if (!(await checkUsername(enteredUsername))) {
-              let alertTitle = enteredUsername.length > 16 ? 'Your username is too long.' : `${enteredUsername} is already taken. Please try another.`;
-              let { value: userName } = await Swal.fire({
-                title: alertTitle,
-                input: 'text',
-                inputLabel: 'Your username. Choose up to 16 characters.',
-                inputPlaceholder: 'johndoe24',
-                allowOutsideClick: false,
-                allowEscapeKey: false
-              })
-              enteredUsername = userName;
-            } else {
-              usernameOK = true;
-              setUsername(enteredUsername);
-              return;
-            }
+        return;
+      }
+      let data = await response.json();
+      if (data && data.recordset) data = data.recordset[0];
+      if (!data || !data.Username) {
+        let enteredUsername = null;
+        let { value: username } = await Swal.fire({
+          title: 'Welcome! Please enter a username to get started.',
+          input: 'text',
+          inputLabel: 'Your username. Choose up to 16 characters.',
+          inputPlaceholder: 'johndoe24',
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        })
+        enteredUsername = username;
+        let usernameOK = false;
+        while (!usernameOK) {
+          if (!(await checkUsername(enteredUsername))) {
+            let alertTitle = enteredUsername.length > 16 ? 'Your username is too long.' : `${enteredUsername} is already taken. Please try another.`;
+            let { value: userName } = await Swal.fire({
+              title: alertTitle,
+              input: 'text',
+              inputLabel: 'Your username. Choose up to 16 characters.',
+              inputPlaceholder: 'johndoe24',
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            })
+            enteredUsername = userName;
+          } else {
+            usernameOK = true;
+            setUsername(enteredUsername);
+            return;
           }
         }
-        setUsername(data.Username);
       }
+      setUsername(data.Username);
     }
+  }
 
-    f();
+  useEffect(() => {
+    getUser();
   }, [user]);
 
-  
+  const refetchUser = () => { getUser() };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -201,7 +201,7 @@ export default function Home() {
             <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
               <div className="flex align-start">
                 <FriendsList />
-                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} setSpotifyAuthenticated={setSpotifyAuthenticated} />
+                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} setSpotifyAuthenticated={setSpotifyAuthenticated} getUser={refetchUser} />
               </div>
             </UserContext.Provider>
           </nav>
