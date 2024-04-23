@@ -7,6 +7,7 @@ import { Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import LoadingDots from "../misc/LoadingDots";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import ScrollingText from "../misc/ScrollingText";
 
 const RequestPage = () => {
     const {
@@ -223,7 +224,7 @@ const RequestPage = () => {
                                                                 ?
                                                                 'Podcast Episode'
                                                                 :
-                                                                `${friendNowPlayingStatus.data.item.name} - ${friendNowPlayingStatus.data.item.artists[0].name}`
+                                                                <ScrollingText text={`${friendNowPlayingStatus.data.item.name} - ${friendNowPlayingStatus.data.item.artists[0].name}`}/>
                                                             }
                                                         </span>
                                                     </div>
