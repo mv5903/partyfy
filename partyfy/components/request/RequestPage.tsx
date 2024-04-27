@@ -246,7 +246,7 @@ const RequestPage = () => {
                 }
                 {
                     currentFriend != null &&
-                    <UserRequest currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} />
+                    <UserRequest currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} temporarySession={null} exitSession={null} />
                 }
             </div>
         </div>

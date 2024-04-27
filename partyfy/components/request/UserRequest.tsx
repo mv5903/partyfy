@@ -14,7 +14,7 @@ import YourPlaylists from "./tabs/YourPlaylists";
 import { Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
 
-const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: Users, setCurrentFriend: Function }) => {
+const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: any, exitSession: Function }) => {
 
     enum RequestPageView {
         Search,
@@ -139,20 +139,46 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
         }
     }
 
+    async function isTemporarySessionNotExpired() {
+        if (!temporarySession) return;
+        const expirationDate = new Date(temporarySession.expiration_date);
+        if (expirationDate < new Date()) {
+            Swal.fire({
+                title: 'Notice',
+                html: `Your temporary session with <strong>${currentFriend.Username}</strong> has expired. You will no longer be able to request songs until they create a new session.`,
+                icon: 'warning'
+            });
+            setTimeout(exitSession, 3000);
+        }
+        // Make sure session still exists (wasn't deleted by friend)
+        const response = await fetch(`/api/database/sessions?UserID=${currentFriend.UserID}`);
+        const data = await response.json();
+        if (!data) {
+            Swal.fire({
+                title: 'Notice',
+                html: `Your friend <strong>${currentFriend.Username}</strong> has ended the session. You will no longer be able to request songs until they create a new session.`,
+                icon: 'warning'
+            });
+            setTimeout(exitSession, 3000);
+        }
+    }
+
     useEffect(() => {
         loadFriendSpotifyAuth();
         unattendedQueuesAllowed();
-        isStillFriends();
+        isTemporarySessionNotExpired();
+
+        if (!temporarySession) isStillFriends();
 
         const subscription = Supabase
             .channel('UserRequest')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                isStillFriends();
+                if (!temporarySession) isStillFriends();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                isStillFriends();
+                if (!temporarySession) isStillFriends();
             })
             .subscribe();
 
@@ -161,10 +187,23 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
         }
     }, []);
 
+    if (temporarySession) {
+        useEffect(() => {
+            // Check if temporary session has expired every 10 seconds
+            const interval = setInterval(() => {
+                isTemporarySessionNotExpired();
+            }, 10000);
+    
+            return () => clearInterval(interval);
+        });
+    }
+
+    let expirationDate = temporarySession ? new Date(temporarySession.expiration_date) : null;
+
     const currentView = () => {
         switch (requestPageView) {
             case RequestPageView.Search:
-                return <Search you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
+                return <Search you={temporarySession ? currentFriend : user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />;
             case RequestPageView.TheirSession:
                 return <TheirSession you={user} friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
             case RequestPageView.YourPlaylists:
@@ -179,12 +218,25 @@ const UserRequest = ({ currentFriend, setCurrentFriend } : { currentFriend: User
                 <>
                     <div className="flex items-center justify-between p-2 mb-6">
                         <h3 className="text-xl me-2 pt-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
-                        <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                        {
+                            temporarySession 
+                            ?
+                            <button className="btn btn-error" onClick={() => exitSession()}>Leave Session</button>
+                            :
+                            <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                        }
                     </div>
+                    {
+                        temporarySession &&
+                        <h3 className="text-center mb-4">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                    }
                     <div className="flex flex-col items-center">
                         <div className="btn-group flex-nowrap">
                             <button className={`btn ${requestPageView == RequestPageView.Search ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.Search)}>Search</button>
-                            <button className={`btn ${requestPageView == RequestPageView.YourPlaylists ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}>Your Playlists</button>
+                            {
+                                !temporarySession && 
+                                <button className={`btn ${requestPageView == RequestPageView.YourPlaylists ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}>Your Playlists</button>
+                            }
                             <button className={`btn ${requestPageView == RequestPageView.TheirSession ? "btn-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}>Their Session</button>
                         </div>
                         <div className="w-full">

@@ -6,17 +6,36 @@ import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { Users } from "@prisma/client";
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import { getUserID } from "@/helpers/Utils";
+import { User } from "@supabase/supabase-js";
 
-const Search = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
+const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: any, spotifyAuth: SpotifyAuth, addToQueue: Function, isTemporarySession: boolean }) => {
 
     const [searchResults, setSearchResults] = useState([]);
+    const [temporarySessionSpotifyAuth, setTemporarySessionSpotifyAuth] = useState<SpotifyAuth | undefined>(undefined);
 
     async function searchSpotify(searchQuery: string) {
         if (searchQuery.length === 0) {
             setSearchResults([]);
             return;
         } 
-        let accessToken = await spotifyAuth.getAccessToken();
+        
+        let accessToken = null;
+        if (isTemporarySession) {
+            if (temporarySessionSpotifyAuth === undefined) {
+                // Get refresh token from db
+                let friendSpotifyAuth = new SpotifyAuth(you.RefreshToken);
+                accessToken = await friendSpotifyAuth.getAccessToken();
+                setTemporarySessionSpotifyAuth(friendSpotifyAuth);
+                // Since state updates are asynchronous, proceed with using the new accessToken
+                // for the rest of this function's logic
+            } else {
+                accessToken = await temporarySessionSpotifyAuth.getAccessToken();
+            }
+        } else {
+            accessToken = await spotifyAuth.getAccessToken();
+        }
+
         const response = await fetch('/api/spotify/search?query=' + searchQuery + '&access_token=' + accessToken);
         const data = await response.json();
         if (!data) return;

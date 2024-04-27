@@ -11,13 +11,13 @@ Notice how you'll never need to install an update since the iOS app is just a wr
 - **Queue Management**: Add songs to their queue just by adding your friends and asking them to turn on *unattended queues*. This allows you to add songs to your friend's queue without them having to do anything. This is perfect for parties, road trips, or any other situation where you want to share the music selection with others.
 - **Queue from Anywhere**: Add songs to the queue from any device, whether it's a phone, tablet, or computer. Add from Spotify search, your playlists, or liked songs (coming soon). 
 - **Queue Visibility**: See the queue in real-time, with the ability to see the next 20 upcoming songs.
+- **One-time QR Code (Beta, initial release 4/27/24)**: Generate a QR code that your friends can scan to join the queue, or copy the link. This will be useful for parties where you don't want to add everyone as a friend or need people to sign up.
 
 ### Upcoming Features
 I'm a solo developer finishing college and I have a part-time job, so I can't work on these as fast as I want to. Here are some of the features I have planned for the future (I will update this list as I complete them):
 - **Back Button**: Use your device's back button to go back to the previous page. Currently, you have to use the back button in the app, and using your device's back button will cause unexpected behavior.
 - **Liked Songs**: Add songs to the queue from your liked songs. (Development finished, awaiting Spotify API approval)
 - **Previously Queued Songs**: See the songs that have already been played in the queue.
-- **One-time QR Code**: Generate a QR code that your friends can scan to join the queue. This will be useful for parties where you don't want to add everyone as a friend or need people to sign up.
 
 ### Known Free Account Limitations
 When linking a Spotify free account, functionality is limited (I have no control over this):

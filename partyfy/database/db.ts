@@ -2,6 +2,82 @@ import { prisma } from '@/./db'
 import { winston } from '@/logs/winston';
 
 export default class Database {
+    async getSessionFromID(SessionID: string) {
+        winston.info(`[Database] Getting session from ID ${SessionID}`);
+        const data = await prisma.sessions.findFirst({
+            where: {
+                session_id: SessionID
+            }
+        });
+        await prisma.$disconnect();
+        if (data) winston.info(`[Database] Successfully got session from ID ${SessionID}`);
+        else winston.info(`[Database] Failed to get session from ID ${SessionID}, likely does not exist`);
+        return data;
+    }
+
+    async deleteSession(UserID: string) {
+        winston.info(`[Database] Deleting session for ${UserID}`);
+        try {
+            const data = await prisma.sessions.delete({
+                where: {
+                    user_id: UserID
+                }
+            });
+            await prisma.$disconnect();
+            winston.info(`[Database] Successfully deleted session for ${UserID}`);
+            return data;
+        } catch (err: any) {
+            winston.error(`[Database] Failed to delete session for ${UserID}: does not exist`);
+            return {
+                name: 'Error deleting session'
+            }
+        }
+
+    }
+
+    async getSession(UserID: string) {
+        winston.info(`[Database] Getting session for ${UserID}`);
+        const data = await prisma.sessions.findMany({
+            where: {
+                user_id: UserID
+            }
+        });
+        let sortedData = data.sort((a, b) => a.created_date.getTime() - b.created_date.getTime());
+        await prisma.$disconnect();
+        if (sortedData) winston.info(`[Database] Successfully got session for ${UserID}`);
+        else winston.info(`[Database] Failed to get session for ${UserID}, likely does not exist`);
+        return sortedData[sortedData.length - 1];
+    }
+
+    async updateSession(UserID: string, NewExpirationDate: Date) {
+        winston.info(`[Database] Updating session for ${UserID} to ${NewExpirationDate}`);
+        const data = await prisma.sessions.update({
+            where: {
+                user_id: UserID
+            },
+            data: {
+                expiration_date: NewExpirationDate
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully updated session for ${UserID} to ${NewExpirationDate}`);
+        return data;
+    }
+
+    async createSession(UserID: string, ExpirationDate: Date) {
+        winston.info(`[Database] Creating session for ${UserID}`);
+        const data = await prisma.sessions.create({
+            data: {
+                user_id: UserID,
+                expiration_date: ExpirationDate
+            }
+        });
+        await prisma.$disconnect();
+        let sessionID = data.session_id;
+        winston.info(`[Database] Successfully created session for ${UserID}, with session ID ${sessionID}`);
+        return data;
+    }
+    
     async updateUsername(UserID: string, newUsername: string) {
         winston.info(`[Database] Updating username for ${UserID} to ${newUsername}`);
         const data = await prisma.users.update({

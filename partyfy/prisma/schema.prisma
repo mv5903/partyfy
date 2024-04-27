@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("POSTGRES_PRISMA_URL")
-  directUrl         = env("POSTGRES_URL_NON_POOLING")
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model AskedQueues {
@@ -53,3 +52,12 @@ model Friends {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 // model Announcements {
 // }
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model sessions {
+  id              Int   @id @default(autoincrement())
+  session_id      String   @unique @default(uuid()) @db.VarChar
+  user_id         String   @unique @db.VarChar
+  created_date    DateTime @default(now()) @db.Timestamptz(6)
+  expiration_date DateTime @db.Timestamptz(6)
+}

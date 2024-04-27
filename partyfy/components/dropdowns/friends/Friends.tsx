@@ -14,6 +14,7 @@ import Search from './submenus/Search';
 import IncomingCount from './submenus/utils/IncomingCount';
 import { Radio, RadioGroup } from 'react-radio-group';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
+import QR from './submenus/QR';
 
 const Friends = () => {
 
@@ -34,6 +35,8 @@ const Friends = () => {
 
     const currentFriendListScreen = () => {
         switch (friendListScreen) {
+            case FriendListScreen.QR:
+                return <QR user={user} setIsComponentVisible={setIsComponentVisible} setFriendsListScreen={setFriendListScreen} />
             case FriendListScreen.Friends:
                 return <List user={user} isComponentVisible={isComponentVisible} setFriendListScreen={setFriendListScreen} />
             case FriendListScreen.Requests:
@@ -57,8 +60,9 @@ const Friends = () => {
             </div>
             {
                 isComponentVisible && 
-                <div className='z-[3] px-3 py-4 w-[350px] absolute right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
+                <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
                     <div className="btn-group flex-nowrap justify-center w-full">
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.QR ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}>QR</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount user={user}/>&nbsp;Requests</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Sent ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}>Sent</button>
