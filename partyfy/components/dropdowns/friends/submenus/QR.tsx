@@ -1,4 +1,4 @@
-import { FaCopy, FaPaperPlane } from 'react-icons/fa';
+import { FaCopy, FaPaperPlane, FaPlus, FaTrash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { getUserID } from '@/helpers/Utils';
@@ -150,6 +150,17 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Use
 
     return (
         <div>
+            <style>
+                {`
+                    .swal2-input {
+                        display: block;
+                        margin: 0 auto;
+                        width: 70%; /* Adjust the width as needed */
+                        text-align: center;
+                        margin-top: 16px;
+                    }
+                `}
+            </style>
             <h1 className='my-3'>QR (Beta)</h1>
             {
                 qrCodeURL 
@@ -158,14 +169,14 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Use
                     <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
                     <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
                     <QRCode value={qrCodeURL} />
-                    <button className='btn btn-secondary' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy link to clipboard</button>
-                    <button className='btn btn-error' onClick={() => deleteSession(true)}>Delete Session</button>
+                    <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy link to clipboard</button>
+                    <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
                 </div>
                 :
                 <div>
                     <div className='w-full flex flex-col place-items-center gap-6'>
-                        <h4 className='text-xl text-center mt-3'>You can now generate a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account. Generate a new session?</h4>
-                        <button className='btn btn-primary' onClick={getNewSession}>Generate</button>
+                        <h4 className='text-xl text-center mt-3'>You can now create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
+                        <button className='btn btn-primary' onClick={getNewSession}><FaPlus className='mr-2' /> Create</button>
                     </div>
                     {
                         loading && <Loading />

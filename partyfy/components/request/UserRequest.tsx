@@ -216,12 +216,12 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             {
                 !friendSpotifyAuth ? <Loading /> :
                 <>
-                    <div className="flex items-center justify-between p-2 mb-6">
-                        <h3 className="text-xl me-2 pt-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
+                    <div className="flex items-center justify-between place-content-center p-2 mb-6">
+                        <h3 className="text-xl me-2 pt-2 mb-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
                         {
                             temporarySession 
                             ?
-                            <button className="btn btn-error" onClick={() => exitSession()}>Leave Session</button>
+                            <button className="btn btn-error p-3" onClick={() => exitSession()}><TiArrowBack className="mr-2" size={25}/> Leave Session</button>
                             :
                             <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
                         }
