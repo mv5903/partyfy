@@ -10,6 +10,7 @@ import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import ScrollToTopButton from "./utils/ScrollToTopButton";
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 interface IActivePlaylist {
     name?: string;
@@ -80,7 +81,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     }, []);
 
     if (loading) return <Loading />;
-    
+
     return (
         <>
             <h3 className="text-2xl text-center my-4">Your Playlists</h3>
@@ -166,7 +167,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                                     <h6 className="p-2 w-10/12"><strong className="me-2">{key + 1}.</strong>{result.name}</h6>
                                                                     { result.explicit && <BsExplicitFill className="mt-3"/> }
                                                                 </div>
-                                                                <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
+                                                                <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center justify-end">

@@ -13,6 +13,7 @@ import LoadingDots from "@/components/misc/LoadingDots";
 
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
 import { MdComputer, MdSmartphone, MdSpeaker, MdPerson, MdList, MdAlbum, MdPodcasts } from "react-icons/md";
+import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
@@ -128,7 +129,7 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                                                 {
                                                     nowPlaying.item
                                                     ?
-                                                    <h6 className="text-left"><i>{nowPlaying.item.artists[0].name}</i></h6>
+                                                    <h6 className="text-left"><i>{getArtistList(nowPlaying.item.artists)}</i></h6>
                                                     :
                                                     <h6 className="text-left"><i>Unknown artist</i></h6>
                                                 }
@@ -207,7 +208,7 @@ const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, f
                                                         <h6 className="whitespace-normal w-3/4"><strong>{item.name}</strong></h6>
                                                         {item.explicit === true ? <BsExplicitFill className="mt-1 ms-2"/> : ''}
                                                     </div>
-                                                    <h6 className="whitespace-normal"><i>{item.type == 'track' ? item.artists[0].name : item.show.name}</i></h6> 
+                                                    <h6 className="whitespace-normal"><i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i></h6> 
                                                 </div>
                                                 <SpotifyLinkBack link={item.external_urls.spotify} />
                                             </div>

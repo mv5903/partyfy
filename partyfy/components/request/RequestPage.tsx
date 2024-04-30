@@ -8,6 +8,7 @@ import { Supabase } from "@/helpers/SupabaseHelper";
 import LoadingDots from "../misc/LoadingDots";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import ScrollingText from "../misc/ScrollingText";
+import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const RequestPage = () => {
     const {
@@ -224,7 +225,7 @@ const RequestPage = () => {
                                                                 ?
                                                                 'Podcast Episode'
                                                                 :
-                                                                <ScrollingText text={`${friendNowPlayingStatus.data.item.name} - ${friendNowPlayingStatus.data.item.artists[0].name}`}/>
+                                                                <ScrollingText text={`${friendNowPlayingStatus.data.item.name} - ${getArtistList(friendNowPlayingStatus.data.item.artists)}`}/>
                                                             }
                                                         </span>
                                                     </div>

@@ -13,6 +13,7 @@ import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
 import { Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
+import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: any, exitSession: Function }) => {
 
@@ -48,7 +49,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     async function addToQueue(song: any) {
         let result = await Swal.fire({
             title: 'Queue Confirmation',
-            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${song.artists[0].name}</i> to ${currentFriend.Username}'s queue.`,
+            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${getArtistList(song.artists)}</i> to ${currentFriend.Username}'s queue.`,
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Add it!',

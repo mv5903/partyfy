@@ -8,6 +8,7 @@ import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getUserID } from "@/helpers/Utils";
 import { User } from "@supabase/supabase-js";
+import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: any, spotifyAuth: SpotifyAuth, addToQueue: Function, isTemporarySession: boolean }) => {
 
@@ -70,7 +71,7 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
                                                     <h6><BsExplicitFill/></h6>
                                                 }
                                             </div>
-                                            <h6 className="p-2"><i>{result.artists[0].name}</i></h6>
+                                            <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
                                         </div>
                                         <div className="flex items-center justify-end">
                                             <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
