@@ -1,6 +1,5 @@
 import { useContext, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
-import { getUserID } from '@/helpers/Utils';
 
 import DataTable from './host/DataTable';
 import NowPlaying from './host/NowPlaying';
@@ -10,10 +9,7 @@ import RequestPage from './request/RequestPage';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         // When user logs in and is redirected to dashboard, we can store the refresh token in the database.
@@ -24,13 +20,13 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: getUserID(user),
-                    RefreshToken: spotifyAuth.refreshToken
+                    UserID: user.getUserID(),
+                    RefreshToken: user.spotifyAuth.refreshToken
                 })
             })
         }
 
-        if (spotifyAuth.refreshToken) {
+        if (user.spotifyAuth.refreshToken) {
             storeRefreshToken();
         }
     }, []);
@@ -54,7 +50,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: getUserID(user),
+                UserID: user.getUserID(),
                 last_login: true
             })
         })

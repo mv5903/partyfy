@@ -159,7 +159,10 @@ export default class Database {
         });
         await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully got user ${UserID}`);
-        else winston.info(`[Database] Failed to get user ${UserID}, likely does not exist`);
+        else {
+            winston.info(`[Database] Failed to get user ${UserID}, likely does not exist`);
+            return null;
+        } 
         return data;
     }
 

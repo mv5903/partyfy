@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
 import { fancyTimeFormat } from '@/helpers/Utils';
-import { getUserID } from '@/helpers/Utils';
 import e from '@/pages/assets/e.png';
 import UserContext from '@/providers/UserContext';
 
@@ -10,15 +9,12 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
     let nowPlayingType = false as any;
     const [nowPlaying, setNowPlaying] = useState(nowPlayingType);
 
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         async function fn() {
             // Get current song, update now playing state
-            let res = await fetch('/api/spotify/nowplaying?access_token=' + spotifyAuth.accessToken);
+            let res = await fetch('/api/spotify/nowplaying?access_token=' + user.spotifyAuth.getAccessToken());
             if (res.status === 204) {
                 setNowPlaying(false);
                 return;
@@ -26,13 +22,13 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
             let currentSong = await res.json();
 
             // Get recent songs from database
-            res = await fetch('/api/database/recents?UserID=' + getUserID(user));
+            res = await fetch('/api/database/recents?UserID=' + user.getUserID());
             let data = (await res.json());
             if (data) {
                 // Get first song in recent songs, see if it matches current song. If not, add to database
                 const firstSong = data[0];
                 if (!currentSong || !currentSong.item) {
-                    await spotifyAuth.refreshAccessToken();
+                    await user.spotifyAuth.refreshAccessToken();
                     return;
                 }
                 if (!firstSong || firstSong.SongID !== currentSong.item.id) {
@@ -43,7 +39,7 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
                         },
                         body: JSON.stringify({
                             SongID: currentSong.item.id,
-                            UserID: getUserID(user),
+                            UserID: user.getUserID(),
                             SongName: currentSong.item.name,
                             SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                             SongAlbum: currentSong.item.album.name,
@@ -60,7 +56,7 @@ const NowPlaying = ({ setIsAHost } : { setIsAHost: Function }) => {
                     },
                     body: JSON.stringify({
                         SongID: currentSong.item.id,
-                        UserID: getUserID(user),
+                        UserID: user.getUserID(),
                         SongName: currentSong.item.name,
                         SongArtist: currentSong.item.artists.map((artist : any) => { return artist.name }).join(', '),
                         SongAlbum: currentSong.item.album.name,

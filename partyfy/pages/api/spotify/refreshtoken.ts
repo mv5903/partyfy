@@ -1,4 +1,3 @@
-import { winston } from '@/logs/winston';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
@@ -12,18 +11,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return;
     }
     let authorization = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64');
-    winston.info(`Getting refresh token with the following credentials: CODE=${code}, AUTHORIZATION=${authorization}, REDIRECT_URI=${process.env.SPOTIFY_REDIRECT_URL as string}`);
+    let body = new URLSearchParams({
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': process.env.SPOTIFY_REDIRECT_URL
+    })
     await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": authorization
         },
-        body: new URLSearchParams({
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': process.env.SPOTIFY_REDIRECT_URL as string
-        })
+        body
     })
     .then(response => response.json())
     .then((data: any) => {

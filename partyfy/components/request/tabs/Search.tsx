@@ -3,11 +3,7 @@ import { BsExplicitFill } from "react-icons/bs";
 import { useState } from "react";
 
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
-import { Users } from "@prisma/client";
-import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
-import { getUserID } from "@/helpers/Utils";
-import { User } from "@supabase/supabase-js";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: any, spotifyAuth: SpotifyAuth, addToQueue: Function, isTemporarySession: boolean }) => {

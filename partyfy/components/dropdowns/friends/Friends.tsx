@@ -1,7 +1,6 @@
 import { FaUserFriends } from 'react-icons/fa';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { useContext, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 
 import UserContext from '@/providers/UserContext';
 import useComponentVisible from '@/hooks/useComponentVisible';
@@ -12,7 +11,6 @@ import IncomingRequests from './submenus/IncomingRequests';
 import SentRequests from './submenus/SentRequests';
 import Search from './submenus/Search';
 import IncomingCount from './submenus/utils/IncomingCount';
-import { Radio, RadioGroup } from 'react-radio-group';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import QR from './submenus/QR';
 
@@ -24,14 +22,7 @@ const Friends = () => {
 
     const DEFAULT_SCREEN = FriendListScreen.Friends;
 
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
-
-    const isNumeric = (val: any) : boolean => {
-        return !isNaN(Number(val));
-     }
+    const { user } = useContext(UserContext);
 
     const currentFriendListScreen = () => {
         switch (friendListScreen) {
@@ -64,7 +55,7 @@ const Friends = () => {
                     <div className="btn-group flex-nowrap justify-center w-full">
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.QR ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}>QR</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount user={user}/>&nbsp;Requests</button>
+                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;Requests</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Sent ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}>Sent</button>
                         <button className={`btn px-4 ${friendListScreen == FriendListScreen.Search ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}>Search</button>
                     </div>

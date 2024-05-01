@@ -1,166 +1,49 @@
-import { useEffect, useRef, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import { useEffect, useState } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { SpotifyAuth } from '@/helpers/SpotifyAuth';
 import { CONSTANTS } from '@/assets/Constants';
-import { getUserID } from '@/helpers/Utils';
 
 import Head from 'next/head'
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import AnchorLink from '@/components/misc/AnchorLink'
 import Loading from '@/components/misc/Loading';
-import CurrentAlert from '@/components/misc/CurrentAlert';
 import Dashboard from '@/components/Dashboard';
 import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import FriendsList from '@/components/dropdowns/friends/Friends';
 import UserContext from '@/providers/UserContext';
 import { FaSpotify } from 'react-icons/fa';
 import UserRequest from '@/components/request/UserRequest';
+import PartyfyUser from '@/helpers/PartyfyUser';
+import { sessions, Users } from '@prisma/client';
+import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 
 export default function Home() {
   const { user, error, isLoading } = useUser();
-  const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState(null);
-  const [isAHost, setIsAHost] = useState(null);
-  const spotifyAuth = useRef();
+  const [ spotifyAuthenticated, setSpotifyAuthenticated ] = useState<boolean>(null);
+  const [ isAHost, setIsAHost ] = useState<boolean>(true);
+  const [ activeTemporarySession, setActiveTemporarySession ] = useState<sessions>(null);
+  const [ temporarySessionFriend, setTemporarySessionFriend ] = useState<Users>(null);
+  const [ partyfyUser, setPartyfyUser ] = useState<PartyfyUser>(null);
+  
   const spotifyAuthURL = CONSTANTS.SPOTIFY_AUTH_URL;
-  const [ username, setUsername ] = useState(undefined);
-  const [ activeTemporarySession, setActiveTemporarySession ] = useState(null);
-  const [ temporarySessionFriend, setTemporarySessionFriend ] = useState(null);
-
+  
   // Handles spotify authentication
   async function handleSpotifyAuth() {
     // Refresh token already in database
-    const response = await fetch('/api/database/users?UserID=' + getUserID(user));
-    const data = await response.json();
-    if (data && data.RefreshToken && data.RefreshToken.length > 0) {
-      if (spotifyAuth.current && spotifyAuth.current.RefreshToken && spotifyAuth.current?.RefreshToken != null) return true;
-      let storedRefreshToken = data.RefreshToken;
-      spotifyAuth.current = new SpotifyAuth(storedRefreshToken);
-      spotifyAuth.current.accessToken = await spotifyAuth.current.refreshAccessToken();
-      return true;
-    }
-    // No refresh token in database, then check for code in url
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    if (code) {
-      spotifyAuth.current = new SpotifyAuth();
-      let data = await spotifyAuth.current.getRefreshToken(code);
-      if (data && data.access_token && data.refresh_token) {
-        spotifyAuth.current.accessToken = data.access_token;
-        spotifyAuth.current.refreshToken = data.refresh_token;
-        await fetch('/api/database/users', {
-          method: 'PATCH',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-              UserID: user?.sub ?? user?.user_id,
-              RefreshToken: data.refresh_token
-          })
-        });
-        window.location.href = window.location.origin;
-      }
-      return true;
-    }
-    return false;
+    let pUser = new PartyfyUser(user);
+    setPartyfyUser(pUser);
+    return await pUser.fillUserInfoFromDB();
   }
 
+  // Normal User Handling
   useEffect(() => {
     if (user) {
-      fetch('/api/database/users', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-              UserID: user?.sub ?? user?.user_id,
-          })
-      });
       handleSpotifyAuth().then((result) => {
         setSpotifyAuthenticated(result || result === undefined);
       });  
     } 
-  });
-
-  async function checkUsername(username) {
-    if (username.length < 1 || username.length > 16) return false;
-    const response = await fetch('/api/database/username', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        UserID: user?.sub ?? user?.user_id,
-        Username: username
-      })
-    })
-    try {
-      let data = await response.json();
-      if ('duplicate' in data && data.duplicate) return false;
-    } catch (e) {
-      return false;
-    }
-    return true;
-  }
-  
-  async function getUser() {
-    if (user && user.sub) {
-      const response = await fetch('/api/database/users?UserID=' + getUserID(user), {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-      });
-      if (response.status === 500) {
-        Swal.fire({
-          title: 'We\'re sorry...',
-          text: 'Our database provider (Supabase) is currently experiencing issues. We apologize for any inconvenience. Please try again later.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-        return;
-      }
-      let data = await response.json();
-      if (data && data.recordset) data = data.recordset[0];
-      if (!data || !data.Username) {
-        let enteredUsername = null;
-        let { value: username } = await Swal.fire({
-          title: 'Welcome! Please enter a username to get started.',
-          input: 'text',
-          inputLabel: 'Your username. Choose up to 16 characters.',
-          inputPlaceholder: 'johndoe24',
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        })
-        enteredUsername = username;
-        let usernameOK = false;
-        while (!usernameOK) {
-          if (!(await checkUsername(enteredUsername))) {
-            let alertTitle = enteredUsername.length > 16 ? 'Your username is too long.' : `${enteredUsername} is already taken. Please try another.`;
-            let { value: userName } = await Swal.fire({
-              title: alertTitle,
-              input: 'text',
-              inputLabel: 'Your username. Choose up to 16 characters.',
-              inputPlaceholder: 'johndoe24',
-              allowOutsideClick: false,
-              allowEscapeKey: false
-            })
-            enteredUsername = userName;
-          } else {
-            usernameOK = true;
-            setUsername(enteredUsername);
-            return;
-          }
-        }
-      }
-      setUsername(data.Username);
-    }
-  }
-
-  useEffect(() => {
-    getUser();
   }, [user]);
 
+  // Temporary Session Handling
   useEffect(() => {
     async function checkSession() {
       // Show Swal loading
@@ -223,7 +106,10 @@ export default function Home() {
     window.location.href = baseUrl;
   }
 
-  const refetchUser = () => { getUser() };
+  const refetchUser = async () => { 
+    await partyfyUser.refetchUser();
+    setPartyfyUser(partyfyUser);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -233,7 +119,7 @@ export default function Home() {
     <>
       <Head>
         <title>Partyfy</title>
-      <meta name="description" content="Queue songs to your friend's Spotify Queue Unattended" />
+        <meta name="description" content="Queue songs to your friend's Spotify Queue Unattended" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -268,11 +154,17 @@ export default function Home() {
       {
         user && activeTemporarySession == null && <main className="text-left z-[2]">
           <nav className='flex justify-between'>
-            <h2 className={`text-2xl m-3`}>{`${username ?? ''}`}</h2>
-            <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
+            <div className='flex justfiy-start place-items-center'>
+              <h2 className={`text-2xl m-3`}>{`${partyfyUser?.db?.Username ?? ''}`}</h2>
+              {
+                user && partyfyUser && partyfyUser.db && partyfyUser.getProductType() == PartyfyProductType.COMMERCIAL &&
+                <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+              }
+            </div>
+            <UserContext.Provider value={{ user: partyfyUser }} >
               <div className="flex align-start">
                 <FriendsList />
-                <UserQuickAction user={user} isAHost={isAHost} setIsAHost={setIsAHost} setSpotifyAuthenticated={setSpotifyAuthenticated} getUser={refetchUser} />
+                <UserQuickAction isAHost={isAHost} setIsAHost={setIsAHost} setSpotifyAuthenticated={setSpotifyAuthenticated} getUser={refetchUser} />
               </div>
             </UserContext.Provider>
           </nav>
@@ -283,7 +175,7 @@ export default function Home() {
               { 
               user != null && 
               <div className="d-flex flex-column justify-content-center align-items-center">
-                  <UserContext.Provider value={{ spotifyAuth: spotifyAuth.current, user, username }} >
+                  <UserContext.Provider value={{ user: partyfyUser }} >
                     <Dashboard isAHost={isAHost} setIsAHost={setIsAHost}/> 
                   </UserContext.Provider>
               </div>
@@ -292,7 +184,7 @@ export default function Home() {
             :
             <>
               {
-                spotifyAuthenticated === false &&
+                spotifyAuthenticated === false && 
                 <div className={`flex flex-col justify-center items-center mt-10`}>
                   <h3 className="text-2xl m-4">You're almost ready to party!</h3>
                   <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to link your Spotify account.</i></h2>

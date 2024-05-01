@@ -1,14 +1,10 @@
 import { useContext } from 'react';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import UserContext from '@/providers/UserContext';
-import { getUserID } from '@/helpers/Utils';
 
 const ClearTable = ({ table } : { table: string }) => {
 
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     async function clearTable() {
         let choice = await Swal.fire({
@@ -28,7 +24,7 @@ const ClearTable = ({ table } : { table: string }) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    OwnerUserID: getUserID(user)
+                    OwnerUserID: user.getUserID(),
                 })
             });
 

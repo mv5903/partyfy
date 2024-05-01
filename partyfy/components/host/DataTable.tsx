@@ -1,13 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import e from '@/pages/assets/e.png';
 
 const DataTable = ({ title } : { title: string }) => {
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [recents, setRecents] = useState([]);
     const [queue, setQueue] = useState([]);
@@ -15,7 +11,7 @@ const DataTable = ({ title } : { title: string }) => {
     if (user) {
         useEffect(() => {
             async function getRecents() {
-                let response = await fetch('/api/database/recents?UserID=' + getUserID(user)); 
+                let response = await fetch('/api/database/recents?UserID=' + user.getUserID()); 
                 let data = await response.json();
                 let songs = data;
                 if (!songs) return;
@@ -24,7 +20,7 @@ const DataTable = ({ title } : { title: string }) => {
             }
             
             async function getQueue() {
-                let response = await fetch("/api/spotify/queue?UserID=&access_token=" + spotifyAuth.accessToken); 
+                let response = await fetch("/api/spotify/queue?UserID=&access_token=" + user.spotifyAuth.accessToken); 
                 let data = await response.json();
                 if (!data) return;
                 if (data.queue.length === 0) return;

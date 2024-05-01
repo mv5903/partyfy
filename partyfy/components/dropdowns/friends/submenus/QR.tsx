@@ -1,14 +1,12 @@
-import { FaCopy, FaPaperPlane, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaCopy, FaPlus, FaTrash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
-import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import QRCode from "react-qr-code";
 import { FriendListScreen } from '@/helpers/FriendListScreen';
-import e from 'express';
+import PartyfyUser from '@/helpers/PartyfyUser';
 
-const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : UserProfile, setIsComponentVisible: Function, setFriendsListScreen: Function } ) => {
+const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : PartyfyUser, setIsComponentVisible: Function, setFriendsListScreen: Function } ) => {
     const [loading, setLoading] = useState(true);
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
@@ -57,7 +55,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Use
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: getUserID(user),
+                UserID: user.getUserID(),
                 ExpirationDate: date
             })
         })
@@ -91,7 +89,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Use
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: getUserID(user)
+                UserID: user.getUserID()
             })
         })
         const data = await response.json();
@@ -108,7 +106,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Use
     }
 
     useEffect(() => {
-        fetch('/api/database/sessions?UserID=' + getUserID(user))
+        fetch('/api/database/sessions?UserID=' + user.getUserID())
         .then(res => res.json())
         .then(data => {
             if (data === null) {

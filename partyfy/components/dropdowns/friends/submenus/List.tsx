@@ -1,20 +1,19 @@
 import { FaTrash } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
-import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
+import PartyfyUser from '@/helpers/PartyfyUser';
 
-const List = ({ user, isComponentVisible, setFriendListScreen } : { user : UserProfile, isComponentVisible: boolean, setFriendListScreen: Function } ) => {
+const List = ({ user, isComponentVisible, setFriendListScreen } : { user : PartyfyUser, isComponentVisible: boolean, setFriendListScreen: Function } ) => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchFriends() {
             if (!isComponentVisible) return;
-            const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
+            const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
             const data = await response.json();
             setLoading(false);
             setFriends(data);
@@ -49,7 +48,7 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : UserP
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        UserID: getUserID(user),
+                        UserID: user.getUserID(),
                         FriendUserID: FriendUserID,
                         action: 'DeleteFriend'
                     }) 

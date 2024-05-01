@@ -4,14 +4,16 @@ import { isMobile } from 'react-device-detect';
 
 import Options from '@/components/host/Options';
 import useComponentVisible from '@/hooks/useComponentVisible';
-
-import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useContext } from 'react';
+import UserContext from '@/providers/UserContext';
+import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 
-const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { user: UserProfile, isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
+const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
 
     const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
+
+    const { user } = useContext(UserContext);
 
     async function checkUsername(username) {
         if (username.length < 1 || username.length > 16) return false;
@@ -21,7 +23,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            UserID: user?.sub ?? user?.user_id,
+            UserID: user.getUserID(),
             Username: username
           })
         })
@@ -42,7 +44,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
             showCancelButton: true
         })
         if (confirmation.isConfirmed) {
-            const res = await fetch('/api/database/users?UserID=' + getUserID(user), {
+            const res = await fetch('/api/database/users?UserID=' + user.getUserID(), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,7 +64,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
             showCancelButton: true
         })
         if (confirmation.isConfirmed) {
-            const res = await fetch('/api/database/users?action=unlink&UserID=' + getUserID(user), {
+            const res = await fetch('/api/database/users?action=unlink&UserID=' + user.getUserID(), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -104,7 +106,7 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: getUserID(user),
+                    UserID: user.getUserID(),
                     mode: 'changeUsername',
                     Username: newUsername
                 })
@@ -119,10 +121,24 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
                     })     
                     // Refetch User details to show that the username has changed on top of screen
                     getUser();
+                    window.location.reload();
                 })
               return;
             }
           }
+    }
+
+    function getProductTypeAsString(type: PartyfyProductType): string {
+        switch (type) {
+            case PartyfyProductType.FREE:
+                return 'Free';
+            case PartyfyProductType.PREMIUM:
+                return 'Premium';
+            case PartyfyProductType.COMMERCIAL:
+                return 'Commercial';
+            default:
+                return 'Free';
+        }
     }
 
     return (
@@ -133,7 +149,14 @@ const UserQuickAction = ({ user, isAHost, setIsAHost, setSpotifyAuthenticated, g
             </div>
             {
                 isComponentVisible &&
-                <div className='z-[2] px-3 py-4 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
+                <div className='z-[2] px-3 py-2 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
+                    {
+                        user &&
+                        <div>
+                            <h3 className="text-center mb-2 text-xl">Quick Actions</h3>
+                            <p className="text-center">User type: {getProductTypeAsString(user.getProductType())}</p>
+                        </div>
+                    }
                     {
                         !isMobile && isAHost &&
                         <Options />

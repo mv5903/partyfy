@@ -14,8 +14,9 @@ import LoadingDots from "@/components/misc/LoadingDots";
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
 import { MdComputer, MdSmartphone, MdSpeaker, MdPerson, MdList, MdAlbum, MdPodcasts } from "react-icons/md";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
+import PartyfyUser from "@/helpers/PartyfyUser";
 
-const TheirSession = ({ you, friendSpotifyAuth, friend } : { you: UserProfile, friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
+const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
     const [queue, setQueue] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);

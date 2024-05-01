@@ -1,15 +1,16 @@
+import PartyfyUser from "@/helpers/PartyfyUser";
 import { Supabase } from "@/helpers/SupabaseHelper";
-import { getUserID } from "@/helpers/Utils";
-import { UserProfile } from '@auth0/nextjs-auth0/client';
+import UserContext from "@/providers/UserContext";
 import { Users } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
-const IncomingCount = ({ user } : { user : UserProfile } ) => {
+const IncomingCount = () => {
+    const { user } = useContext(UserContext);
     const [numberOfRequests, setNumberOfRequests] = useState(0);
 
     async function fetchRequests() {
-        const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=requests')
-        const data = await response.json() as Users[];
+        const response = await fetch('/api/database/friends?UserID=' + user.getUserID() + '&action=requests')
+        const data = await response.json() as PartyfyUser[];
         if (data) {
             setNumberOfRequests(data.length);
         }

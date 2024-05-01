@@ -1,21 +1,19 @@
 import { TiArrowBack } from "react-icons/ti";
 import {  useContext, useEffect, useState } from "react";
-import { RadioGroup, Radio } from "react-radio-group";
 
 import UserContext from '@/providers/UserContext';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
-import { getUserID } from '@/helpers/Utils';
 
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
-import { Users } from "@prisma/client";
+import { sessions, Users } from "@prisma/client";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 
-const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: any, exitSession: Function }) => {
+const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
 
     enum RequestPageView {
         Search,
@@ -23,10 +21,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         YourPlaylists
     }
 
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
@@ -127,7 +122,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     async function isStillFriends() {
         if (!currentFriend) return;
-        const response = await fetch(`/api/database/friends?action=isFriend&UserID=${getUserID(user)}&FriendUserID=${currentFriend.UserID}`);
+        const response = await fetch(`/api/database/friends?action=isFriend&UserID=${user.getUserID()}&FriendUserID=${currentFriend.UserID}`);
         const data = await response.json();
         
         if (!data) {
@@ -204,11 +199,11 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     const currentView = () => {
         switch (requestPageView) {
             case RequestPageView.Search:
-                return <Search you={temporarySession ? currentFriend : user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />;
+                return <Search you={temporarySession ? currentFriend : user} spotifyAuth={temporarySession ? friendSpotifyAuth : user.spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />;
             case RequestPageView.TheirSession:
-                return <TheirSession you={user} friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
+                return <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
             case RequestPageView.YourPlaylists:
-                return <YourPlaylists you={user} spotifyAuth={spotifyAuth} addToQueue={addToQueue} />;
+                return <YourPlaylists you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />;
         }
     }
 

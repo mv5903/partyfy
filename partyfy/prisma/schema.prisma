@@ -7,14 +7,6 @@ datasource db {
   url      = env("POSTGRES_PRISMA_URL")
 }
 
-model AskedQueues {
-  id          Int    @id @default(autoincrement())
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  OwnerUserID String?   @db.VarChar
-  RequestedAt DateTime? @db.Timestamp(6)
-  SongID      String?   @db.VarChar
-}
-
 model Recents {
   id           Int    @id @default(autoincrement())
   created_at   DateTime  @default(now()) @db.Timestamptz(6)
@@ -38,6 +30,7 @@ model Users {
   disableuqdate    DateTime?
   options          Json?     @db.Json
   last_login       DateTime? @db.Timestamptz(6)
+  product_type     String?   @db.VarChar
 }
 
 model Friends {
@@ -48,11 +41,6 @@ model Friends {
   IsFriendRequest Boolean?
 }
 
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-// model Announcements {
-// }
-
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model sessions {
   id              Int   @id @default(autoincrement())
@@ -61,3 +49,8 @@ model sessions {
   created_date    DateTime @default(now()) @db.Timestamptz(6)
   expiration_date DateTime @db.Timestamptz(6)
 }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// model Announcements {
+// }

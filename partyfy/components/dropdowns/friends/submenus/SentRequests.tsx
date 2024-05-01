@@ -1,19 +1,18 @@
-import { GiCancel } from 'react-icons/gi';
 import { useEffect, useState } from 'react';
-import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { getUserID } from '@/helpers/Utils';
+import { GiCancel } from 'react-icons/gi';
 
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
+import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-const SentRequests = ({ user } : { user : UserProfile } ) => {
+const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function loadSentFriendRequests() {
-            const response = await fetch('/api/database/friends?UserID=' + getUserID(user) + '&action=sent')
+            const response = await fetch('/api/database/friends?UserID=' + user.getUserID() + '&action=sent')
             const data = await response.json();
             if (data) {
                 setLoading(false);
@@ -51,7 +50,7 @@ const SentRequests = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: getUserID(user),
+                    UserID: user.getUserID(),
                     FriendID: FriendUserID,
                     action: 'DeleteFriendRequest'
                 })

@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { getUserID } from '@/helpers/Utils';
 import UserContext from '@/providers/UserContext';
 import Loading from "../misc/Loading";
 import UserRequest from "./UserRequest";
@@ -11,10 +10,7 @@ import ScrollingText from "../misc/ScrollingText";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const RequestPage = () => {
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
     const [friendsList, setFriendsList] = useState([]);
@@ -27,7 +23,7 @@ const RequestPage = () => {
     async function fetchFriends() {
         setRefreshingFriendsLoading(true);
         if (currentFriend) return;
-        const response = await fetch('/api/database/friends?UserID=' + getUserID(user))
+        const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
         let data = await response.json();
         // Show users who have functionality enabled first
         data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
@@ -37,7 +33,7 @@ const RequestPage = () => {
     }
     async function fetchUQStatus() {
         if (currentFriend) return;
-        const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
+        const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
         const data = await response.json();
         if (data) {
             if (data.UnattendedQueues === null) {
@@ -109,7 +105,7 @@ const RequestPage = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: getUserID(user),
+                UserID: user.getUserID(),
                 enable: !isUnattendedQueuesEnabled
             })
         });
@@ -133,7 +129,13 @@ const RequestPage = () => {
                             </div>
                             :
                             <div>
-                                <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
+                                <div className="flex justify-center place-items-center">
+                                    <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
+                                    {/* {
+                                        user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
+                                        <button className="btn btn-primary p-2 px-4" onClick={showCommercialOptions}><FaCog /></button>
+                                    } */}
+                                </div>
                                 <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
                             </div>
                         }

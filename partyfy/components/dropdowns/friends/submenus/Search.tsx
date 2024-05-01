@@ -1,11 +1,10 @@
 import { FaPaperPlane } from 'react-icons/fa';
 import { useState } from 'react';
-import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { getUserID } from '@/helpers/Utils';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
+import PartyfyUser from '@/helpers/PartyfyUser';
 
-const Search = ({ user } : { user : UserProfile } ) => {
+const Search = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -16,12 +15,12 @@ const Search = ({ user } : { user : UserProfile } ) => {
             setUsersReturned([]);
             return;
         }
-        const response = await fetch('/api/database/friends?Query=' + query + '&action=search&UserID=' + getUserID(user));
+        const response = await fetch('/api/database/friends?Query=' + query + '&action=search&UserID=' + user.getUserID());
         let data = await response.json();
 
         // Don't show yourself in search result
         if (data.length > 0) {
-            data = data.filter((users : any) => users.UserID != getUserID(user));
+            data = data.filter((users : any) => users.UserID != user.getUserID());
             setUsersReturned(data);
         }
         setLoading(false);
@@ -52,7 +51,7 @@ const Search = ({ user } : { user : UserProfile } ) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    UserID: getUserID(user),
+                    UserID: user.getUserID(),
                     FriendUserID: FriendUserID,
                     action: 'SendFriendRequest'
                 })

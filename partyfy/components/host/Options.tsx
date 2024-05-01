@@ -1,20 +1,16 @@
 import { useEffect, useState, useContext } from 'react';
 import ClearTable from './ClearTable';
 import UserContext from '@/providers/UserContext';
-import { getUserID } from '@/helpers/Utils';
 
 const Options = () => {
-    const {
-        spotifyAuth,
-        user
-    } = useContext(UserContext);
+    const { user } = useContext(UserContext);
 
     const [showOptions, setShowOptions] = useState(false);
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(false);
     
     useEffect(() => {
         async function fn() {
-            const response = await fetch('/api/database/unattendedqueues?UserID=' + getUserID(user));
+            const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
             const data = await response.json();
             if (data) {
                 setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
@@ -31,7 +27,7 @@ const Options = () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                UserID: getUserID(user),
+                UserID: user.getUserID(),
                 enable: !isUnattendedQueuesEnabled
             })
         });
