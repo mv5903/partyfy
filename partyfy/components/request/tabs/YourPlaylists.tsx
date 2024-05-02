@@ -17,6 +17,7 @@ interface IActivePlaylist {
     id?: string;
     next?: string;
     items?: any[];
+    length?: number;
 }
 
 const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
@@ -54,12 +55,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             if (!accessToken) return;
             const response = await fetch('/api/spotify/playlist?action=get&access_token=' + accessToken + '&playlist_id=' + playlist_id + '&offset=' + offset);
             const data = await response.json();
+            console.log(data);
             if (data) {
                 setActivePlaylist({
                     name,
                     id: playlist_id,
                     next: data.next,
-                    items: (activePlaylist && activePlaylist.items && activePlaylist.items.length > 0 ? activePlaylist.items.concat(data.items) : data.items)
+                    items: (activePlaylist && activePlaylist.items && activePlaylist.items.length > 0 ? activePlaylist.items.concat(data.items) : data.items),
+                    length: data.total
                 });
             }
         }
@@ -84,7 +87,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
 
     return (
         <>
-            <h3 className="text-2xl text-center my-4">Your Playlists</h3>
+            <h3 className="text-2xl text-center my-4">Your Playlists { playlists && !activePlaylist && `(${playlists.length})`}</h3>
             <div className="flex flex-col justify-center items-center w-full">
                 {
                     !activePlaylist && playlists.length > 0 &&
@@ -135,7 +138,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     activePlaylist &&
                     <div className="w-full flex flex-col items-center">
                         <div className="flex justify-center items-center">
-                            <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
+                            <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name} {`(${activePlaylist.length})`}</strong></h3>
                             <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack/></button>
                         </div>
                         {
