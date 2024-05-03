@@ -1,20 +1,18 @@
-import { BsExplicitFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
+import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "@/components/misc/Loading";
-import { fancyTimeFormat } from "@/helpers/Utils";
-import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
-import { Users } from "@prisma/client";
-import { UserProfile } from "@auth0/nextjs-auth0/client";
-import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import LoadingDots from "@/components/misc/LoadingDots";
+import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
+import { fancyTimeFormat } from "@/helpers/Utils";
+import { Users } from "@prisma/client";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
-import { MdComputer, MdSmartphone, MdSpeaker, MdPerson, MdList, MdAlbum, MdPodcasts } from "react-icons/md";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
-import PartyfyUser from "@/helpers/PartyfyUser";
+import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
+import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
 
 const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 

@@ -1,4 +1,3 @@
-import { UserProfile } from "@auth0/nextjs-auth0/client";
 
 /**
  * Converts milliseconds to a human readable time format (mm:ss) used primarily

@@ -1,9 +1,9 @@
 import { useContext, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 
+import UserContext from '@/providers/UserContext';
 import DataTable from './host/DataTable';
 import NowPlaying from './host/NowPlaying';
-import UserContext from '@/providers/UserContext';
 import RequestPage from './request/RequestPage';
 
 import Swal from 'sweetalert2/dist/sweetalert2.js';

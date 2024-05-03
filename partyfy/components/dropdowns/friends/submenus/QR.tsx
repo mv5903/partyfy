@@ -1,10 +1,10 @@
-import { FaCopy, FaPlus, FaTrash } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
-import QRCode from "react-qr-code";
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
+import { useEffect, useState } from 'react';
+import { FaCopy, FaPlus, FaTrash } from 'react-icons/fa';
+import QRCode from "react-qr-code";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : PartyfyUser, setIsComponentVisible: Function, setFriendsListScreen: Function } ) => {
     const [loading, setLoading] = useState(true);

@@ -1,8 +1,8 @@
-import { FaPaperPlane } from 'react-icons/fa';
-import { useState } from 'react';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
+import { useState } from 'react';
+import { FaPaperPlane } from 'react-icons/fa';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const Search = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);

@@ -1,13 +1,13 @@
-import { useContext, useEffect, useState } from "react";
-import UserContext from '@/providers/UserContext';
-import Loading from "../misc/Loading";
-import UserRequest from "./UserRequest";
-import { Users } from "@prisma/client";
-import { Supabase } from "@/helpers/SupabaseHelper";
-import LoadingDots from "../misc/LoadingDots";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
-import ScrollingText from "../misc/ScrollingText";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
+import { Supabase } from "@/helpers/SupabaseHelper";
+import UserContext from '@/providers/UserContext';
+import { Users } from "@prisma/client";
+import { useContext, useEffect, useState } from "react";
+import Loading from "../misc/Loading";
+import LoadingDots from "../misc/LoadingDots";
+import ScrollingText from "../misc/ScrollingText";
+import UserRequest from "./UserRequest";
 
 const RequestPage = () => {
     const { user } = useContext(UserContext);

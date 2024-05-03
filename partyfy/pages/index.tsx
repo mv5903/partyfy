@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { CONSTANTS } from '@/assets/Constants';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { useEffect, useState } from 'react';
 
-import Head from 'next/head'
-import Swal from 'sweetalert2/dist/sweetalert2.js';
-import AnchorLink from '@/components/misc/AnchorLink'
-import Loading from '@/components/misc/Loading';
 import Dashboard from '@/components/Dashboard';
 import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import FriendsList from '@/components/dropdowns/friends/Friends';
-import UserContext from '@/providers/UserContext';
-import { FaSpotify } from 'react-icons/fa';
+import AnchorLink from '@/components/misc/AnchorLink';
+import Loading from '@/components/misc/Loading';
 import UserRequest from '@/components/request/UserRequest';
-import PartyfyUser from '@/helpers/PartyfyUser';
-import { sessions, Users } from '@prisma/client';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
+import PartyfyUser from '@/helpers/PartyfyUser';
+import UserContext from '@/providers/UserContext';
+import { sessions, Users } from '@prisma/client';
+import Head from 'next/head';
+import { FaSpotify } from 'react-icons/fa';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 export default function Home() {
   const { user, error, isLoading } = useUser();

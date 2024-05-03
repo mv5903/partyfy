@@ -1,18 +1,18 @@
+import { useContext, useState } from 'react';
 import { FaUserFriends } from 'react-icons/fa';
 import { IoMdArrowDropdown } from 'react-icons/io';
-import { useContext, useState } from 'react';
 
-import UserContext from '@/providers/UserContext';
 import useComponentVisible from '@/hooks/useComponentVisible';
+import UserContext from '@/providers/UserContext';
 
 
-import List from './submenus/List';
-import IncomingRequests from './submenus/IncomingRequests';
-import SentRequests from './submenus/SentRequests';
-import Search from './submenus/Search';
-import IncomingCount from './submenus/utils/IncomingCount';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
+import IncomingRequests from './submenus/IncomingRequests';
+import List from './submenus/List';
 import QR from './submenus/QR';
+import Search from './submenus/Search';
+import SentRequests from './submenus/SentRequests';
+import IncomingCount from './submenus/utils/IncomingCount';
 
 const Friends = () => {
 

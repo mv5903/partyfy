@@ -1,17 +1,17 @@
+import { useContext, useEffect, useState } from "react";
 import { TiArrowBack } from "react-icons/ti";
-import {  useContext, useEffect, useState } from "react";
 
+import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
-import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 
+import { getArtistList } from "@/helpers/SpotifyDataParser";
+import { Supabase } from "@/helpers/SupabaseHelper";
+import { sessions, Users } from "@prisma/client";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
-import { sessions, Users } from "@prisma/client";
-import { Supabase } from "@/helpers/SupabaseHelper";
-import { getArtistList } from "@/helpers/SpotifyDataParser";
 
 const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
 

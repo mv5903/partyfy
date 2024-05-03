@@ -1,16 +1,16 @@
-import { TiArrowBack } from "react-icons/ti";
-import { FaPlusCircle } from "react-icons/fa";
-import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
 import { useEffect, useState } from "react";
+import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
+import { FaPlusCircle } from "react-icons/fa";
+import { TiArrowBack } from "react-icons/ti";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
-import ScrollToTopButton from "./utils/ScrollToTopButton";
-import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
+import { UserProfile } from "@auth0/nextjs-auth0/client";
+import ScrollToTopButton from "./utils/ScrollToTopButton";
 
 interface IActivePlaylist {
     name?: string;

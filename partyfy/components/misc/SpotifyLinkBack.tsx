@@ -1,5 +1,5 @@
-import { FaShare } from "react-icons/fa";
 import whiteSpotifyLogo from '@/pages/assets/white.png';
+import { FaShare } from "react-icons/fa";
 
 const SpotifyLinkBack = ({link} : {link: string}) => {
     return (

@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from 'react';
-import ClearTable from './ClearTable';
 import UserContext from '@/providers/UserContext';
+import { useContext, useEffect, useState } from 'react';
+import ClearTable from './ClearTable';
 
 const Options = () => {
     const { user } = useContext(UserContext);

@@ -1,6 +1,6 @@
 import Database from '@/database/db';
 import { winston } from '@/logs/winston';
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 type Data = {
   name: string

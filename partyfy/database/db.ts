@@ -1,4 +1,4 @@
-import { prisma } from '@/./db'
+import { prisma } from '@/./db';
 import { winston } from '@/logs/winston';
 
 export default class Database {

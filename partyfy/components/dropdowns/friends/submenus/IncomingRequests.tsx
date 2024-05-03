@@ -1,11 +1,11 @@
+import { useEffect, useState } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import { GiCancel } from 'react-icons/gi';
-import { useEffect, useState } from 'react';
 
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
-import { Supabase } from '@/helpers/SupabaseHelper';
 import PartyfyUser from '@/helpers/PartyfyUser';
+import { Supabase } from '@/helpers/SupabaseHelper';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);

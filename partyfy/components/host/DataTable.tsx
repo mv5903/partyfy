@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
-import UserContext from '@/providers/UserContext';
 import e from '@/pages/assets/e.png';
+import UserContext from '@/providers/UserContext';
+import { useContext, useEffect, useState } from 'react';
 
 const DataTable = ({ title } : { title: string }) => {
     const { user } = useContext(UserContext);

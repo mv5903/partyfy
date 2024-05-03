@@ -1,6 +1,5 @@
-import React from 'react';
-import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useRouter } from 'next/router';
 
 const NavBarItem = ({ children, href, className, icon, tabIndex, testId } : { children : any, href : any, className : any, icon : any, tabIndex : any, testId : any }) => {
   const router = useRouter();

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
 import { randomBytes } from 'crypto';
+import { memo, useEffect, useRef, useState } from 'react';
 
 // memo is used to prevent re-rendering of the component if the props are the same (song title doesn't change.), otherwise, the animation will keep restarting.
 const ScrollingText = memo(({ text } : {text: string }) => {

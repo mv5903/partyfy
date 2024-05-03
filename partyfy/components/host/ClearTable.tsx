@@ -1,6 +1,6 @@
+import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
-import UserContext from '@/providers/UserContext';
 
 const ClearTable = ({ table } : { table: string }) => {
 

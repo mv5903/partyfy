@@ -1,13 +1,13 @@
+import { isMobile } from 'react-device-detect';
 import { BsFillPersonFill } from 'react-icons/bs';
 import { IoMdArrowDropdown } from 'react-icons/io';
-import { isMobile } from 'react-device-detect';
 
 import Options from '@/components/host/Options';
-import useComponentVisible from '@/hooks/useComponentVisible';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
-import { useContext } from 'react';
-import UserContext from '@/providers/UserContext';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
+import useComponentVisible from '@/hooks/useComponentVisible';
+import UserContext from '@/providers/UserContext';
+import { useContext } from 'react';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
 

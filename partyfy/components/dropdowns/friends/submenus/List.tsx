@@ -1,10 +1,10 @@
-import { FaTrash } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from '@/components/misc/Loading';
-import { Supabase } from '@/helpers/SupabaseHelper';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
+import { Supabase } from '@/helpers/SupabaseHelper';
+import { useEffect, useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const List = ({ user, isComponentVisible, setFriendListScreen } : { user : PartyfyUser, isComponentVisible: boolean, setFriendListScreen: Function } ) => {
     const [friends, setFriends] = useState([]);

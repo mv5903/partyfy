@@ -1,8 +1,8 @@
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { Users } from "@prisma/client";
-import { SpotifyAuth } from "./SpotifyAuth";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { PartyfyProductType } from "./PartyfyProductType";
+import { SpotifyAuth } from "./SpotifyAuth";
 
 export default class PartyfyUser {
     /**

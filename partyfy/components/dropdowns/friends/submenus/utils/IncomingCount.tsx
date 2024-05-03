@@ -1,7 +1,6 @@
 import PartyfyUser from "@/helpers/PartyfyUser";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import UserContext from "@/providers/UserContext";
-import { Users } from "@prisma/client";
 import { useContext, useEffect, useState } from "react";
 
 const IncomingCount = () => {
