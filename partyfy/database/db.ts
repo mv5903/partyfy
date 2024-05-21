@@ -1,7 +1,24 @@
 import { prisma } from '@/./db';
 import { winston } from '@/logs/winston';
+import UserOptions from '@/prisma/UserOptions';
 
 export default class Database {
+    async setOptions(UserID: string, userOptions: UserOptions) {
+        winston.info(`[Database] Setting options for ${UserID}`);
+        let json = JSON.stringify(userOptions);
+        const data = await prisma.users.update({
+            where: {
+                UserID: UserID
+            },
+            data: {
+                options: JSON.parse(json)  
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully set options for ${UserID}`);
+        return data;
+    }
+
     async getSessionFromID(SessionID: string) {
         winston.info(`[Database] Getting session from ID ${SessionID}`);
         const data = await prisma.sessions.findFirst({

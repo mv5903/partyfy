@@ -1,4 +1,5 @@
 import Database from '@/database/db';
+import UserOptions from '@/prisma/UserOptions';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 type Data = {
@@ -24,6 +25,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             res.status(200).json(data);
         } else if (req.body.changeUsername) {
             let data = await database.updateUsername(req.body.UserID as string, req.body.Username as string) as any;
+            res.status(200).json(data);
+        } else if (req.body.setOptions) {
+            let options = JSON.parse(req.body.setOptions as string) as UserOptions;
+            let data = await database.setOptions(req.body.UserID as string, options) as any;
             res.status(200).json(data);
         } else {
             let data = await database.addUserRefreshToken(req.body.UserID as string, req.body.RefreshToken as string) as any;
