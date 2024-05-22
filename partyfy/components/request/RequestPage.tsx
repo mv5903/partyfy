@@ -1,9 +1,14 @@
+import showCommercialOptions from "@/helpers/CommercialOptions";
+import { PartyfyProductType } from "@/helpers/PartyfyProductType";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { Supabase } from "@/helpers/SupabaseHelper";
+import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
 import { Users } from "@prisma/client";
 import { useContext, useEffect, useState } from "react";
+import { FaCog } from "react-icons/fa";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
@@ -19,6 +24,7 @@ const RequestPage = () => {
     const [uqLoading, setUQLoading] = useState(false);
     const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
     const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
+    const [commercialOptionsVisible, setCommercialOptionsVisible] = useState(false);
 
     async function fetchFriends() {
         setRefreshingFriendsLoading(true);
@@ -74,6 +80,23 @@ const RequestPage = () => {
         const interval = setInterval(getFriendPlayingStatus, 10000);
         return () => clearInterval(interval);
     }, [currentFriend, friendsList]);
+
+
+    useEffect(() => {
+        fetch('api/database/users?UserID=' + user.getUserID())
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data && data.options) {
+                    const options = data.options;
+                    if (options.queueLimitTimeRestriction) {
+                        setMaxQueueCount(options.queueLimitTimeRestriction.maxQueueCount);
+                        setIntervalValue(options.queueLimitTimeRestriction.intervalValue);
+                        setIntervalUnit(options.queueLimitTimeRestriction.intervalUnit);
+                    }
+                }
+            });
+    }, [showCommercialOptions])
     
 
     useEffect(() => {
@@ -115,6 +138,105 @@ const RequestPage = () => {
         }
     }
 
+    const [maxQueueCount, setMaxQueueCount] = useState(5);
+    const [intervalValue, setIntervalValue] = useState(1);
+    const [intervalUnit, setIntervalUnit] = useState<RollingPeriod>(RollingPeriod.HOUR);
+    
+    if (commercialOptionsVisible) {
+        const saveCommercialOptions = () => {
+            // Save the commercial options
+            console.log({
+                queueLimitTimeRestriction: {
+                    maxQueueCount,
+                    intervalValue,
+                    intervalUnit
+                }
+            });
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will save your selected options.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                cancelButtonText: 'No, cancel!',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const response = await fetch('/api/database/users', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            UserID: user.getUserID(),
+                            setOptions: JSON.stringify({
+                                queueLimitTimeRestriction: {
+                                    maxQueueCount,
+                                    intervalValue,
+                                    intervalUnit
+                                }
+                            })
+                        })
+                    });
+                    if (response.ok) {
+                        Swal.fire({
+                            title: 'Saved!',
+                            text: 'Your commercial options have been saved.',
+                            icon: 'success'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'There was an error saving your commercial options.',
+                            icon: 'error'
+                        });
+                    }
+                }
+            
+            })
+        }
+
+
+        return (
+            <div className="my-12">
+                <div className="text-center">
+                    <h3 className="text-2xl font-semibold text-white mb-3">Commercial Options</h3>
+                    <div className="card p-3 w-[90%] mx-auto">
+                        <h4 className="text-xl font-semibold text-white mb-3">Queue Limit</h4>
+                        <p className="text-gray-400">Set the maximum number of songs that can be added to your queue in a given time period (rolling).</p>
+                        <p className="text-gray-400">Time period will be enforced per device, and even works with QR code functionality.</p>
+                        <div className="">
+                            <div>
+                                <label className="block text-white mt-4 mb-2">Maximum Songs/Period</label>
+                                <input type="number" className="input" value={maxQueueCount} onChange={e => setMaxQueueCount((e as any).target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-white mt-4 mb-2">Time period</label>
+                                <div className="flex justify-around">
+                                    <input type="number" className="input" value={intervalValue} onChange={e => setIntervalValue((e as any).target.value)} />
+                                    <select onChange={e => setIntervalUnit((e as any).target.value)} value={intervalUnit} className="input">
+                                        <option value="minute">Minute(s)</option>
+                                        <option value="hour">Hour(s)</option>
+                                        <option value="day">Day(s)</option>
+                                        <option value="week">Week(s)</option>
+                                        <option value="month">Month(s)</option>
+                                        <option value="year">Year(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="absolute bottom-[10%] flex justify-center gap-12 w-full">
+                        <button className="btn btn-primary" onClick={() => setCommercialOptionsVisible(false)}>Back</button>
+                        <button className="btn btn-success" onClick={() => saveCommercialOptions()}>Save</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="my-12">
             {
@@ -131,10 +253,10 @@ const RequestPage = () => {
                             <div>
                                 <div className="flex justify-center place-items-center">
                                     <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
-                                    {/* {
+                                    {
                                         user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
-                                        <button className="btn btn-primary p-2 px-4" onClick={showCommercialOptions}><FaCog /></button>
-                                    } */}
+                                        <button className="btn btn-primary p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></button>
+                                    }
                                 </div>
                                 <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
                             </div>

@@ -8,6 +8,7 @@ import Loading from "../misc/Loading";
 
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { Supabase } from "@/helpers/SupabaseHelper";
+import { getDeviceIdentifier } from "@/utils/deviceIdentifier";
 import { sessions, Users } from "@prisma/client";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
@@ -60,6 +61,10 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     Swal.showLoading()
                 }
             });
+
+            // Obtain device id
+            const device_id = getDeviceIdentifier();
+
             const uri = song.uri;
             let friendAccessToken = await friendSpotifyAuth.getAccessToken();
             const response = await fetch('/api/spotify/queue', {
@@ -69,7 +74,9 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 },
                 body: JSON.stringify({
                     uri: uri,
-                    UserID: currentFriend.UserID,
+                    UserID: user.getUserID(),
+                    FriendUserID: currentFriend.UserID,
+                    DeviceID: device_id,
                     access_token: friendAccessToken
                 })
             });

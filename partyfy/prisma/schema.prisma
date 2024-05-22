@@ -54,3 +54,12 @@ model sessions {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 // model Announcements {
 // }
+
+model DeviceQueue {
+  id             Int   @id @default(autoincrement())
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  device_id      String?  @db.VarChar
+  user_id        String?  @db.VarChar
+  friend_user_id String?  @db.VarChar
+  song_id        String?  @db.VarChar
+}

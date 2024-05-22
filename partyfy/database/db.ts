@@ -3,6 +3,55 @@ import { winston } from '@/logs/winston';
 import UserOptions from '@/prisma/UserOptions';
 
 export default class Database {
+
+    async addToDeviceQueue(requesteeUserID: string | null, requesteeDeviceID: string, friendUserID: string, song_uri: string) {
+        winston.info(`[Database] Adding song ${song_uri} to device queue for ${requesteeUserID}`);
+        await prisma.deviceQueue.create({
+            data: {
+                user_id: requesteeUserID,
+                device_id: requesteeDeviceID,
+                friend_user_id: friendUserID,
+                song_id: song_uri
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully added song ${song_uri} to device queue for ${requesteeUserID}`);
+    }
+
+    async getDeviceQueues(requesteeUserID: string | null, requesteeDeviceID: string, friendUserID: string) {
+        winston.info(`[Database] Getting device queues for ${requesteeUserID}`);
+        if (requesteeUserID) {
+            const queues = await prisma.deviceQueue.findMany({
+                where: {
+                    user_id: requesteeUserID,
+                    friend_user_id: friendUserID
+                },
+                orderBy: {
+                    created_at: 'asc'
+                }
+            });
+            await prisma.$disconnect();
+            if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeUserID}`);
+            else winston.info(`[Database] User ${requesteeUserID} has no device queues`);
+            return queues;
+        } else {
+            const queues = await prisma.deviceQueue.findMany({
+                where: {
+                    device_id: requesteeDeviceID,
+                    friend_user_id: friendUserID
+                },
+                orderBy: {
+                    created_at: 'asc'
+                }
+            });
+            await prisma.$disconnect();
+            if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeDeviceID}`);
+            else winston.info(`[Database] Device ${requesteeDeviceID} has no device queues`);
+            return queues;
+        }
+    }
+
+
     async setOptions(UserID: string, userOptions: UserOptions) {
         winston.info(`[Database] Setting options for ${UserID}`);
         let json = JSON.stringify(userOptions);
