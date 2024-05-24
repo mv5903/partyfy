@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             res.status(404).json({name: 'User not found'});
             return;
         }
-        if (friendData.product_type === 'commercial') {
+        if (friendData.product_type === 'commercial' && friendData.options) {
             // Get all the queues from the requestee (userID first if exists, otherwise deviceID). Sorted by most recent to oldest.
             let deviceQueues = await database.getDeviceQueues(requesteeUserID, requesteeDeviceID, friendUserID);
     
@@ -65,8 +65,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     });
     
                     if (songsWithinTimeRestriction.length >= queueLimitTimeRestriction.maxQueueCount) {
-                        res.status(403).json({ name: 'Queue limit reached' });
-                        return;
+                        let timeUntilNextQueue = new Date(
+                            new Date(songsWithinTimeRestriction[0].created_at).getTime() +
+                            queueLimitTimeRestriction.intervalValue * getMilliseconds(queueLimitTimeRestriction.intervalUnit)
+                        );
+
+                        // Check if now's date is the same, if so, hide the date portion
+                        if (timeUntilNextQueue.toLocaleDateString() === currentTime.toLocaleDateString()) {
+                            let reopeningDate = timeUntilNextQueue.toLocaleTimeString();
+                            res.status(201).json({ name: 'Try again at '  + reopeningDate });
+                            return;
+                        } else {
+                            let reopeningDate = timeUntilNextQueue.toLocaleDateString() + " " + timeUntilNextQueue.toLocaleTimeString();
+                            res.status(201).json({ name: 'Try again at '  + reopeningDate });
+                            return;
+                        }
                     }
                 }
             }
@@ -128,4 +141,24 @@ function getPastTime(intervalValue: number, intervalUnit: RollingPeriod): Date {
             throw new Error(`Unsupported interval unit: ${intervalUnit}`);
     }
     return currentTime;
+}
+
+// Function to convert interval unit to milliseconds
+function getMilliseconds(intervalUnit: RollingPeriod): number {
+    switch (intervalUnit) {
+        case RollingPeriod.MINUTE:
+            return 1000 * 60;
+        case RollingPeriod.HOUR:
+            return 1000 * 60 * 60;
+        case RollingPeriod.DAY:
+            return 1000 * 60 * 60 * 24;
+        case RollingPeriod.WEEK:
+            return 1000 * 60 * 60 * 24 * 7;
+        case RollingPeriod.MONTH:
+            return 1000 * 60 * 60 * 24 * 30; // Approximation
+        case RollingPeriod.YEAR:
+            return 1000 * 60 * 60 * 24 * 365; // Approximation
+        default:
+            throw new Error(`Unsupported interval unit: ${intervalUnit}`);
+    }
 }

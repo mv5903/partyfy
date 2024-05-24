@@ -27,7 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             let data = await database.updateUsername(req.body.UserID as string, req.body.Username as string) as any;
             res.status(200).json(data);
         } else if (req.body.setOptions) {
-            let options = JSON.parse(req.body.setOptions as string) as UserOptions;
+            let options : UserOptions | null = null;
+            if (req.body.setOptions) options = JSON.parse(req.body.setOptions as string) as UserOptions;
             let data = await database.setOptions(req.body.UserID as string, options) as any;
             res.status(200).json(data);
         } else {

@@ -26,6 +26,19 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
+    const [friendUserObject, setFriendUserObject] = useState<Users>(null);
+
+    useEffect(() => {
+        async function loadFriendUserObject() {
+            const response = await fetch(`/api/database/users?UserID=${currentFriend.UserID}`);
+            const data = await response.json();
+            setFriendUserObject(data);
+        }
+
+        loadFriendUserObject();
+        let timeout = setInterval(loadFriendUserObject, 1000);
+        return () => clearInterval(timeout);
+    }, [currentFriend])
 
 
     async function loadFriendSpotifyAuth() {
@@ -74,12 +87,23 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 },
                 body: JSON.stringify({
                     uri: uri,
-                    UserID: user.getUserID(),
+                    UserID: temporarySession ? null : user.getUserID(),
                     FriendUserID: currentFriend.UserID,
                     DeviceID: device_id,
                     access_token: friendAccessToken
                 })
             });
+
+            if (response.status == 201) {
+                const data = await response.json();
+                Swal.fire({
+                    title: 'Time Restricted',
+                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
+                    icon: 'warning'
+                })
+                return;
+            }
+
             const data = await response.json();
             // User attempts to queue to a free friend
             if (data && data.name && data.name === "Player command failed: Premium required") {
@@ -219,7 +243,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             {
                 !friendSpotifyAuth ? <Loading /> :
                 <>
-                    <div className="flex items-center justify-between place-content-center p-2 mb-6">
+                    <div className="flex items-center justify-between place-content-center p-2 mb-4">
                         <h3 className="text-xl me-2 pt-2 mb-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
                         {
                             temporarySession 
@@ -232,6 +256,10 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     {
                         temporarySession &&
                         <h3 className="text-center mb-4">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                    }
+                    {
+                        friendUserObject && friendUserObject.options && friendUserObject.options["queueLimitTimeRestriction"] && friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount > 0 &&
+                        <h3 className="text-center mb-4">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
                     }
                     <div className="flex flex-col items-center">
                         <div className="btn-group flex-nowrap">

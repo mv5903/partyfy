@@ -1,4 +1,3 @@
-import showCommercialOptions from "@/helpers/CommercialOptions";
 import { PartyfyProductType } from "@/helpers/PartyfyProductType";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
@@ -7,7 +6,8 @@ import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
 import { Users } from "@prisma/client";
 import { useContext, useEffect, useState } from "react";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaSave } from "react-icons/fa";
+import { TiArrowBack } from "react-icons/ti";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
@@ -25,6 +25,8 @@ const RequestPage = () => {
     const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
     const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
     const [commercialOptionsVisible, setCommercialOptionsVisible] = useState(false);
+    const [originalOptions, setOriginalOptions] = useState(null);
+    const [hadQueueLimit, setHadQueueLimit] = useState(false);
 
     async function fetchFriends() {
         setRefreshingFriendsLoading(true);
@@ -81,22 +83,30 @@ const RequestPage = () => {
         return () => clearInterval(interval);
     }, [currentFriend, friendsList]);
 
-
     useEffect(() => {
         fetch('api/database/users?UserID=' + user.getUserID())
             .then(response => response.json())
             .then(data => {
-                console.log(data);
                 if (data && data.options) {
                     const options = data.options;
                     if (options.queueLimitTimeRestriction) {
+                        setQueueLimitEnabled(true);
                         setMaxQueueCount(options.queueLimitTimeRestriction.maxQueueCount);
                         setIntervalValue(options.queueLimitTimeRestriction.intervalValue);
                         setIntervalUnit(options.queueLimitTimeRestriction.intervalUnit);
+                        setHadQueueLimit(true);
+                    } else {
+                        setHadQueueLimit(false);
+                        setMaxQueueCount(0);
+                        setIntervalValue(0);
+                        setIntervalUnit(RollingPeriod.HOUR);
+                        setQueueLimitEnabled(false);
                     }
+                    setOriginalOptions(options);
+
                 }
             });
-    }, [showCommercialOptions])
+    }, [commercialOptionsVisible]);     
     
 
     useEffect(() => {
@@ -141,17 +151,19 @@ const RequestPage = () => {
     const [maxQueueCount, setMaxQueueCount] = useState(5);
     const [intervalValue, setIntervalValue] = useState(1);
     const [intervalUnit, setIntervalUnit] = useState<RollingPeriod>(RollingPeriod.HOUR);
+    const [queueLimitEnabled, setQueueLimitEnabled] = useState(false);
     
     if (commercialOptionsVisible) {
         const saveCommercialOptions = () => {
             // Save the commercial options
-            console.log({
-                queueLimitTimeRestriction: {
-                    maxQueueCount,
-                    intervalValue,
-                    intervalUnit
-                }
-            });
+            if (queueLimitEnabled && maxQueueCount < 1 || intervalValue < 1) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please enter a value greater than 0 for both fields.',
+                    icon: 'error'
+                });
+                return;
+            }
             
             Swal.fire({
                 title: 'Are you sure?',
@@ -164,6 +176,16 @@ const RequestPage = () => {
                 cancelButtonColor: '#d33'
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Saving...',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                     const response = await fetch('/api/database/users', {
                         method: 'PATCH',
                         headers: {
@@ -171,13 +193,18 @@ const RequestPage = () => {
                         },
                         body: JSON.stringify({
                             UserID: user.getUserID(),
-                            setOptions: JSON.stringify({
-                                queueLimitTimeRestriction: {
-                                    maxQueueCount,
-                                    intervalValue,
-                                    intervalUnit
-                                }
-                            })
+                            setOptions: 
+                                queueLimitEnabled === true
+                                ?
+                                JSON.stringify({
+                                    queueLimitTimeRestriction: {
+                                        maxQueueCount,
+                                        intervalValue,
+                                        intervalUnit
+                                    }
+                                })
+                                :
+                                JSON.stringify({})
                         })
                     });
                     if (response.ok) {
@@ -186,6 +213,16 @@ const RequestPage = () => {
                             text: 'Your commercial options have been saved.',
                             icon: 'success'
                         });
+                        setHadQueueLimit(queueLimitEnabled);
+                        if (queueLimitEnabled) {
+                            setOriginalOptions({
+                                queueLimitTimeRestriction: {
+                                    maxQueueCount,
+                                    intervalValue,
+                                    intervalUnit
+                                }
+                            })
+                        }
                     } else {
                         Swal.fire({
                             title: 'Error!',
@@ -200,22 +237,26 @@ const RequestPage = () => {
 
 
         return (
-            <div className="my-12">
+            <div className="my-4">
                 <div className="text-center">
                     <h3 className="text-2xl font-semibold text-white mb-3">Commercial Options</h3>
                     <div className="card p-3 w-[90%] mx-auto">
-                        <h4 className="text-xl font-semibold text-white mb-3">Queue Limit</h4>
-                        <p className="text-gray-400">Set the maximum number of songs that can be added to your queue in a given time period (rolling).</p>
-                        <p className="text-gray-400">Time period will be enforced per device, and even works with QR code functionality.</p>
-                        <div className="">
+                        <div className="flex justify-center gap-8">
+                            <h4 className="text-xl font-semibold text-white mb-3">Queue Limit</h4>
+                            <input type="checkbox" className="switch switch-lg" checked={queueLimitEnabled} onChange={() => setQueueLimitEnabled(!queueLimitEnabled)} />
+                        </div>
+
+                        <p className="text-gray-400">Set the maximum number of songs that can be added to your queue through Partyfy in a given time period (rolling), via your friends or the QR code method.</p>
+                        {/* <p className="text-gray-400">This functionality is not guranteed if someone queues using a private browser window without an account.</p> */}
+                        <div className={`${queueLimitEnabled === false && 'blur-sm'}`}>
                             <div>
-                                <label className="block text-white mt-4 mb-2">Maximum Songs/Period</label>
-                                <input type="number" className="input" value={maxQueueCount} onChange={e => setMaxQueueCount((e as any).target.value)} />
+                                <label className="block text-white mt-4 mb-2">Maximum Songs</label>
+                                <input minLength={1} required type="number" className="input" value={maxQueueCount} onChange={e => setMaxQueueCount((e as any).target.value)} />
                             </div>
                             <div>
-                                <label className="block text-white mt-4 mb-2">Time period</label>
+                                <label className="block text-white mt-4 mb-2">Per Time Period of</label>
                                 <div className="flex justify-around">
-                                    <input type="number" className="input" value={intervalValue} onChange={e => setIntervalValue((e as any).target.value)} />
+                                    <input minLength={1} required type="number" className="input" value={intervalValue} onChange={e => setIntervalValue((e as any).target.value)} />
                                     <select onChange={e => setIntervalUnit((e as any).target.value)} value={intervalUnit} className="input">
                                         <option value="minute">Minute(s)</option>
                                         <option value="hour">Hour(s)</option>
@@ -228,9 +269,47 @@ const RequestPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="absolute bottom-[10%] flex justify-center gap-12 w-full">
-                        <button className="btn btn-primary" onClick={() => setCommercialOptionsVisible(false)}>Back</button>
-                        <button className="btn btn-success" onClick={() => saveCommercialOptions()}>Save</button>
+                    <div className="absolute bottom-[2%] flex justify-center gap-12 w-full">
+                        <button className="btn btn-primary" onClick={() => {
+                            let options = { maxQueueCount, intervalValue, intervalUnit };
+
+                            function confirmBackPress() {
+                                Swal.fire({
+                                    title: 'Are you sure?',
+                                    text: 'You have unsaved changes. Are you sure you want to go back?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Yes, go back!',
+                                    cancelButtonText: 'No, cancel!'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        setCommercialOptionsVisible(false);
+                                    }
+                                });
+                            }
+
+                            if (hadQueueLimit == queueLimitEnabled)  {
+                                setCommercialOptionsVisible(false);
+                                return;
+                            }
+
+                            if ( hadQueueLimit != queueLimitEnabled ) {
+                                confirmBackPress();
+                                return; 
+                            } 
+                                
+                            else if (originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount 
+                                || originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue 
+                                || originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit)
+                                {
+                                    confirmBackPress();
+                                    return;
+                                }
+                        
+                            else setCommercialOptionsVisible(false);
+                    
+                        }}><TiArrowBack size={25}/></button>
+                        <button className="btn btn-success" onClick={() => saveCommercialOptions()}><FaSave className="mr-2" /> Save</button>
                     </div>
                 </div>
             </div>

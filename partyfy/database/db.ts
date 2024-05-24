@@ -52,7 +52,7 @@ export default class Database {
     }
 
 
-    async setOptions(UserID: string, userOptions: UserOptions) {
+    async setOptions(UserID: string, userOptions: UserOptions | null) {
         winston.info(`[Database] Setting options for ${UserID}`);
         let json = JSON.stringify(userOptions);
         const data = await prisma.users.update({
