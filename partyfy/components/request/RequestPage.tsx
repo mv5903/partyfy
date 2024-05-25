@@ -269,7 +269,7 @@ const RequestPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="absolute bottom-[2%] flex justify-center gap-12 w-full">
+                    <div className="absolute bottom-[5%] flex justify-center gap-12 w-full">
                         <button className="btn btn-primary" onClick={() => {
                             let options = { maxQueueCount, intervalValue, intervalUnit };
 

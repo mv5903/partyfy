@@ -1,8 +1,8 @@
 import Loading from '@/components/misc/Loading';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
-import { useEffect, useState } from 'react';
-import { FaCopy, FaPlus, FaTrash } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
@@ -10,6 +10,8 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
     const [loading, setLoading] = useState(true);
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
+
+    const qrRef = useRef(null);
 
     async function getNewSession() {
 
@@ -93,13 +95,6 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
             })
         })
         const data = await response.json();
-        // if (data.name === 'Error deleting session') {
-        //     Swal.fire({
-        //         title: 'Error',
-        //         text: 'There was an error deleting the session. Please try again later.',
-        //         icon: 'error'
-        //     })
-        // }
         setQRCodeURL('');
         setIsComponentVisible(true);
         setFriendsListScreen(FriendListScreen.QR);
@@ -146,6 +141,48 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
         })
     }
 
+    function saveQR() {
+        // Create an XML serializer
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(qrRef.current);
+      
+        // Create a data URL
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+      
+        // Create an image element
+        const image = new Image();
+        image.onload = () => {
+          // Create a canvas and draw the image on it
+          const canvas = document.createElement('canvas');
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0);
+      
+          // Create a data URL from the canvas
+          const imageURL = canvas.toDataURL('image/png');
+      
+          // Create a download link and click it programmatically
+          const downloadLink = document.createElement('a');
+          downloadLink.href = imageURL;
+          downloadLink.download = 'downloaded-image.png';
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+      
+          // Revoke the object URL
+          URL.revokeObjectURL(url);
+
+          Swal.fire({
+            title: 'Saved',
+            text: 'The QR code has been saved successfully.',
+            icon: 'success'
+          })
+        };
+        image.src = url;
+      };
+
     return (
         <div>
             <style>
@@ -159,14 +196,15 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
                     }
                 `}
             </style>
-            <h1 className='my-3'>QR (Beta)</h1>
+            <h1 className='my-3'>QR</h1>
             {
                 qrCodeURL 
                 ?
                 <div className='w-full text-center flex flex-col place-items-center gap-4'>
                     <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
                     <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
-                    <QRCode value={qrCodeURL} />
+                    <QRCode ref={qrRef} value={qrCodeURL} />
+                    <button className='btn btn-primary p-3' onClick={() => saveQR()}><FaSave className='mr-2'/> Save QR Image</button>
                     <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy link to clipboard</button>
                     <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
                 </div>

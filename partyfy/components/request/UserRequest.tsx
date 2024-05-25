@@ -141,17 +141,21 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
         if (data) {
             if (!data.UnattendedQueues)  {
-                setCurrentFriend(null);
-                Swal.fire({
+                // show warning and then exit when pressed ok
+                await Swal.fire({
                     title: 'Notice',
                     html: `Your friend <strong>${currentFriend.Username}</strong> has disabled unattended queues. You will no longer be able to request songs until it has been turned back on.`,
-                    icon: 'warning'
-                })
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
+                if (temporarySession) exitSession();
+                else setCurrentFriend(null);
             }
         }
     }
 
     async function isStillFriends() {
+        if (temporarySession) return;
         if (!currentFriend) return;
         const response = await fetch(`/api/database/friends?action=isFriend&UserID=${user.getUserID()}&FriendUserID=${currentFriend.UserID}`);
         const data = await response.json();
