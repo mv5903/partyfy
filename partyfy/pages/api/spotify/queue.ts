@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                         // Check if now's date is the same, if so, hide the date portion
                         if (timeUntilNextQueue.toLocaleDateString() === currentTime.toLocaleDateString()) {
-                            res.status(201).json({ name: `Try again in ${getNextAvailableTime(timeUntilNextQueue)}.` });
+                            res.status(201).json({ name: `Try again in ${getNextAvailableTime(timeUntilNextQueue)}` });
                             return;
                         }
                     }
