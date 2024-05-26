@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { FaUserFriends } from 'react-icons/fa';
+import { FaPaperPlane, FaQrcode, FaSearch, FaUserFriends, FaUserPlus } from 'react-icons/fa';
 import { IoMdArrowDropdown } from 'react-icons/io';
 
 import useComponentVisible from '@/hooks/useComponentVisible';
@@ -7,6 +7,7 @@ import UserContext from '@/providers/UserContext';
 
 
 import { FriendListScreen } from '@/helpers/FriendListScreen';
+import { FaPeopleGroup } from 'react-icons/fa6';
 import IncomingRequests from './submenus/IncomingRequests';
 import List from './submenus/List';
 import QR from './submenus/QR';
@@ -52,12 +53,12 @@ const Friends = () => {
             {
                 isComponentVisible && 
                 <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
-                    <div className="btn-group flex-nowrap justify-center w-full">
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.QR ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}>QR</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Friends ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}>Friends</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Requests ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;Requests</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Sent ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}>Sent</button>
-                        <button className={`btn px-4 ${friendListScreen == FriendListScreen.Search ? "btn-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}>Search</button>
+                    <div role="tablist" className="tabs tabs-boxed tabs-lg mx-auto w-full">
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.QR ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}><FaQrcode className='mx-auto'/></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Friends ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}><FaPeopleGroup className='mx-auto' /></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Requests ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;<FaUserPlus  className='mx-auto' /></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Sent ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}><FaPaperPlane  className='mx-auto'/></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Search ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaSearch  className='mx-auto' /></button>
                     </div>
                     { isComponentVisible && currentFriendListScreen() }
                 </div>

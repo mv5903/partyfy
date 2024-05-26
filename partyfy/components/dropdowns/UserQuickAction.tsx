@@ -7,6 +7,8 @@ import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaLinkSlash, FaPersonWalkingArrowRight } from "react-icons/fa6";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
@@ -149,7 +151,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
             </div>
             {
                 isComponentVisible &&
-                <div className='z-[2] px-3 py-2 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
+                <div className='z-[2] p-3 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
                     {
                         user &&
                         <div>
@@ -165,10 +167,10 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                         !isMobile && isAHost != null &&
                         <button className="btn btn-primary" onClick={() => { setIsComponentVisible(!isComponentVisible); setIsAHost(null); }}>Return to Mode Selection</button>
                     }
-                    <button className="btn btn-error" onClick={() => deleteAccount()}>Delete my account</button>
-                    <button className="btn btn-secondary" onClick={() => changeUsername()}>Change Username</button>
-                    <button className="btn btn-warning" onClick={() => unlinkSpotify()}>Unlink Spotify</button>
-                    <a href="/api/auth/logout" className="btn btn-primary" onClick={() => setIsComponentVisible(!isComponentVisible)}>Log Out</a>
+                    <button className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
+                    <button className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
+                    <button className="btn bg-green-700 flex justify-start" onClick={() => unlinkSpotify()}><FaLinkSlash className='mr-2'/> Unlink Spotify</button>
+                    <a href="/api/auth/logout" className="btn btn-primary flex justify-start" onClick={() => setIsComponentVisible(!isComponentVisible)}><FaPersonWalkingArrowRight className='mr-2' />Log Out {user.db.Username}</a>
                 </div>
             }
         </div>

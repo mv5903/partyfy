@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
-import { FaPlusCircle } from "react-icons/fa";
+import { FaEye, FaPlusCircle } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -55,7 +55,6 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             if (!accessToken) return;
             const response = await fetch('/api/spotify/playlist?action=get&access_token=' + accessToken + '&playlist_id=' + playlist_id + '&offset=' + offset);
             const data = await response.json();
-            console.log(data);
             if (data) {
                 setActivePlaylist({
                     name,
@@ -116,14 +115,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                         <SpotifyLinkBack link={playlist.external_urls.spotify} />
                                                     </div>
                                                     <div className="flex flex-col w-3/4 ps-2">
-                                                        <div className="flex">
+                                                        <div className="flex gap-1">
                                                             <h6 className="p-2">{playlist.name}</h6>
                                                             { playlist.collaborative && <h6 className="mt-3"><BsPeopleFill/></h6> }
                                                             { playlist.public && <h6 className="mt-3"><BsGlobe/></h6> }
                                                         </div>
                                                         <h6 className="p-2"><i>{playlist.owner.display_name}</i></h6>
                                                     </div>
-                                                    <button className="btn btn-primary" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}>View</button>
+                                                    <button className="btn btn-primary" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, playlist.name); }}><FaEye className="mr-2" /> View</button>
                                                 </div>
                                             </div>
                                         );

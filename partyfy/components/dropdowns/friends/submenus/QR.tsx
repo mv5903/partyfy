@@ -203,9 +203,11 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
                 <div className='w-full text-center flex flex-col place-items-center gap-4'>
                     <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
                     <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
-                    <QRCode ref={qrRef} value={qrCodeURL} />
+                    <div className='card w-auto p-3 bg-white' >
+                        <QRCode ref={qrRef} value={qrCodeURL} />
+                    </div>
                     <button className='btn btn-primary p-3' onClick={() => saveQR()}><FaSave className='mr-2'/> Save QR Image</button>
-                    <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy link to clipboard</button>
+                    <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy Link to Clipboard</button>
                     <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
                 </div>
                 :
