@@ -72,12 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                         // Check if now's date is the same, if so, hide the date portion
                         if (timeUntilNextQueue.toLocaleDateString() === currentTime.toLocaleDateString()) {
-                            let reopeningDate = timeUntilNextQueue.toLocaleTimeString();
-                            res.status(201).json({ name: 'Try again at '  + reopeningDate });
-                            return;
-                        } else {
-                            let reopeningDate = timeUntilNextQueue.toLocaleDateString() + " " + timeUntilNextQueue.toLocaleTimeString();
-                            res.status(201).json({ name: 'Try again at '  + reopeningDate });
+                            res.status(201).json({ name: `Try again in ${getNextAvailableTime(timeUntilNextQueue)}.` });
                             return;
                         }
                     }
@@ -161,4 +156,38 @@ function getMilliseconds(intervalUnit: RollingPeriod): number {
         default:
             throw new Error(`Unsupported interval unit: ${intervalUnit}`);
     }
+}
+
+function getNextAvailableTime(targetDate: Date): string {
+    const now = new Date();
+    const diff = targetDate.getTime() - now.getTime();
+
+    if (diff <= 0) return "The date has already passed.";
+
+    const minute = 1000 * 60;
+    const hour = minute * 60;
+    const day = hour * 24;
+    const week = day * 7;
+    const month = day * 30.44; // Approximate month length
+    const year = day * 365.25; // Approximate year length
+
+    const years = Math.floor(diff / year);
+    const months = Math.floor((diff % year) / month);
+    const weeks = Math.floor((diff % month) / week);
+    const days = Math.floor((diff % week) / day);
+    const hours = Math.floor((diff % day) / hour);
+    const minutes = Math.floor((diff % hour) / minute);
+    const seconds = Math.floor((diff % minute) / 1000);
+
+    const timeSegments: string[] = [];
+
+    if (years > 0) timeSegments.push(`${years} ${RollingPeriod.YEAR}${years > 1 ? 's' : ''}`);
+    if (months > 0) timeSegments.push(`${months} ${RollingPeriod.MONTH}${months > 1 ? 's' : ''}`);
+    if (weeks > 0) timeSegments.push(`${weeks} ${RollingPeriod.WEEK}${weeks > 1 ? 's' : ''}`);
+    if (days > 0) timeSegments.push(`${days} ${RollingPeriod.DAY}${days > 1 ? 's' : ''}`);
+    if (hours > 0) timeSegments.push(`${hours} ${RollingPeriod.HOUR}${hours > 1 ? 's' : ''}`);
+    if (minutes > 0) timeSegments.push(`${minutes} ${RollingPeriod.MINUTE}${minutes > 1 ? 's' : ''}`);
+    if (seconds > 0) timeSegments.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+
+    return timeSegments.join(', ');
 }
