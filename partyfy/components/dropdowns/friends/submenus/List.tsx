@@ -77,6 +77,7 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : Party
 
     return (
         <div>
+            <h1 className='mt-3 mb-6'>Friends</h1>
             {
                 friends.length === 0 || !friends
                 ?

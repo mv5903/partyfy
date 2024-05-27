@@ -54,11 +54,11 @@ const Friends = () => {
                 isComponentVisible && 
                 <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
                     <div role="tablist" className="tabs tabs-boxed tabs-lg mx-auto w-full">
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.QR ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}><FaQrcode className='mx-auto'/></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Friends ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}><FaPeopleGroup className='mx-auto' /></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Requests ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;<FaUserPlus  className='mx-auto' /></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Sent ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}><FaPaperPlane  className='mx-auto'/></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Search ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaSearch  className='mx-auto' /></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.QR ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}><FaQrcode size={20} className='mx-auto'/></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Friends ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}><FaPeopleGroup size={20} className='mx-auto' /></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Requests ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;<FaUserPlus size={20}  className='mx-auto' /></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Sent ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}><FaPaperPlane size={20}  className='mx-auto'/></button>
+                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Search ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaSearch size={20} className='mx-auto' /></button>
                     </div>
                     { isComponentVisible && currentFriendListScreen() }
                 </div>

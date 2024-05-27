@@ -88,6 +88,7 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
 
     return (
         <div>
+            <h1 className='mt-3 mb-6'>Incoming Requests</h1>
         {
             loading 
             ?
