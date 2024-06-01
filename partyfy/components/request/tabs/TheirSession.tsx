@@ -3,13 +3,13 @@ import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
 import Loading from "@/components/misc/Loading";
-import LoadingDots from "@/components/misc/LoadingDots";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
+import LoadingDots from "@/components/misc/LoadingDots";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
@@ -59,14 +59,13 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
     }
 
     useEffect(() => {
-        showNowPlaying();
-        const interval = setInterval(showNowPlaying, 1000);
-        return () => clearInterval(interval);
-    }, []);
+        const fetchData = async () => {
+            await Promise.all([showFullQueue(), showNowPlaying()]);
+        };
+        
+        fetchData();
+        const interval = setInterval(fetchData, 2000); // Adjust the interval as necessary
 
-    useEffect(() => {
-        showFullQueue();
-        const interval = setInterval(showFullQueue, 2000);
         return () => clearInterval(interval);
     }, []);
 
@@ -79,6 +78,8 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         ) 
     }
 
+    console.log(nowPlaying);
+
     return (
         <div>
             <div className="w-full">
@@ -89,7 +90,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         nowPlaying 
                         ?                            
                         <>
-                            <div className="card p-2 my-2 flex justify-center w-ful">
+                            <div className="card p-2 my-2 flex justify-center w-full">
                                 <div className="flex gap-2">
                                     <div className="flex flex-col">
                                         {
@@ -115,16 +116,17 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                     </div>
                                     <div className="flex justify-between w-full">
                                         <div className="flex flex-col items-start justify-between w-full px-2">
-                                            <div className="flex justify-start">
+                                            <div className="flex justify-start gap-2">
                                                 {
                                                     nowPlaying.item 
                                                     ?
-                                                    <h6 className="text-left"><strong>{nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}</strong></h6>
+                                                    <h6 className="text-left text-lg"><strong>{nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}</strong></h6>
                                                     :
                                                     <h6 className="text-left"><strong>Uknown {nowPlaying.currently_playing_type == 'episode' ? "(Podcasts not supported)" : ""}</strong></h6>
                                                 }
                                                 { nowPlaying.item && nowPlaying.item.explicit === true ? <BsExplicitFill className="mt-1 ms-2"/> : ''}
                                             </div>
+                                            <div className="flex justify-start gap-2">
                                                 {
                                                     nowPlaying.item
                                                     ?
@@ -132,6 +134,10 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                     :
                                                     <h6 className="text-left"><i>Unknown artist</i></h6>
                                                 }
+                                            </div>
+                                            <div className="flex justify-start place-items-center gap-2">
+                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
+                                            </div>
                                             <div className="flex justify-between w-full">
                                                 <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
                                                 { nowPlaying?.is_playing == false && <h6><i>Paused</i></h6> }
@@ -181,7 +187,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                 ?
                                 <h3 className="text-center mt-4">Nothing is playing.</h3>
                                 :
-                                <LoadingDots className="m-16" />
+                                <LoadingDots />
                             }
                         </>
                     }
