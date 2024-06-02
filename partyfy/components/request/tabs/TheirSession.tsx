@@ -64,7 +64,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         };
         
         fetchData();
-        const interval = setInterval(fetchData, 2000); // Adjust the interval as necessary
+        const interval = setInterval(fetchData, 1000); // Adjust the interval as necessary
 
         return () => clearInterval(interval);
     }, []);
