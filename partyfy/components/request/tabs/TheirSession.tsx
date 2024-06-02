@@ -77,9 +77,6 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
             </div>
         ) 
     }
-
-    console.log(nowPlaying);
-
     return (
         <div>
             <div className="w-full">
@@ -116,47 +113,53 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                     </div>
                                     <div className="flex justify-between w-full">
                                         <div className="flex flex-col items-start justify-between w-full px-2">
-                                            <div className="flex justify-start gap-2">
+                                        <div className="flex justify-start gap-2">
+                                            {nowPlaying.item ? (
+                                                <h6 className="text-left text-lg">
+                                                    <strong>
+                                                        {nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}
+                                                    </strong>
+                                                    {nowPlaying.item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
+                                                </h6>
+                                            ) : (
+                                                <h6 className="text-left">
+                                                    <strong>
+                                                        Unknown {nowPlaying.currently_playing_type === 'episode' ? "(Podcasts not supported)" : ""}
+                                                    </strong>
+                                                </h6>
+                                            )}
+                                        </div>
+                                        <div className="flex justify-start gap-2">
+                                            {
+                                                nowPlaying.item
+                                                ?
+                                                <h6 className="text-left"><i>{getArtistList(nowPlaying.item.artists)}</i></h6>
+                                                :
+                                                <h6 className="text-left"><i>Unknown artist</i></h6>
+                                            }
+                                        </div>
+                                        <div className="flex justify-start place-items-center gap-2">
+                                            <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
+                                        </div>
+                                        <div className="flex justify-between w-full">
+                                            <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
+                                            { nowPlaying?.is_playing == false && <h6><i>Paused</i></h6> }
+                                            {
+                                                nowPlaying.item
+                                                ?
+                                                <>
                                                 {
-                                                    nowPlaying.item 
+                                                    showEndTimeAsTotal
                                                     ?
-                                                    <h6 className="text-left text-lg"><strong>{nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}</strong></h6>
+                                                    <h6 onClick={() => setShowEndTimeAsTotal(false)}>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
                                                     :
-                                                    <h6 className="text-left"><strong>Uknown {nowPlaying.currently_playing_type == 'episode' ? "(Podcasts not supported)" : ""}</strong></h6>
+                                                    <h6 onClick={() => setShowEndTimeAsTotal(true)}>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
                                                 }
-                                                { nowPlaying.item && nowPlaying.item.explicit === true ? <BsExplicitFill className="mt-1 ms-2"/> : ''}
-                                            </div>
-                                            <div className="flex justify-start gap-2">
-                                                {
-                                                    nowPlaying.item
-                                                    ?
-                                                    <h6 className="text-left"><i>{getArtistList(nowPlaying.item.artists)}</i></h6>
-                                                    :
-                                                    <h6 className="text-left"><i>Unknown artist</i></h6>
-                                                }
-                                            </div>
-                                            <div className="flex justify-start place-items-center gap-2">
-                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
-                                            </div>
-                                            <div className="flex justify-between w-full">
-                                                <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
-                                                { nowPlaying?.is_playing == false && <h6><i>Paused</i></h6> }
-                                                {
-                                                    nowPlaying.item
-                                                    ?
-                                                    <>
-                                                    {
-                                                        showEndTimeAsTotal
-                                                        ?
-                                                        <h6 onClick={() => setShowEndTimeAsTotal(false)}>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
-                                                        :
-                                                        <h6 onClick={() => setShowEndTimeAsTotal(true)}>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
-                                                    }
-                                                    </>
-                                                    :
-                                                    <h6>?</h6>
-                                                }
-                                            </div>
+                                                </>
+                                                :
+                                                <h6>?</h6>
+                                            }
+                                        </div>
                                             <progress className="progress progress-flat-primary w-full" value={nowPlaying.progress_ms} max={nowPlaying.item ? nowPlaying.item.duration_ms : ''}></progress>
                                         </div>
                                         <div className="flex flex-col justify-between my-1 text-white w-[5%] gap-3">
@@ -189,7 +192,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                 :
                                 <LoadingDots />
                             }
-                        </>
+                        </> 
                     }
                 </div>
                 <h4 className="mt-2 text-2xl">Up Next</h4>
@@ -197,34 +200,43 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                     queue != null && Array.isArray(queue) && queue.length > 0 &&
                     <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
                 }
-                <table className="table table-dark mt-3 w-full">
-                    <tbody>
-                        {
-                            queue != null && Array.isArray(queue) &&
-                            queue.map((item: any, index: number) => {
-                                return (
-                                    <tr key={index}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>
-                                            <div className="flex items-center justify-between">
-                                                <img className="me-2" src={item.type == 'track' ? item.album.images[2].url : item.images[0].url} style={{ width: '50px', height: '50px' }} />    
-                                                <div className="w-2/3">
-                                                    <div className="flex justify-start">
-                                                        <h6 className="whitespace-normal w-3/4"><strong>{item.name}</strong></h6>
-                                                        {item.explicit === true ? <BsExplicitFill className="mt-1 ms-2"/> : ''}
-                                                    </div>
-                                                    <h6 className="whitespace-normal"><i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i></h6> 
-                                                </div>
-                                                <SpotifyLinkBack link={item.external_urls.spotify} />
+                <div className="table table-dark mt-3 w-full">
+                    {
+                        queue != null && Array.isArray(queue) &&
+                        queue.map((item: any, index: number) => {
+                            return (
+                                <div key={index}>
+                                    <div className="flex justify-between w-full px-0 gap-1">
+                                        <h2 className="mr-2">{index + 1}</h2>
+                                        <img 
+                                            className="me-2" 
+                                            src={item.type == 'track' ? item.album.images[2].url : item.images[0].url} 
+                                            style={{ width: '50px', height: '50px' }} 
+                                        />
+                                        <div className="w-2/3">
+                                            <div className="flex justify-start">
+                                                <h6 className="text-left text-md">
+                                                    <strong>
+                                                        {item.name}
+                                                    </strong>
+                                                    {item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
+                                                </h6>
                                             </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-
-                        }
-                    </tbody>
-                </table>
+                                            <h6 className="text-left">
+                                                <i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i>
+                                            </h6>
+                                        </div>
+                                        <SpotifyLinkBack link={item.external_urls.spotify} />
+                                    </div>
+                                    {
+                                        index < queue.length - 1 &&
+                                        <div className="divider divider-horizontal"></div>
+                                    }
+                                </div>
+                            );
+                        })
+                    }
+                </div>
             </div>
             {
                 queue != null && nowPlaying != null

@@ -166,8 +166,11 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                             </div>
                                                             <div className="text-left w-3/4">
                                                                 <div className="flex justify-start">
-                                                                    <h6 className="p-2 w-10/12"><strong className="me-2">{key + 1}.</strong>{result.name}</h6>
-                                                                    { result.explicit && <BsExplicitFill className="mt-3"/> }
+                                                                    <h6 className="text-left p-2 w-full">
+                                                                        <strong className="me-2">{key + 1}.</strong>
+                                                                        {result.name}
+                                                                        { result.explicit && <BsExplicitFill className="inline-block ml-2 mb-1"/> }
+                                                                    </h6>
                                                                 </div>
                                                                 <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
                                                             </div>

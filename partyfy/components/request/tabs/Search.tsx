@@ -61,11 +61,12 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
                                         </div>
                                         <div className="flex flex-col justify-start w-[60%]">
                                             <div className="flex place-items-center">
-                                                <h6 className="p-2">{result.name}</h6>
-                                                {
-                                                    result.explicit &&
-                                                    <h6><BsExplicitFill/></h6>
-                                                }
+                                                <h6 className="p-2">{result.name}
+                                                    {
+                                                        result.explicit &&
+                                                        <BsExplicitFill className="inline-block ml-2 mb-1"/>
+                                                    }
+                                                </h6>
                                             </div>
                                             <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
                                         </div>
