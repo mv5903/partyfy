@@ -3,6 +3,21 @@ import { winston } from '@/logs/winston';
 import UserOptions from '@/prisma/UserOptions';
 
 export default class Database {
+    async addNewClientError(errDetails: any) {
+        winston.info(`[Database] Adding new client error`);
+        console.log(errDetails)
+        await prisma.clientSideErrors.create({
+            data: {
+                message: errDetails.error,
+                filename: errDetails.source,
+                line_no: errDetails.lineno,
+                col_no: errDetails.colno,
+                user_agent: errDetails.userAgent
+            }
+        });
+        await prisma.$disconnect();
+        winston.info(`[Database] Successfully added new client error`);
+    }
 
     async addToDeviceQueue(requesteeUserID: string | null, requesteeDeviceID: string, friendUserID: string, song_uri: string) {
         winston.info(`[Database] Adding song ${song_uri} to device queue for ${requesteeUserID}`);

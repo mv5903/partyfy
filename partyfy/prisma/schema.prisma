@@ -50,11 +50,6 @@ model sessions {
   expiration_date DateTime @db.Timestamptz(6)
 }
 
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-// model Announcements {
-// }
-
 model DeviceQueue {
   id             Int   @id @default(autoincrement())
   created_at     DateTime @default(now()) @db.Timestamptz(6)
@@ -62,4 +57,20 @@ model DeviceQueue {
   user_id        String?  @db.VarChar
   friend_user_id String?  @db.VarChar
   song_id        String?  @db.VarChar
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// model Announcements {
+// }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ClientSideErrors {
+  id         BigInt   @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  message    String?  @db.VarChar
+  filename   String?  @db.VarChar
+  line_no    Int?
+  col_no     Int?
+  user_agent String?  @db.VarChar
 }
