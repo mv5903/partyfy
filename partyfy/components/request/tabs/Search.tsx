@@ -35,9 +35,7 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
 
         const response = await fetch('/api/spotify/search?query=' + searchQuery + '&access_token=' + accessToken);
         const data = await response.json();
-        if (!data) return;
-        if (!data.tracks.items) return;
-        if (data.tracks.items.length === 0) return;
+        if (!data?.tracks?.items?.length) return;
         setSearchResults(data.tracks.items);
     }
 
