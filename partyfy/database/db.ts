@@ -5,7 +5,13 @@ import UserOptions from '@/prisma/UserOptions';
 export default class Database {
     async addNewClientError(errDetails: any) {
         winston.info(`[Database] Adding new client error`);
-        console.log(errDetails)
+        console.log(errDetails);
+        // Ignore load failed errors as these are most likely due to user error
+        if (errDetails?.error === 'Load failed') {
+            await prisma.$disconnect();
+            winston.info(`[Database] Ignoring fetch client error: Load failed`);
+            return;
+        }
         await prisma.clientSideErrors.create({
             data: {
                 message: errDetails.error,
