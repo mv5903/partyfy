@@ -14,11 +14,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log('Error reported:', errDetails);
     
-    // Add error to database
-    await database.addNewClientError(errDetails);
+    // Add error to database if it isn't a client-side user network error
+    const wasLogged = await database.addNewClientError(errDetails);
 
     // Notify myself via Home Assistant Automation
-    await fetch(process.env.HOME_ASSISTANT_ALERT_WEBHOOK_URL);
+    if (wasLogged) await fetch(process.env.HOME_ASSISTANT_ALERT_WEBHOOK_URL);
 
     res.status(200).json({ message: 'Error reported successfully' });
   } else {

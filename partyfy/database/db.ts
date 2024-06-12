@@ -3,14 +3,20 @@ import { winston } from '@/logs/winston';
 import UserOptions from '@/prisma/UserOptions';
 
 export default class Database {
-    async addNewClientError(errDetails: any) {
+
+    /**
+     * Adds a new client error to the database. Originates from client-side from _app.tsx
+     * @param errDetails Details of the error, including error message, source, line number, column number, and user agent
+     * @returns If error was logged successfully, will also be false if error is 'Load failed'
+     */
+    async addNewClientError(errDetails: any) : Promise<Boolean> {
         winston.info(`[Database] Adding new client error`);
         console.log(errDetails);
         // Ignore load failed errors as these are most likely due to user error
         if (errDetails?.error === 'Load failed') {
             await prisma.$disconnect();
             winston.info(`[Database] Ignoring fetch client error: Load failed`);
-            return;
+            return false;
         }
         await prisma.clientSideErrors.create({
             data: {
@@ -23,6 +29,7 @@ export default class Database {
         });
         await prisma.$disconnect();
         winston.info(`[Database] Successfully added new client error`);
+        return true;
     }
 
     async addToDeviceQueue(requesteeUserID: string | null, requesteeDeviceID: string, friendUserID: string, song_uri: string) {
