@@ -9,7 +9,6 @@ import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-import LoadingDots from "@/components/misc/LoadingDots";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
@@ -190,7 +189,14 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                 ?
                                 <h3 className="text-center mt-4">Nothing is playing.</h3>
                                 :
-                                <LoadingDots />
+                                <div className="card p-2 my-2 w-full h-[15vh] flex justify-center place-items-center">
+                                    <div className="spinner-wave">
+                                        <div className="spinner-wave-dot"></div>
+                                        <div className="spinner-wave-dot"></div>
+                                        <div className="spinner-wave-dot"></div>
+                                        <div className="spinner-wave-dot"></div>
+                                    </div>
+                                </div>
                             }
                         </> 
                     }

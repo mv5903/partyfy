@@ -325,11 +325,11 @@ const RequestPage = () => {
                         {
                             isUnattendedQueuesEnabled === null || uqLoading
                             ?
-                            <div>
+                            <div className="h-[10vh]">
                                 <LoadingDots className="mt-4" />
                             </div>
                             :
-                            <div>
+                            <div className="h-[10vh]">
                                 <div className="flex justify-center place-items-center">
                                     <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
                                     {
