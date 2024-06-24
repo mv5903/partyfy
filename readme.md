@@ -39,3 +39,15 @@ For those who are curious, here is a general overview of the stack used to creat
 - Database: Vercel's PostgreSQL database with Prisma ORM for Typescript
 - Authentication: Auth0
 - Hosting: Vercel
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0. Key points of the license include:
+
+- You are free to use, modify, and distribute this software.
+- If you distribute copies or modified versions of this software, you must provide the source code under the same license.
+- If you use this software to provide a service over a network, you must also make the source code available to the users of that service.
+- This software comes with no warranty; use it at your own risk.
+
+See the [LICENSE](LICENSE) file for details.
+
