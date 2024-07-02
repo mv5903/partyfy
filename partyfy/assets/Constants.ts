@@ -10,5 +10,5 @@ export const CONSTANTS = {
             '?response_type=code' +
             '&client_id=' + LOCAL_CONSTANTS.SPOTIFY_CLIENT_ID +
             (LOCAL_CONSTANTS.SPOTIFY_SCOPES ? '&scope=' + encodeURIComponent(LOCAL_CONSTANTS.SPOTIFY_SCOPES) : '') +
-            '&redirect_uri=' + encodeURIComponent(LOCAL_CONSTANTS.SPOTIFY_REDIRECT_URL),
+            '&redirect_uri=' + encodeURIComponent(LOCAL_CONSTANTS.SPOTIFY_REDIRECT_URL) + '&show_dialog=true',
 }
