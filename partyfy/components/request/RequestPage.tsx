@@ -421,12 +421,12 @@ const RequestPage = () => {
                                                 <span className="max-w-[50%] truncate">{friend.Username}</span>
                                                 {friendIsActive && (
                                                     <div className="flex items-center max-w-[50%]">
-                                                        <span className={`inline-block w-2 h-2 ${!isQueueEnabled ? 'bg-red-500' : isPodcast ? 'bg-yellow-500' : 'bg-green-500'} rounded-full mr-2`}></span>
+                                                        <span className={`inline-block w-2 h-2 ${!isQueueEnabled ? 'bg-red-500' : 'bg-green-500'} rounded-full mr-2`}></span>
                                                         <span className="text-xs text-gray-300 max-w-[87%] truncate">
                                                             {
                                                                 isPodcast
                                                                 ?
-                                                                'Podcast Episode'
+                                                                <ScrollingText text={`${friendNowPlayingStatus.data.item.name} - ${friendNowPlayingStatus.data.item.show.publisher}`}/>
                                                                 :
                                                                 <ScrollingText text={`${friendNowPlayingStatus.data.item.name} - ${getArtistList(friendNowPlayingStatus.data.item.artists)}`}/>
                                                             }

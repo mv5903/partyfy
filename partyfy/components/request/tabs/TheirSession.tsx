@@ -132,13 +132,19 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                             {
                                                 nowPlaying.item
                                                 ?
-                                                <h6 className="text-left"><i>{getArtistList(nowPlaying.item.artists)}</i></h6>
+                                                <h6 className="text-left"><i>{nowPlaying.currently_playing_type === 'episode' ? nowPlaying.item.show.publisher : getArtistList(nowPlaying.item.artists)}</i></h6>
                                                 :
                                                 <h6 className="text-left"><i>Unknown artist</i></h6>
                                             }
                                         </div>
                                         <div className="flex justify-start place-items-center gap-2">
-                                            <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
+                                            {
+                                                nowPlaying.currently_playing_type === 'episode'
+                                                ?
+                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.show.name : ''}</h6>
+                                                :
+                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
+                                            }
                                         </div>
                                         <div className="flex justify-between w-full">
                                             <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
