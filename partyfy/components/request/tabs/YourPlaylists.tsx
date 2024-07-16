@@ -89,11 +89,11 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
         const data = await response.json();
         if (data) {
             setActivePlaylist({
-                name: 'Recently Played',
+                name: 'Recently Queued',
                 id: 'recentSongs',
                 items: data.tracks,
                 tracks: data.tracks.length,
-                tags: ['recent']
+                tags: ['recent', 'up to 50 available']
             });
             setLoading(false);
         }
