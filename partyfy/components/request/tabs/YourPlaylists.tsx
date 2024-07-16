@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { BsExplicitFill, BsGlobe, BsHeartFill, BsPeopleFill } from "react-icons/bs";
-import { FaExclamationCircle, FaEye, FaPlusCircle, FaSpotify } from "react-icons/fa";
+import { useContext, useEffect, useState } from "react";
+import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
+import { FaExclamationCircle, FaEye, FaHeart, FaHistory, FaPlusCircle, FaSpotify } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -11,6 +11,7 @@ import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
+import UserContext from '@/providers/UserContext';
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import ScrollToTopButton from "./utils/ScrollToTopButton";
 
@@ -30,6 +31,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
     const [nextURL, setNextURL] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const { user } = useContext(UserContext);
 
     async function getPlaylists() {
         let accessToken = await spotifyAuth.getAccessToken();
@@ -54,6 +57,10 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     }
 
     async function getPlaylistSongs(isFirstLoad: boolean, playlist_id: string, tags: string[], name: string, offset: number = 0) {
+        if (playlist_id === 'recentSongs') {
+            getRecentSongs();
+            return;
+        }
         if (playlist_id) {
             let accessToken = await spotifyAuth.getAccessToken();
             if (!accessToken) return;
@@ -73,6 +80,23 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
         }
         setLoading(false);
         if (isFirstLoad) window.scrollTo(0, 0);
+    }
+
+    async function getRecentSongs() {
+        let accessToken = await spotifyAuth.getAccessToken();
+        if (!accessToken) return;
+        const response = await fetch('/api/spotify/recentlyplayed?user=' + user.getUserID() + '&access_token=' + accessToken);
+        const data = await response.json();
+        if (data) {
+            setActivePlaylist({
+                name: 'Recently Played',
+                id: 'recentSongs',
+                items: data.tracks,
+                tracks: data.tracks.length,
+                tags: ['recent']
+            });
+            setLoading(false);
+        }
     }
 
     async function acquireLikedSongsPermission() {
@@ -104,6 +128,12 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                         owner: { display_name: 'Requires additional permissions' }
                     });
                 }
+                playlists.unshift({
+                    id: 'recentSongs',
+                    name: 'Recently Queued',
+                    images: [],
+                    owner: { display_name: 'by you to others' }
+                })
                 setLoading(false);
                 setPlaylists(playlists);
             }
@@ -116,7 +146,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
 
     return (
         <>
-            { !activePlaylist && <h3 className="text-2xl text-center my-4">Your Playlists { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
+            { !activePlaylist && <h3 className="text-2xl text-center my-4">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
             <div className="flex flex-col justify-center items-center w-full">
                 {
                     !activePlaylist && playlists.length > 0 &&
@@ -132,6 +162,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                 {
                                     playlists.map((playlist: any, key: number) => {
                                         const isLikedSongs = playlist.id === 'likedSongs';
+                                        const isRecentSongs = playlist.id === 'recentSongs';
                                         const isNeedLikedSongsPermission = playlist.id === 'needLikedSongsPermission';
                                         let tags = [playlist.public ? 'public' : 'private'];
                                         if (playlist.collaborative) tags.push('collaborative');
@@ -144,10 +175,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                             ?
                                                             <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
                                                             :
-                                                            <img src="https://www.freeiconspng.com/uploads/spotify-icon-2.png" style={{ minWidth: '50px', height: '50px' }} />
+                                                            isLikedSongs
+                                                            ?
+                                                            <FaHeart size={50} />
+                                                            :
+                                                            <FaHistory size={50} />
                                                         }
                                                         {
-                                                            !isLikedSongs && !isNeedLikedSongsPermission &&
+                                                            !isLikedSongs && !isNeedLikedSongsPermission && !isRecentSongs &&
                                                             <SpotifyLinkBack link={playlist.external_urls.spotify} />
                                                         }
                                                     </div>
@@ -156,7 +191,6 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                             <h6 className="p-2">{playlist.name}</h6>
                                                             { playlist.collaborative && <h6 className="mt-3"><BsPeopleFill/></h6> }
                                                             { playlist.public && <h6 className="mt-3"><BsGlobe/></h6> }
-                                                            { isLikedSongs && <h6 className="mt-3"><BsHeartFill/></h6> }
                                                             { isNeedLikedSongsPermission && <h6 className="mt-3"><FaExclamationCircle className="text-red-600"/></h6> }
                                                         </div>
                                                         <h6 className="p-2"><i>{playlist.id === 'likedSongs' ? "Your Liked Songs" : playlist.owner.display_name}</i></h6>
@@ -198,8 +232,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                 >
                                     {
                                         activePlaylist.items.map((item: any, key: number) => {
-                                            if (!item || !item.track) return;
-                                            let result = item.track;
+                                            let result = activePlaylist.id == 'recentSongs' ? item : item.track;
                                             if (!result) return;
                                             if (!result.album.images[2]) return;
                                             return (

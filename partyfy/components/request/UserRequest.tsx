@@ -271,9 +271,9 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                             <button className={`tab flex place-items-center ${requestPageView == RequestPageView.Search ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.Search)}><FaSearch className="mr-2" size={10} />Search</button>
                             {
                                 !temporarySession && 
-                                <button className={`tab flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Playlists</button>
+                                <button className={`tab flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Music</button>
                             }
-                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Their Session</button>
+                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Session</button>
                         </div>
                         <div className="w-full">
                             { currentView() }

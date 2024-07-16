@@ -203,11 +203,15 @@ export default class Database {
 
     async getRecentSongs(OwnerUserID: string) {
         winston.info(`[Database] Getting recent songs for ${OwnerUserID}`);
-        const data = (await prisma.recents.findMany({
+        const data = (await prisma.deviceQueue.findMany({
             where: {
-                OwnerUserID: OwnerUserID
+                user_id: OwnerUserID
             },
-        })).reverse();
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: 50
+        }))
         await prisma.$disconnect();
         if (data.length > 0) winston.info(`[Database] Successfully got ${data.length} recent songs for ${OwnerUserID}`);
         return data;
