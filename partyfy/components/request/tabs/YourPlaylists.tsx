@@ -170,7 +170,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                             <div key={key} className="card mb-2 p-2 bg-zinc-900 opacity-80 w-full">
                                                 <div style={{ textAlign: 'left'}} className="flex items-center justify-between">
                                                     <div className="flex flex-col">
-                                                        {
+                                                        {                                                   
                                                             playlist.images && playlist.images.length > 0
                                                             ?
                                                             <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
@@ -179,7 +179,11 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                             ?
                                                             <FaHeart size={50} />
                                                             :
+                                                            isRecentSongs
+                                                            ?
                                                             <FaHistory size={50} />
+                                                            :
+                                                            <FaSpotify size={50} />
                                                         }
                                                         {
                                                             !isLikedSongs && !isNeedLikedSongsPermission && !isRecentSongs &&
