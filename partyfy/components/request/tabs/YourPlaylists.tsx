@@ -86,6 +86,15 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
         let accessToken = await spotifyAuth.getAccessToken();
         if (!accessToken) return;
         const response = await fetch('/api/spotify/recentlyplayed?user=' + user.getUserID() + '&access_token=' + accessToken);
+        if (response.status === 204) {
+            setActivePlaylist(null);
+            setLoading(false);
+            Swal.fire({
+                title: "You haven't queued any songs yet!",
+                icon: 'info'
+            })
+            return;
+        }
         const data = await response.json();
         if (data) {
             setActivePlaylist({
@@ -96,7 +105,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 tags: ['recent', 'up to 50 available']
             });
             setLoading(false);
-        }
+        } 
     }
 
     async function acquireLikedSongsPermission() {
