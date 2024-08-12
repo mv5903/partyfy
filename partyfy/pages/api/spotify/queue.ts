@@ -1,4 +1,5 @@
 import Database from '@/database/db';
+import { winston } from '@/logs/winston';
 import UserOptions, { RollingPeriod } from '@/prisma/UserOptions';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -95,16 +96,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             }
         });
         if (!response.ok) {
-            let json = await response.json();
-            if (json.error) {
-                res.status(json.error.status).json({name: json.error.message});
-                return;
-            } else {
-                res.status(response.status).json({name: response.statusText});
+            try {
+                let json = await response.json();
+                if (json.error) {
+                    res.status(json.error.status).json({ name: json.error.message });
+                    return;
+                } else {
+                    res.status(response.status).json({ name: response.statusText });
+                    return;
+                }
+            } catch (error) {
+                winston.error(`Invalid JSON response received from Spotify API: ${error}. Response status: ${response.status}. Response text: ${response.statusText}. access_token: ${req.body.access_token}. uri: ${req.body.uri}. UserID: ${req.body.UserID}.`);
+                res.status(500).json({ name: 'Invalid JSON response received from Spotify API' });
                 return;
             }
         } else {
-            res.status(200).json({name: 'OK'});
+            res.status(200).json({ name: 'OK' });
             return;
         }
     }

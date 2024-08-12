@@ -105,7 +105,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 return;
             }
 
-            const data = await response.json();
+            const data = await response.json(); // ERROR LINE
             // User attempts to queue to a free friend
             if (data && data.name && data.name === "Player command failed: Premium required") {
                 Swal.fire({
