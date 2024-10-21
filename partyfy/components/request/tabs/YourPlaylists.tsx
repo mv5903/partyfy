@@ -161,13 +161,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 {
                     !activePlaylist && playlists.length > 0 &&
                     <div className="w-full">
-                        <div className="max-h-[70vh] overflow-auto">
+                        <div className="max-h-[70vh] overflow-auto" id="playlists">
                             <InfiniteScroll
                                 dataLength={playlists.length}
                                 next={() => getMorePlaylists()}
                                 hasMore={nextURL}
                                 loader={<Loading />}
                                 endMessage={<h6 className="text-center">You've reached the end.</h6>}
+                                scrollableTarget="playlists"
                             >
                                 {
                                     playlists.map((playlist: any, key: number) => {
@@ -249,13 +250,14 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                         <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
                             activePlaylist.items.length > 0 &&
-                            <div className="w-full max-h-[67vh] overflow-auto">
-                                <InfiniteScroll
+                            <div className="w-full max-h-[67vh] overflow-auto" id="playlistItems">
+                                 <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.tags, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
                                     hasMore={activePlaylist.next != null}
                                     loader={<Loading />} 
                                     endMessage={<h6 className="text-center">You've reached the end.</h6>}
+                                    scrollableTarget="playlistItems"
                                 >
                                     {
                                         activePlaylist.items.map((item: any, key: number) => {
