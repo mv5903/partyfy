@@ -12,9 +12,9 @@ import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
-import UserRequest from "./UserRequest";
+import RequestSong from "./RequestSong";
 
-const RequestPage = () => {
+const SelectFriend = () => {
     const { user } = useContext(UserContext);
 
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
@@ -454,11 +454,11 @@ const RequestPage = () => {
                 }
                 {
                     currentFriend != null &&
-                    <UserRequest currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} temporarySession={null} exitSession={null} />
+                    <RequestSong currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} temporarySession={null} exitSession={null} />
                 }
             </div>
         </div>
     );
 }
 
-export default RequestPage;
+export default SelectFriend;

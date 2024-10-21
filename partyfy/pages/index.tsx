@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 
 import Dashboard from '@/components/Dashboard';
 import UserQuickAction from '@/components/dropdowns/UserQuickAction';
-import FriendsList from '@/components/dropdowns/friends/Friends';
+import FriendsList from '@/components/dropdowns/friends/FriendsMenu';
 import AnchorLink from '@/components/misc/AnchorLink';
 import Loading from '@/components/misc/Loading';
-import UserRequest from '@/components/request/UserRequest';
+import RequestSong from '@/components/request/RequestSong';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import UserContext from '@/providers/UserContext';
@@ -126,7 +126,7 @@ export default function Home() {
       {
         activeTemporarySession &&
         <div className='text-white text-center'>
-          <UserRequest currentFriend={temporarySessionFriend} setCurrentFriend={null} temporarySession={activeTemporarySession} exitSession={exitSession} />
+          <RequestSong currentFriend={temporarySessionFriend} setCurrentFriend={null} temporarySession={activeTemporarySession} exitSession={exitSession} />
         </div>
       }
       { 

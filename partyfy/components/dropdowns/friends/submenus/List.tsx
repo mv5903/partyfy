@@ -70,37 +70,39 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : Party
             }
         });
     }
-
-    if (loading) {
-        return (<Loading/>);
-    }
-
+    
     return (
         <div>
             <h1 className='mt-3 mb-6'>Friends</h1>
-            <div className='overflow-y-scroll max-h-[65vh]'>
-                {
-                    friends.length === 0 || !friends
-                    ?
-                    <div>
-                        <h5 className="text-xl text-center">You have no friends yet.</h5>
-                        <div className='flex justify-center'>
-                            <button className='btn btn-primary mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}>Add a Friend</button>
-                        </div>
-                    </div>
-                    :
-                    friends.map((user, index) => {
-                        return (
-                            <div key={index} className="card bg-[#222] p-2 mt-3">
-                                <div className="flex place-items-center justify-between">
-                                    <h3 className="text-lg">{user.Username}</h3>
-                                    <button className="btn btn-sm bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
-                                </div>
+            {
+                loading 
+                ?
+                <Loading />
+                :
+                <div className='overflow-y-scroll max-h-[65vh]'>
+                    {
+                        friends.length === 0 || !friends
+                        ?
+                        <div>
+                            <h5 className="text-xl text-center">You have no friends yet.</h5>
+                            <div className='flex justify-center'>
+                                <button className='btn btn-primary mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}>Add a Friend</button>
                             </div>
-                        );
-                    })
-                }
-            </div>
+                        </div>
+                        :
+                        friends.map((user, index) => {
+                            return (
+                                <div key={index} className="card bg-primary p-2 mt-3">
+                                    <div className="flex place-items-center justify-between">
+                                        <h3 className="text-lg">{user.Username}</h3>
+                                        <button className="btn btn-sm bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+            }
         </div>
     );
 }

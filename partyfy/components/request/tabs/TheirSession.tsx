@@ -109,7 +109,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         nowPlaying 
                         ?                            
                         <>
-                            <div ref={nowPlayingRef} className="card bg-zinc-900 p-2 my-2 flex justify-center w-full">
+                            <div ref={nowPlayingRef} className="card bg-primary p-2 my-2 flex justify-center w-full">
                                 <div className="flex gap-2">
                                     <div className="flex flex-col">
                                         {
@@ -218,7 +218,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                 ?
                                 <h3 className="text-center mt-4">Nothing is playing.</h3>
                                 :
-                                <div className="card p-2 my-2 w-full h-[15vh] flex justify-center place-items-center">
+                                <div className="card bg-primary p-2 my-2 w-full h-[15vh] flex justify-center place-items-center">
                                     <div className="spinner-wave">
                                         <div className="spinner-wave-dot"></div>
                                         <div className="spinner-wave-dot"></div>

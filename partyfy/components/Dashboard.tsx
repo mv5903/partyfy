@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 
 import UserContext from '@/providers/UserContext';
-import RequestPage from './request/RequestPage';
+import SelectFriend from './request/SelectFriend';
 
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
@@ -56,7 +56,7 @@ const Dashboard = () => {
             .catch(err => console.log(err));
     }, []);
 
-    return <RequestPage />;
+    return <SelectFriend />;
 }
 
 export default Dashboard;

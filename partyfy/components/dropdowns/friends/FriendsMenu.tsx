@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { FaPaperPlane, FaQrcode, FaSearch, FaUserFriends, FaUserPlus } from 'react-icons/fa';
-import { IoMdArrowDropdown } from 'react-icons/io';
+import { IoMdArrowDropdown, IoMdReturnLeft } from 'react-icons/io';
 
 import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
@@ -15,7 +15,7 @@ import Search from './submenus/Search';
 import SentRequests from './submenus/SentRequests';
 import IncomingCount from './submenus/utils/IncomingCount';
 
-const Friends = () => {
+const FriendsMenu = () => {
 
     const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
 
@@ -44,27 +44,39 @@ const Friends = () => {
         setFriendListScreen(DEFAULT_SCREEN);
     }
 
+    const icons = [<FaQrcode className='mx-auto'/>, <FaPeopleGroup className='mx-auto'/>, <FaUserPlus className='mx-auto'/>, <FaPaperPlane className='mx-auto'/>, <FaSearch className='mx-auto'/>];
+
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible && 'bg-neutral'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25}/>
             </div>
             {
                 isComponentVisible && 
-                <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs h-[80vh]'>
-                    <div role="tablist" className="tabs tabs-boxed tabs-lg mx-auto w-full">
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.QR ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}><FaQrcode size={20} className='mx-auto'/></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Friends ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}><FaPeopleGroup size={20} className='mx-auto' /></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Requests ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Requests)}><IncomingCount />&nbsp;<FaUserPlus size={20}  className='mx-auto' /></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Sent ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Sent)}><FaPaperPlane size={20}  className='mx-auto'/></button>
-                        <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Search ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaSearch size={20} className='mx-auto' /></button>
+                <div className='z-[3] px-3 py-4 absolute w-[calc(100%-1rem)] left-0 bg-zinc-800 rounded-md shadow-lg flex flex-col gap-2 text-xs h-[80vh] mx-2'>
+                    <div role="tablist" className="tabs tabs-boxed bg-primary tabs-lg mx-auto w-full">
+                        {
+                        Object.values(FriendListScreen)
+                            .filter((value): value is FriendListScreen => typeof value === 'number')
+                            .map((screen, index) => {
+                            return (
+                                <button
+                                    key={index}
+                                    className={`tab w-1/5 px-4 ${friendListScreen === screen ? "tab-active" : "bg-primary"}`}
+                                    onClick={() => setFriendListScreen(screen)}
+                                >
+                                {icons[index]}
+                                </button>
+                            );
+                            })
+                        }
                     </div>
-                    { isComponentVisible && currentFriendListScreen() }
+                    {isComponentVisible && currentFriendListScreen()}
                 </div>
             }
         </div>
     );
 }
 
-export default Friends;
+export default FriendsMenu;

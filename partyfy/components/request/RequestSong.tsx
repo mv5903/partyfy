@@ -18,7 +18,7 @@ import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
 
-const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
+const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
 
     enum RequestPageView {
         Search,
@@ -283,13 +283,13 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                         <h3 className="text-center mb-4">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
                     }
                     <div className="flex flex-col items-center">
-                        <div role="tablist" className="tabs tabs-boxed">
-                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.Search ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.Search)}><FaSearch className="mr-2" size={10} />Search</button>
+                        <div role="tablist" className="tabs tabs-boxed bg-primary p-0">
+                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.Search ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.Search)}><FaSearch className="mr-2" size={10} />Search</button>
                             {
                                 !temporarySession && 
-                                <button className={`tab flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Music</button>
+                                <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Music</button>
                             }
-                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : ""}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Session</button>
+                            <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Session</button>
                         </div>
                         <div className="w-full">
                             { currentView() }
@@ -301,4 +301,4 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     )
 }
 
-export default UserRequest;
+export default RequestSong;

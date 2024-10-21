@@ -130,8 +130,6 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
         return () => clearInterval(interval);
     }, [qrCodeURL, expirationDate])
 
-    if (loading) return <Loading />
-
     function copyLinkToClipboard(): void {
         navigator.clipboard.writeText(qrCodeURL);
         Swal.fire({
@@ -198,28 +196,37 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
             </style>
             <h1 className='my-3'>QR</h1>
             {
-                qrCodeURL 
+                loading 
                 ?
-                <div className='w-full text-center flex flex-col place-items-center gap-4'>
-                    <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
-                    <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
-                    <div className='card w-auto p-3 bg-white' >
-                        <QRCode ref={qrRef} value={qrCodeURL} />
-                    </div>
-                    <button className='btn btn-primary p-3' onClick={() => saveQR()}><FaSave className='mr-2'/> Save QR Image</button>
-                    <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy Link to Clipboard</button>
-                    <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
-                </div>
+                <Loading />
                 :
-                <div>
-                    <div className='w-full flex flex-col place-items-center gap-6'>
-                        <h4 className='text-xl text-center mt-3'>You can now create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
-                        <button className='btn btn-primary' onClick={getNewSession}><FaPlus className='mr-2' /> Create</button>
-                    </div>
+                <>
                     {
-                        loading && <Loading />
+                        qrCodeURL 
+                        ?
+                        <div className='w-full text-center flex flex-col place-items-center gap-4'>
+                            <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
+                            <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
+                            <div className='card w-auto p-3 bg-white' >
+                                <QRCode ref={qrRef} value={qrCodeURL} />
+                            </div>
+                            <button className='btn btn-primary p-3' onClick={() => saveQR()}><FaSave className='mr-2'/> Save QR Image</button>
+                            <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy Link to Clipboard</button>
+                            <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
+                        </div>
+                        :
+                        <div>
+                            <div className='w-full flex flex-col place-items-center gap-6'>
+                                <h4 className='text-xl text-center mt-3'>You can now create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
+                                <button className='btn btn-primary' onClick={getNewSession}><FaPlus className='mr-2' /> Create</button>
+                            </div>
+                            {
+                                loading && <Loading />
+                            }
+                        </div>
                     }
-                </div>
+                </>
+
             }
         </div>
     )

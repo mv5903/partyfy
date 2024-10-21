@@ -30,7 +30,7 @@ function ListContentCard(props: ListContentCardProps) {
     } = props;
 
     return (
-        <div className="card my-2 bg-zinc-900 w-full shadow-md rounded-md">
+        <div className="card my-2 bg-primary w-full shadow-md rounded-md">
             <div className="flex items-center p-2 gap-2">
                 {position && <span className="text-white text-xs rounded-md px-1">{position}</span>}
                 <div className="flex-shrink-0 mr-2">

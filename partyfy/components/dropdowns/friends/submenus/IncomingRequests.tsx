@@ -103,7 +103,7 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
                     :
                     usersReturned.map((user, index) => {
                         return (
-                            <div key={index} className="card bg-[#222] p-2 mt-3">
+                            <div key={index} className="card bg-primary p-2 mt-3">
                                 <div className="flex place-items-center justify-between">
                                     <h5 className="text-lg">{user.Username}</h5>
                                     <div className="flex align-center">

@@ -3,7 +3,7 @@ const Transport = require('winston-transport');
 const axios = require('axios');
 
 class HttpTransport extends Transport {
-  constructor(opts) {
+  constructor(opts: any) {
     super(opts);
     this.url = opts.url;
   }

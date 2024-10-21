@@ -7,7 +7,7 @@ import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaCog, FaEdit, FaTrash } from 'react-icons/fa';
 import { FaLinkSlash, FaPersonWalkingArrowRight } from "react-icons/fa6";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
@@ -145,27 +145,19 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible && 'bg-neutral'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25} />
             </div>
             {
                 isComponentVisible &&
-                <div className='z-[2] p-3 min-w-40 absolute right-0 bg-[#333] rounded-md flex flex-col gap-2'>
+                <div className='z-[2] p-3 min-w-40 absolute right-0 mr-2 bg-zinc-800 rounded-md flex flex-col gap-2 shadow-lg'>
                     {
                         user &&
                         <div>
                             <h3 className="text-center mb-2 text-xl">Quick Actions</h3>
                             <p className="text-center">User type: {getProductTypeAsString(user.getProductType())}</p>
                         </div>
-                    }
-                    {
-                        !isMobile && isAHost &&
-                        <Options />
-                    }
-                    {
-                        !isMobile && isAHost != null &&
-                        <button className="btn btn-primary" onClick={() => { setIsComponentVisible(!isComponentVisible); setIsAHost(null); }}>Return to Mode Selection</button>
                     }
                     <button className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
                     <button className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
