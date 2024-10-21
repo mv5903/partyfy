@@ -152,7 +152,8 @@ export default function Home() {
         </div>
       }
       {
-        user && activeTemporarySession == null && <main className="text-left z-[2]">
+        user && activeTemporarySession == null && 
+        <main className="text-left z-[2] flex flex-col h-screen">
           <nav className='flex justify-between'>
             <div className='flex justfiy-start place-items-center'>
               <h2 className={`text-2xl m-3`}>{`${partyfyUser?.db?.Username ?? ''}`}</h2>
@@ -174,11 +175,9 @@ export default function Home() {
             <>
               { 
               user != null && 
-              <div className="d-flex flex-column justify-content-center align-items-center">
-                  <UserContext.Provider value={{ user: partyfyUser }} >
-                    <Dashboard isAHost={isAHost} setIsAHost={setIsAHost}/> 
-                  </UserContext.Provider>
-              </div>
+                <UserContext.Provider value={{ user: partyfyUser }} >
+                    <Dashboard /> 
+                </UserContext.Provider>
               }
             </> 
             :

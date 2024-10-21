@@ -89,31 +89,33 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
     return (
         <div>
             <h1 className='mt-3 mb-6'>Incoming Requests</h1>
-        {
-            loading 
-            ?
-            <Loading />
-            :
-                usersReturned.length === 0 || !usersReturned
+            <div className='overflow-y-scroll max-h-[65vh]'>
+            {
+                loading 
                 ?
-                <div>
-                    <h5 className="text-xl text-center">You have no incoming friend requests.</h5>
-                </div>
+                <Loading />
                 :
-                usersReturned.map((user, index) => {
-                    return (
-                        <div key={index} className="card bg-[#222] p-2 mt-3">
-                            <div className="flex place-items-center justify-between">
-                                <h5 className="text-lg">{user.Username}</h5>
-                                <div className="flex align-center">
-                                    <button className="btn btn-sm bg-green-8 me-2 mt-1" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
-                                    <button className="btn btn-sm bg-red-8 mt-1" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                    usersReturned.length === 0 || !usersReturned
+                    ?
+                    <div>
+                        <h5 className="text-xl text-center">You have no incoming friend requests.</h5>
+                    </div>
+                    :
+                    usersReturned.map((user, index) => {
+                        return (
+                            <div key={index} className="card bg-[#222] p-2 mt-3">
+                                <div className="flex place-items-center justify-between">
+                                    <h5 className="text-lg">{user.Username}</h5>
+                                    <div className="flex align-center">
+                                        <button className="btn btn-sm bg-green-8 me-2 mt-1" onClick={() => acceptIncomingRequest(user.UserID, user.Username)}><FaCheckCircle /></button>
+                                        <button className="btn btn-sm bg-red-8 mt-1" onClick={() => deleteIncomingRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })
-        }
+                        );
+                    })
+            }
+            </div>
     </div>
     )
 }

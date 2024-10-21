@@ -392,7 +392,7 @@ export default class Database {
                     notIn: friendIDS
                 }
             },
-            take: 5
+            take: 8
         })).filter((user, index, array) => array.findIndex(u => u.UserID === user.UserID) === index && user.Username !== UserID);
         await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully searched for users with query ${Query} for ${UserID}`);
@@ -467,6 +467,7 @@ export default class Database {
             },
         });
         await prisma.$disconnect();
+        friends.sort((a, b) => a.Username.localeCompare(b.Username));
         if (friends) winston.info(`[Database] Successfully got friends for ${UserID}`);
         else winston.info(`[Database] User ${UserID} has no friends`);
         return friends;

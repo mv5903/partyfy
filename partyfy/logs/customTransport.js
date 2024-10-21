@@ -9,6 +9,7 @@ class HttpTransport extends Transport {
   }
 
   log(info, callback) {
+    if (process.env.NODE_ENV === 'development') return;
     axios.post(this.url, {
       level: info.level,
       message: info.message,

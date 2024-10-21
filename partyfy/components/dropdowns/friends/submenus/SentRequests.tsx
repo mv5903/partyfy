@@ -61,28 +61,30 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     return (
         <div>
             <h1 className='mt-3 mb-6'>Outgoing Requests</h1>
-            {
-                loading 
-                ?
-                <Loading />
-                :
-                    usersReturned.length === 0 || !usersReturned
+            <div className='overflow-y-scroll max-h-[65vh]'>
+                {
+                    loading 
                     ?
-                    <div>
-                        <h5 className="text-xl text-center">You have not sent any friend requests.</h5>
-                    </div>
+                    <Loading />
                     :
-                    usersReturned.map((user, index) => {
-                        return (
-                            <div key={index} className="card bg-[#222] p-2 mt-3">
-                                <div className="flex place-items-center justify-between">
-                                    <h5 className="text-lg">{user.Username}</h5>
-                                    <button className="btn btn-sm bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
+                        usersReturned.length === 0 || !usersReturned
+                        ?
+                        <div>
+                            <h5 className="text-xl text-center">You have not sent any friend requests.</h5>
+                        </div>
+                        :
+                        usersReturned.map((user, index) => {
+                            return (
+                                <div key={index} className="card bg-[#222] p-2 mt-3">
+                                    <div className="flex place-items-center justify-between">
+                                        <h5 className="text-lg">{user.Username}</h5>
+                                        <button className="btn btn-sm bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })
-            }
+                            );
+                        })
+                }
+            </div>
         </div>
     )
 }

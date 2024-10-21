@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { BsExplicitFill } from "react-icons/bs";
 import { FaPlusCircle } from "react-icons/fa";
-
-import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
+import ListContentCard, { ListContentCardProps } from "@/components/misc/ListContentCard";
 
 const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: any, spotifyAuth: SpotifyAuth, addToQueue: Function, isTemporarySession: boolean }) => {
 
@@ -47,33 +45,23 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
             </div>
             {
                 searchResults.length > 0 &&
-                <div className="mt-4 w-full flex flex-col items-center">
+                <div className="mt-4 w-full flex flex-col items-center max-h-[62vh] overflow-auto">
                     {
                         searchResults.map((result: any, key: number) => {
-                            return (
-                                <div key={key} className="card p-2 my-2 bg-zinc-900 w-full">
-                                    <div className="flex items-center justify-between text-left">
-                                        <div className="flex flex-col">
-                                            <img className="mt-2" src={result.album.images[2].url} />
-                                            <SpotifyLinkBack link={result.external_urls.spotify} />
-                                        </div>
-                                        <div className="flex flex-col justify-start w-[60%]">
-                                            <div className="flex place-items-center">
-                                                <h6 className="p-2">{result.name}
-                                                    {
-                                                        result.explicit &&
-                                                        <BsExplicitFill className="inline-block ml-2 mb-1"/>
-                                                    }
-                                                </h6>
-                                            </div>
-                                            <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
-                                        </div>
-                                        <div className="flex items-center justify-end">
-                                            <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
+
+                            const listContentCardProps: ListContentCardProps = {
+                                imgSrc: result.album.images[2].url,
+                                spotifyLinkBack: result.external_urls.spotify,
+                                primaryContent: result.name,
+                                secondaryContent: getArtistList(result.artists),
+                                explicit: result.explicit,
+                                btnOnClick: () => addToQueue(result),
+                                btnIcon: <FaPlusCircle />,
+                                btnColorClass: 'btn-success',
+                            }
+
+                            return <ListContentCard key={key} {...listContentCardProps} />;
+                            
                         })
                     }
                 </div>

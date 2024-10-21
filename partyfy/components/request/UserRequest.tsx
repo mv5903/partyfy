@@ -148,7 +148,7 @@ const UserRequest = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 // show warning and then exit when pressed ok
                 await Swal.fire({
                     title: 'Notice',
-                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled unattended queues. You will no longer be able to request songs until it has been turned back on.`,
+                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled remote queues. You will no longer be able to request songs until it has been turned back on.`,
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });

@@ -145,7 +145,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center me-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible && 'bg-neutral'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25} />
             </div>

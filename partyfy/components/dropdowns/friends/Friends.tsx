@@ -46,13 +46,13 @@ const Friends = () => {
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 cursor-pointer ${isComponentVisible ? 'bg-secondary' : 'bg-gray-800'} p-1 rounded mt-2 ps-2`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible && 'bg-neutral'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <FaUserFriends size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25}/>
             </div>
             {
                 isComponentVisible && 
-                <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs'>
+                <div className='z-[3] px-3 py-4 absolute w-full right-0 bg-[#333] rounded-md flex flex-col gap-2 text-xs h-[80vh]'>
                     <div role="tablist" className="tabs tabs-boxed tabs-lg mx-auto w-full">
                         <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.QR ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.QR)}><FaQrcode size={20} className='mx-auto'/></button>
                         <button className={`tab w-1/5 px-4 ${friendListScreen == FriendListScreen.Friends ? "tab-active" : ""}`} onClick={() => setFriendListScreen(FriendListScreen.Friends)}><FaPeopleGroup size={20} className='mx-auto' /></button>

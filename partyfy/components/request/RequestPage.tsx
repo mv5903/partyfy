@@ -44,11 +44,7 @@ const RequestPage = () => {
         const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
         const data = await response.json();
         if (data) {
-            if (data.UnattendedQueues === null) {
-                setIsUnattendedQueuesEnabled(false);
-            } else {
-                setIsUnattendedQueuesEnabled(data.UnattendedQueues);
-            }
+            setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
         }
     }
 
@@ -317,7 +313,7 @@ const RequestPage = () => {
     }
 
     return (
-        <div className="my-6">
+        <div className="grow h-full flex flex-col">
             {
                 !currentFriend &&
                 <>
@@ -331,7 +327,7 @@ const RequestPage = () => {
                             :
                             <div className="h-[10vh]">
                                 <div className="flex justify-center place-items-center">
-                                    <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues: Enabled" : "Unattended Queues: Disabled"}</button>
+                                    <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}</button>
                                     {
                                         user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
                                         <button className="btn btn-primary p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></button>
@@ -344,7 +340,7 @@ const RequestPage = () => {
                     <div className="divider divider-horizontal m-4">OR</div>
                 </>
             }
-            <div className="text-center mt-4 ms-2 me-2">
+            <div className="grow text-center mx-2 flex flex-col gap-3">
                 {
                     loading &&
                     <Loading />
@@ -356,7 +352,7 @@ const RequestPage = () => {
                             {
                                 refreshingFriendsLoading === true
                                 ?
-                                <div className="mt-5">
+                                <div className="">
                                     <LoadingDots />
                                 </div>
                                 :
@@ -368,23 +364,20 @@ const RequestPage = () => {
                 }
                 {
                     !currentFriend && !loading && friendsList.length > 0 &&
-                    <div className="p-2">
-                        <h3 className="text-2xl font-semibold text-white mb-3">Add to:</h3>
-                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
+                    <>
+                        <h3 className="text-2xl font-semibold text-white">Add to:</h3>
+                        <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends()}>
                             {
                                 refreshingFriendsLoading === true
                                 ?
-                                <div className="mt-5">
-                                    <LoadingDots />
-                                </div>
+                                <LoadingDots />
                                 :
                                 <i>Tap here to refresh</i>
                             }
                         </h6>
-                        <div className="space-y-3">
+                        <div className="h-[68vh] overflow-y-scroll flex flex-col gap-3">
                             {
-                                [...friendsList] 
-                                .sort((a, b) => {
+                                [...friendsList].sort((a, b) => {
                                     const aIsActive = spotifyStatuses?.some(status => status.UserID === a.UserID);
                                     const bIsActive = spotifyStatuses?.some(status => status.UserID === b.UserID);
                                     const aIsQueueEnabled = a.UnattendedQueues === true;
@@ -411,8 +404,19 @@ const RequestPage = () => {
                                     return (
                                         <button
                                             key={index}
-                                            onClick={() => setCurrentFriend(friend)}
-                                            disabled={!isQueueEnabled || !friendIsActive}
+                                            onClick={() => {
+                                                if (!friendIsActive) return;
+                                                if (!isQueueEnabled) {
+                                                    Swal.fire({
+                                                        title: 'Error!',
+                                                        text: `${friend.Username} does not have unattended queues enabled. Ask them to enable it if you want to queue songs.`,
+                                                        icon: 'error'
+                                                    });
+                                                    return;
+                                                }
+                                                setCurrentFriend(friend);
+                                            } }
+                                            disabled={!friendIsActive}
                                             className={`w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300
                                                         ${isQueueEnabled && friendIsActive ? 'bg-blue-600 hover:bg-blue-600' : 'bg-gray-700'}
                                                         ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
@@ -445,7 +449,7 @@ const RequestPage = () => {
                                 })
                             }
                         </div>
-                    </div>
+                    </>
 
                 }
                 {

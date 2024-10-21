@@ -6,7 +6,7 @@ import RequestPage from './request/RequestPage';
 
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Function }) => {
+const Dashboard = () => {
     const { user } = useContext(UserContext);
 
     useEffect(() => {
@@ -56,45 +56,7 @@ const Dashboard = ({ isAHost, setIsAHost } : { isAHost: boolean, setIsAHost: Fun
             .catch(err => console.log(err));
     }, []);
 
-    return (
-        // <>
-        // {
-        //      isAHost && !isMobile && 
-        //      <>  
-        //         <div>
-        //             <h3 className="text-center mb-2"><i>Dashboard</i></h3>
-        //             <div className="flex flex-row justify-between">
-        //                 <div className="flex flex-row justify-between">
-        //                     <DataTable title="Queue"/>
-        //                     <DataTable title="Recently Played" />
-        //                 </div>
-        //                 <NowPlaying setIsAHost={setIsAHost} />
-        //             </div>
-        //         </div>
-        //      </>
-        // }
-        // {
-        //     (isAHost === false || isMobile) &&
-        //     <>
-                <div>
-                    <RequestPage />
-                </div>
-        //      </>
-        // }
-        // {
-        //     isAHost === null && !isMobile &&
-        //     <>
-        //         <div>
-        //             <h3 className="text-center p-4" style={{ marginTop: '20vh' }}>What would you like to do next?</h3>
-        //             <div className="flex flex-row justify-center gap-4 m-4">
-        //                 <button className="btn btn-secondary disable">Host a Party (coming soon)</button>
-        //                 <button className="btn btn-success" onClick={() => setIsAHost(false)}>Request Music</button>
-        //             </div>
-        //         </div>
-        //     </>
-        // }
-        // </>
-    )
+    return <RequestPage />;
 }
 
 export default Dashboard;

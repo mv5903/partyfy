@@ -14,6 +14,7 @@ import { getArtistList } from "@/helpers/SpotifyDataParser";
 import UserContext from '@/providers/UserContext';
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import ScrollToTopButton from "./utils/ScrollToTopButton";
+import ListContentCard from "@/components/misc/ListContentCard";
 
 interface IActivePlaylist {
     name?: string;
@@ -141,7 +142,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     id: 'recentSongs',
                     name: 'Recently Queued',
                     images: [],
-                    owner: { display_name: 'by you to others' }
+                    owner: { display_name: 'from you to others' }
                 })
                 setLoading(false);
                 setPlaylists(playlists);
@@ -160,7 +161,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 {
                     !activePlaylist && playlists.length > 0 &&
                     <div className="w-full">
-                        <div>
+                        <div className="max-h-[70vh] overflow-auto">
                             <InfiniteScroll
                                 dataLength={playlists.length}
                                 next={() => getMorePlaylists()}
@@ -173,51 +174,64 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                         const isLikedSongs = playlist.id === 'likedSongs';
                                         const isRecentSongs = playlist.id === 'recentSongs';
                                         const isNeedLikedSongsPermission = playlist.id === 'needLikedSongsPermission';
+
                                         let tags = [playlist.public ? 'public' : 'private'];
                                         if (playlist.collaborative) tags.push('collaborative');
-                                        return (
-                                            <div key={key} className="card mb-2 p-2 bg-zinc-900 opacity-80 w-full">
-                                                <div style={{ textAlign: 'left'}} className="flex items-center justify-between">
-                                                    <div className="flex flex-col">
-                                                        {                                                   
-                                                            playlist.images && playlist.images.length > 0
-                                                            ?
-                                                            <img src={playlist.images[0].url} width={'50px'} height={'50px'}/>
-                                                            :
-                                                            isLikedSongs
-                                                            ?
-                                                            <FaHeart size={50} />
-                                                            :
-                                                            isRecentSongs
-                                                            ?
-                                                            <FaHistory size={50} />
-                                                            :
-                                                            <FaSpotify size={50} />
-                                                        }
-                                                        {
-                                                            !isLikedSongs && !isNeedLikedSongsPermission && !isRecentSongs &&
-                                                            <SpotifyLinkBack link={playlist.external_urls.spotify} />
-                                                        }
-                                                    </div>
-                                                    <div className="flex flex-col w-3/4 ps-2">
-                                                        <div className="flex gap-1">
-                                                            <h6 className="p-2">{playlist.name}</h6>
-                                                            { playlist.collaborative && <h6 className="mt-3"><BsPeopleFill/></h6> }
-                                                            { playlist.public && <h6 className="mt-3"><BsGlobe/></h6> }
-                                                            { isNeedLikedSongsPermission && <h6 className="mt-3"><FaExclamationCircle className="text-red-600"/></h6> }
-                                                        </div>
-                                                        <h6 className="p-2"><i>{playlist.id === 'likedSongs' ? "Your Liked Songs" : playlist.owner.display_name}</i></h6>
-                                                    </div>
-                                                    {
-                                                        isNeedLikedSongsPermission 
-                                                        ?
-                                                        <button className="btn bg-green-600" onClick={acquireLikedSongsPermission}><FaSpotify className="mr-2" /> Login</button>
-                                                        :
-                                                        <button className="btn btn-primary" onClick={() => { setLoading(true); getPlaylistSongs(true, playlist.id, tags, playlist.name); }}><FaEye className="mr-2" /> View</button>
-                                                    }
-                                                </div>
-                                            </div>
-                                        );
+
+                                        const listContentCardProps = {
+                                            // Image source configuration
+                                            imgSrc: playlist.images && playlist.images.length > 0
+                                                ? <img src={playlist.images[0].url} width={'50px'} height={'50px'} />
+                                                : isLikedSongs
+                                                ? <FaHeart size={50} />
+                                                : isRecentSongs
+                                                ? <FaHistory size={50} />
+                                                : <FaSpotify size={50} />, 
+                                        
+                                            // Spotify link (only for non-liked, non-recent songs)
+                                            spotifyLinkBack: 
+                                                !isLikedSongs && !isNeedLikedSongsPermission && !isRecentSongs 
+                                                    ? playlist.external_urls.spotify 
+                                                    : undefined,
+                                        
+                                            // Primary content including title and icons
+                                            primaryContent: (
+                                                <>
+                                                    <h6 className="p-2">{playlist.name}</h6>
+                                                    {playlist.collaborative && <BsPeopleFill /> }
+                                                    {playlist.public && <BsGlobe /> }
+                                                    {isNeedLikedSongsPermission && <FaExclamationCircle className="text-red-600" />} 
+                                                </>
+                                            ),
+                                        
+                                            // Secondary content (owner's display name or liked songs description)
+                                            secondaryContent:
+                                                playlist.id === 'likedSongs' ? 'Your Liked Songs' : playlist.owner.display_name,
+                                        
+                                            // Button click handler and icon
+                                            btnOnClick: isNeedLikedSongsPermission
+                                                ? acquireLikedSongsPermission
+                                                : () => {
+                                                    setLoading(true);
+                                                    getPlaylistSongs(true, playlist.id, tags, playlist.name);
+                                                },
+
+                                            // Button icon (Spotify login or view)
+                                            btnIcon: isNeedLikedSongsPermission ? <FaSpotify /> : <FaEye />,
+                                        
+                                            // Button styling class
+                                            btnColorClass: isNeedLikedSongsPermission ? 'bg-green-600' : 'btn-primary',
+                                        
+                                            // Position (used for ordering purposes)
+                                            position: key + 1,
+                                        
+                                            // Explicit flag (currently not used)
+                                            explicit: null,
+                                        };
+                                        
+                                        return <ListContentCard key={key} {...listContentCardProps} />;
+                                        
+                                          
                                     })
                                 }
                             </InfiniteScroll>
@@ -235,7 +249,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                         <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
                             activePlaylist.items.length > 0 &&
-                            <div className="w-full">
+                            <div className="w-full max-h-[67vh] overflow-auto">
                                 <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.tags, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
@@ -248,31 +262,20 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                             let result = activePlaylist.id == 'recentSongs' ? item : item.track;
                                             if (!result) return;
                                             if (!result.album.images[2]) return;
-                                            return (
-                                                <div key={key} className="card p-2 my-2 bg-zinc-900 w-full">
-                                                    <div className="flex items-center justify-between w-full">
-                                                        <div className="flex justify-start w-full">
-                                                            <div className="flex flex-col">
-                                                                <img src={result.album.images[2].url} className="mt-3" style={{ width: '50px', height: '50px' }} />
-                                                                <SpotifyLinkBack link={result.external_urls.spotify} />
-                                                            </div>
-                                                            <div className="text-left w-3/4">
-                                                                <div className="flex justify-start">
-                                                                    <h6 className="text-left p-2 w-full">
-                                                                        <strong className="me-2">{key + 1}.</strong>
-                                                                        {result.name}
-                                                                        { result.explicit && <BsExplicitFill className="inline-block ml-2 mb-1"/> }
-                                                                    </h6>
-                                                                </div>
-                                                                <h6 className="p-2"><i>{getArtistList(result.artists)}</i></h6>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center justify-end">
-                                                            <button className="btn btn-success" onClick={() => addToQueue(result)}><FaPlusCircle /></button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
+
+                                            const listContentCardProps = {
+                                                imgSrc: result.album.images[2].url,
+                                                spotifyLinkBack: result.external_urls.spotify,
+                                                primaryContent: result.name,
+                                                position: key + 1,
+                                                secondaryContent: getArtistList(result.artists),
+                                                explicit: result.explicit,
+                                                btnOnClick: () => addToQueue(result),
+                                                btnIcon: <FaPlusCircle />,
+                                                btnColorClass: 'btn-success',
+                                            }
+
+                                            return <ListContentCard key={key} {...listContentCardProps} />
                                         })
                                     }
                                 </InfiniteScroll>

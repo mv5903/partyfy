@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -20,6 +20,29 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
 
     // Show end time of progress bar as total rather than remaining
     const [showEndTimeAsTotal, setShowEndTimeAsTotal] = useLocalStorage('showEndTimeAsTotal', false);
+
+
+    // Resize the queue div when the now playing div resizes because of the length of song name and artists
+    const [queueHeight, setQueueHeight] = useState("");
+    const queueRef = useRef(null);
+    const nowPlayingRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (queueRef.current) {
+                const padding = 10;
+                const height = window.innerHeight - queueRef.current.getBoundingClientRect().top - padding;
+                // Calculate the height of the queue div, based on the top-left corner to the bottom of the window
+                setQueueHeight(height.toFixed(0));
+            }
+        }
+
+        handleResize();
+        const interval = setInterval(handleResize, 1000);
+        
+        return () => clearInterval(interval);
+    }, [queueRef, nowPlayingRef]);
+
 
     async function showQueueDisclaimer() {
         await Swal.fire({
@@ -86,7 +109,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         nowPlaying 
                         ?                            
                         <>
-                            <div className="card p-2 my-2 flex justify-center w-full">
+                            <div ref={nowPlayingRef} className="card bg-zinc-900 p-2 my-2 flex justify-center w-full">
                                 <div className="flex gap-2">
                                     <div className="flex flex-col">
                                         {
@@ -212,42 +235,44 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                     queue != null && Array.isArray(queue) && queue.length > 0 &&
                     <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
                 }
-                <div className="table table-dark mt-3 w-full">
-                    {
-                        queue != null && Array.isArray(queue) &&
-                        queue.map((item: any, index: number) => {
-                            return (
-                                <div key={index}>
-                                    <div className="flex justify-between w-full px-0 gap-1">
-                                        <h2 className="mr-2">{index + 1}</h2>
-                                        <img 
-                                            className="me-2" 
-                                            src={item.type == 'track' ? item.album.images[2].url : item.images[0].url} 
-                                            style={{ width: '50px', height: '50px' }} 
-                                        />
-                                        <div className="w-2/3">
-                                            <div className="flex justify-start">
-                                                <h6 className="text-left text-md">
-                                                    <strong>
-                                                        {item.name}
-                                                    </strong>
-                                                    {item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
+                <div className="overflow-auto" style={{ maxHeight: `${queueHeight}px` }} ref={queueRef} >
+                    <div className="table table-dark mt-3 w-full">
+                        {
+                            queue != null && Array.isArray(queue) &&
+                            queue.map((item: any, index: number) => {
+                                return (
+                                    <div key={index}>
+                                        <div className="flex justify-between w-full px-0 gap-1">
+                                            <h2 className="mr-2">{index + 1}</h2>
+                                            <img 
+                                                className="me-2" 
+                                                src={item.type == 'track' ? item.album.images[2].url : item.images[0].url} 
+                                                style={{ width: '50px', height: '50px' }} 
+                                            />
+                                            <div className="w-2/3">
+                                                <div className="flex justify-start">
+                                                    <h6 className="text-left text-md">
+                                                        <strong>
+                                                            {item.name}
+                                                        </strong>
+                                                        {item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
+                                                    </h6>
+                                                </div>
+                                                <h6 className="text-left">
+                                                    <i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i>
                                                 </h6>
                                             </div>
-                                            <h6 className="text-left">
-                                                <i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i>
-                                            </h6>
+                                            <SpotifyLinkBack link={item.external_urls.spotify} />
                                         </div>
-                                        <SpotifyLinkBack link={item.external_urls.spotify} />
+                                        {
+                                            index < queue.length - 1 &&
+                                            <div className="divider divider-horizontal"></div>
+                                        }
                                     </div>
-                                    {
-                                        index < queue.length - 1 &&
-                                        <div className="divider divider-horizontal"></div>
-                                    }
-                                </div>
-                            );
-                        })
-                    }
+                                );
+                            })
+                        }
+                    </div>
                 </div>
             </div>
             {
