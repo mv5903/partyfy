@@ -1,13 +1,11 @@
-import { isMobile } from 'react-device-detect';
 import { BsFillPersonFill } from 'react-icons/bs';
 import { IoMdArrowDropdown } from 'react-icons/io';
 
-import Options from '@/components/host/Options';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
-import { FaCog, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FaLinkSlash, FaPersonWalkingArrowRight } from "react-icons/fa6";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
@@ -145,7 +143,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
 
     return (
         <div ref={ref}>
-            <div className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
+            <div id="user-quick-action-btn" className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
                 <BsFillPersonFill size={40} />
                 <IoMdArrowDropdown className='mt-2' size={25} />
             </div>
@@ -159,10 +157,10 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                             <p className="text-center">User type: {getProductTypeAsString(user.getProductType())}</p>
                         </div>
                     }
-                    <button className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
-                    <button className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
-                    <button className="btn bg-green-700 flex justify-start" onClick={() => unlinkSpotify()}><FaLinkSlash className='mr-2'/> Unlink Spotify</button>
-                    <a href="/api/auth/logout" className="btn btn-primary flex justify-start" onClick={() => setIsComponentVisible(!isComponentVisible)}><FaPersonWalkingArrowRight className='mr-2' />Log Out {user.db.Username}</a>
+                    <button id="delete-account-btn" className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
+                    <button id="change-username-btn" className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
+                    <button id="unlink-spotify-btn" className="btn bg-green-700 flex justify-start" onClick={() => unlinkSpotify()}><FaLinkSlash className='mr-2'/> Unlink Spotify</button>
+                    <a id="logout-btn" href="/api/auth/logout" className="btn btn-primary flex justify-start" onClick={() => setIsComponentVisible(!isComponentVisible)}><FaPersonWalkingArrowRight className='mr-2' />Log Out {user.db.Username}</a>
                 </div>
             }
         </div>
