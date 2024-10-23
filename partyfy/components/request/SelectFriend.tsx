@@ -1,3 +1,4 @@
+import BackgroundEffectColor from "@/helpers/BackgroundEffectColor";
 import { PartyfyProductType } from "@/helpers/PartyfyProductType";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
@@ -74,6 +75,7 @@ const SelectFriend = () => {
     }
 
     useEffect(() => {
+        BackgroundEffectColor.removeBackgroundEffectColor();
         getFriendPlayingStatus();
         const interval = setInterval(getFriendPlayingStatus, 10000);
         return () => clearInterval(interval);

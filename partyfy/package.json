@@ -8,12 +8,7 @@
     "build": "next build",
     "start": "concurrently \"next start\" \"node api-server\"",
     "start:api": "node api-server",
-    "test": "jest tests --coverage --maxWorkers=10",
-    "test:watch": "jest --coverage --watch",
-    "test:integration": "start-server-and-test start http-get://localhost:3000 cypress:run",
-    "test:integration:watch": "start-server-and-test start http-get://localhost:3000 cypress:open",
-    "cypress:run": "cypress run",
-    "cypress:open": "cypress open"
+    "test": "npx cypress open"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^2.0.0",
@@ -35,6 +30,8 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-jwt": "^8.0",
+    "fast-average-color": "^9.4.0",
+    "fast-average-color-node": "^3.1.0",
     "helmet": "^6.0.1",
     "highlight.js": "^11.7.0",
     "jwks-rsa": "^3.0.0",
@@ -75,6 +72,7 @@
     "autoprefixer": "^10.4.14",
     "babel-jest": "^29.3.1",
     "cypress": "^11.2.0",
+    "cypress-terminal-report": "^7.0.4",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-typescript": "^3.5.5",
@@ -85,6 +83,7 @@
     "jest-environment-jsdom": "^29.3.1",
     "postcss": "^8.4.27",
     "prettier": "^2.8.8",
+    "request-promise": "^4.2.6",
     "start-server-and-test": "^1.15.1",
     "tailwindcss": "^3.3.3",
     "ts-node": "^10.9.1",

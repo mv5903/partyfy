@@ -6,10 +6,12 @@ import UserContext from '@/providers/UserContext';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 
+import BackgroundEffectColor from "@/helpers/BackgroundEffectColor";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import { getDeviceIdentifier } from "@/utils/deviceIdentifier";
 import { sessions, Users } from "@prisma/client";
+import { FastAverageColor } from 'fast-average-color';
 import Image from 'next/image';
 import { FaList, FaMusic, FaSearch } from "react-icons/fa";
 import appStoreIcon from "../../public/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg";
@@ -31,6 +33,51 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
+    const [nowPlaying, setNowPlaying] = useState<any>(null);
+
+    const RGBtoHSL = (r, g, b) => {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const l = Math.max(r, g, b);
+        const s = l - Math.min(r, g, b);
+        const h = s
+            ? l === r
+                ? (g - b) / s
+                : l === g
+                    ? 2 + (b - r) / s
+                    : 4 + (r - g) / s
+            : 0;
+        return [
+            60 * h < 0 ? 60 * h + 360 : 60 * h,
+            100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
+            (100 * (2 * l - s)) / 2,
+        ];
+    };
+
+    useEffect(() => {
+        loadFriendSpotifyAuth();
+        unattendedQueuesAllowed();
+        isTemporarySessionNotExpired();
+
+        if (!temporarySession) isStillFriends();
+
+        const subscription = Supabase
+            .channel('UserRequest')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
+                unattendedQueuesAllowed();
+                if (!temporarySession) isStillFriends();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
+                unattendedQueuesAllowed();
+                if (!temporarySession) isStillFriends();
+            })
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        }
+    }, []);
 
     useEffect(() => {
         async function loadFriendUserObject() {
@@ -43,8 +90,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         let timeout = setInterval(loadFriendUserObject, 1000);
         return () => clearInterval(timeout);
     }, [currentFriend])
-
-
+    
     async function loadFriendSpotifyAuth() {
         if (currentFriend && currentFriend.RefreshToken) {
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
@@ -58,6 +104,42 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             setCurrentFriend(null);
         }
     }
+    
+    useEffect(() => {
+        if (!friendSpotifyAuth) return;
+        async function getNowPlaying() {
+            try {
+                let accessToken = await friendSpotifyAuth.getAccessToken();
+                if (!accessToken) return;
+                const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
+                if (response.status == 204) setNowPlaying(false);
+                const data = await response.json();
+    
+                // Decide background color based on album art
+                let albumArt = null;
+                console.log("Test: ", data.item.album.images[0].url);
+                if (!data?.item?.album?.images[0]?.url) return;
+                albumArt = data.item.album.images[0].url;
+                const fac = new FastAverageColor();
+                fac.getColorAsync(albumArt).then(color => {
+                    console.log(color);
+                    let rgb = color.value;
+                    let [h, s, l] = RGBtoHSL(rgb[0], rgb[1], rgb[2]);
+                    BackgroundEffectColor.setBackgroundEffectColor(h); 
+                });
+    
+                if (data) {
+                    setNowPlaying(data);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    
+        getNowPlaying();
+        let interval = setInterval(getNowPlaying, 1000);
+        return () => clearInterval(interval);
+    }, [friendSpotifyAuth]);    
 
     async function addToQueue(song: any) {
         let result = await Swal.fire({
@@ -197,30 +279,6 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             setTimeout(exitSession, 3000);
         }
     }
-
-    useEffect(() => {
-        loadFriendSpotifyAuth();
-        unattendedQueuesAllowed();
-        isTemporarySessionNotExpired();
-
-        if (!temporarySession) isStillFriends();
-
-        const subscription = Supabase
-            .channel('UserRequest')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
-                unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
-            })
-            .subscribe();
-
-        return () => {
-            subscription.unsubscribe();
-        }
-    }, []);
 
     if (temporarySession) {
         useEffect(() => {

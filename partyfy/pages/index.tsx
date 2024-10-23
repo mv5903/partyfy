@@ -8,6 +8,7 @@ import FriendsList from '@/components/dropdowns/friends/FriendsMenu';
 import AnchorLink from '@/components/misc/AnchorLink';
 import Loading from '@/components/misc/Loading';
 import RequestSong from '@/components/request/RequestSong';
+import BackgroundEffectColor from '@/helpers/BackgroundEffectColor';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import UserContext from '@/providers/UserContext';
@@ -36,6 +37,7 @@ export default function Home() {
 
   // Normal User Handling
   useEffect(() => {
+    BackgroundEffectColor.removeBackgroundEffectColor();
     if (user) {
       handleSpotifyAuth().then((result) => {
         setSpotifyAuthenticated(result || result === undefined);
