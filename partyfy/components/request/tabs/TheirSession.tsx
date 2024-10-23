@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -100,7 +100,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         ) 
     }
     return (
-        <div>
+        <div className="overflow-auto">
             <div className="w-full">
                 <h5 className="mt-2 text-lg">Their Session</h5>
                 <div className="flex flex-col items-center">
@@ -235,7 +235,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                     queue != null && Array.isArray(queue) && queue.length > 0 &&
                     <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
                 }
-                <div className="overflow-auto" style={{ maxHeight: `${queueHeight}px` }} ref={queueRef} >
+                <div style={{ maxHeight: `${queueHeight}px` }} ref={queueRef} >
                     <div className="table table-dark mt-3 w-full">
                         {
                             queue != null && Array.isArray(queue) &&

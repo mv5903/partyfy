@@ -11,23 +11,47 @@ $body-font: 'Montserrat', sans-serif;
   $text-shadow: ();
   @for $i from 0 through $count {
     $text-shadow: $text-shadow,
-                 (-.5+(random()) * 3) + em
-                 (-.5+(random()) * 3) + em
+                 (-.5 + (random()) * 3) + em
+                 (-.5 + (random()) * 3) + em
                  7px
-                 hsla(var(--dot-hue, 0), 100%, 50%, .6); // Use global CSS variable
+                 hsla(var(--dot-hue, 0), 100%, 50%, .6); // Global CSS variable for color hue
   }
   text-shadow: $text-shadow;
-  transition: text-shadow 3s ease-in-out; // Add transition for the smooth color change
+  transition: text-shadow 3s ease-in-out; // Smooth transition for color change
+}
+
+// Keyframes for rotating and pulsating effects
+@keyframes rotate-dots {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(180deg) scale(1.2); } // Slight scale to give depth
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-180deg) scale(1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes pulse-dots {
+  0%, 100% { text-shadow: 0 0 7px hsla(var(--dot-hue, 0), 100%, 50%, 0.6); }
+  50% { text-shadow: 0 0 14px hsla(var(--dot-hue, 0), 100%, 50%, 0.8); } // Pulse glow effect
 }
 
 body::before,
 body::after,
 head::before,
 head::after {
-  @include dots(20);
-  animation-duration: 44s;
+  @include dots(40);
+  animation: rotate-dots 44s infinite linear, pulse-dots 3s ease-in-out infinite alternate;
   animation-delay: -27s;
-  transition: all 3s ease-in-out; // Add transition effect
+  transition: all 3s ease-in-out; // Smooth transition when changing properties
+}
+
+// Adding hover effect to enhance interaction
+body:hover::before,
+body:hover::after,
+head:hover::before,
+head:hover::after {
+  @include dots(10);
+  animation-duration: 30s; // Speed up rotation on hover
+  filter: blur(1px); // Adding a subtle blur on hover for depth
 }
   
 html {
