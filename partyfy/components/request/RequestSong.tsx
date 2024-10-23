@@ -12,10 +12,8 @@ import { Supabase } from "@/helpers/SupabaseHelper";
 import { getDeviceIdentifier } from "@/utils/deviceIdentifier";
 import { sessions, Users } from "@prisma/client";
 import { FastAverageColor } from 'fast-average-color';
-import Image from 'next/image';
 import { FaList, FaMusic, FaSearch } from "react-icons/fa";
-import appStoreIcon from "../../public/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg";
-import appLogo from "../../public/logo.png";
+import PromotionalHeader from "../misc/PromotionalHeader";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
@@ -117,12 +115,10 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     
                 // Decide background color based on album art
                 let albumArt = null;
-                console.log("Test: ", data.item.album.images[0].url);
                 if (!data?.item?.album?.images[0]?.url) return;
                 albumArt = data.item.album.images[0].url;
                 const fac = new FastAverageColor();
                 fac.getColorAsync(albumArt).then(color => {
-                    console.log(color);
                     let rgb = color.value;
                     let [h, s, l] = RGBtoHSL(rgb[0], rgb[1], rgb[2]);
                     BackgroundEffectColor.setBackgroundEffectColor(h); 
@@ -320,17 +316,8 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                         }
                     </div>
                     {
-                        temporarySession &&
-                        <div className="card flex-row w-auto flex mx-auto m-3 p-2 gap-3 justify-center place-items-center">
-                            <div className="w-10">
-                                <a href="https://partyfy.mattvandenberg.com" target="_blank">
-                                    <Image priority src={appLogo} alt="Partyfy Web App" />
-                                </a>
-                            </div>
-                            <a href="https://apps.apple.com/us/app/partyfy-queue-management/id6463042237" target="_blank">
-                                <Image priority src={appStoreIcon} alt="Partyfy iOS App" />
-                            </a>
-                        </div>
+                        temporarySession && <PromotionalHeader />
+                        
                     }
                     {
                         temporarySession &&
