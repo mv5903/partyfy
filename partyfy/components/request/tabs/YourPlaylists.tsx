@@ -13,7 +13,6 @@ import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import UserContext from '@/providers/UserContext';
 import { UserProfile } from "@auth0/nextjs-auth0/client";
-import ScrollToTopButton from "./utils/ScrollToTopButton";
 import ListContentCard from "@/components/misc/ListContentCard";
 
 interface IActivePlaylist {
@@ -237,7 +236,6 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                 }
                             </InfiniteScroll>
                         </div>
-                        <ScrollToTopButton />
                     </div>
                 }
                 {
@@ -287,7 +285,6 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                             (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
                             <h3 className="text-center m-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
                         }
-                        <ScrollToTopButton />
                     </div>
                 }
             </div>

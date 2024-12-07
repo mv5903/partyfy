@@ -182,7 +182,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
       };
 
     return (
-        <div>
+        <div className='h-full'>
             <style>
                 {`
                     .swal2-input {
@@ -204,7 +204,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
                     {
                         qrCodeURL 
                         ?
-                        <div className='w-full text-center flex flex-col place-items-center gap-4'>
+                        <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
                             <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
                             <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
                             <div className='card w-auto p-3 bg-white' >
