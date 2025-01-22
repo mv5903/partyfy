@@ -20,7 +20,7 @@ class HttpTransport extends Transport {
     })
     .catch(err => {
       console.error('Error sending logs to remote server:', err);
-      callback(err);
+      callback();
     });
   }
 }
