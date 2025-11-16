@@ -54,7 +54,7 @@ const FriendsMenu = () => {
             </div>
             {
                 isComponentVisible && 
-                <div className='z-[3] px-3 py-4 absolute w-[calc(100%-1rem)] left-0 bg-zinc-800 rounded-md shadow-lg flex flex-col gap-2 text-xs h-[80vh] mx-2'>
+                <div className='z-[3] px-3 py-4 absolute w-[calc(100%-1rem)] left-0 bg-zinc-800 rounded-md shadow-lg flex flex-col gap-2 text-xs min-h-[80vh] mx-2'>
                     <div role="tablist" className="tabs tabs-boxed bg-primary tabs-lg mx-auto w-full">
                         {
                         Object.values(FriendListScreen)
