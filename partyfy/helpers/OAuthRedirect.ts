@@ -36,7 +36,9 @@ export class OAuthRedirect {
    * Get the Spotify OAuth URL with dynamic redirect
    */
   static getSpotifyAuthUrl(clientId: string, scopes: string): string {
-    const redirectUri = this.getStoredOrigin();
+    // Use the current window origin, not the stored one
+    // The stored one is for after the OAuth callback
+    const redirectUri = typeof window !== 'undefined' ? window.location.origin : '';
 
     return 'https://accounts.spotify.com/authorize' +
       '?response_type=code' +

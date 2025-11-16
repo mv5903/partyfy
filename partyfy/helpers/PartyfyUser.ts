@@ -101,9 +101,13 @@ export default class PartyfyUser {
                     })
                 });
                 // Redirect back to the stored origin (or current origin if not stored)
+                // Clean up the URL by removing the code parameter
                 const redirectOrigin = OAuthRedirect.getStoredOrigin();
                 OAuthRedirect.clearStoredOrigin(); // Clean up after use
-                window.location.href = redirectOrigin;
+                
+                // Remove the code from URL and stay on current domain
+                const cleanUrl = `${redirectOrigin}${window.location.pathname}`;
+                window.location.href = cleanUrl;
                 return true;
             }
         }
