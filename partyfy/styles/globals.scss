@@ -7,59 +7,16 @@
 $title-font: 'Inter', sans-serif;
 $body-font: 'Inter', sans-serif;
 
-// @mixin dots($count) {
-//   $text-shadow: ();
-//   @for $i from 0 through $count {
-//     $text-shadow: $text-shadow,
-//                  (-.5 + (random()) * 3) + em
-//                  (-.5 + (random()) * 3) + em
-//                  7px
-//                  hsla(var(--dot-hue, 0), 100%, 50%, .6); 
-//   }
-//   text-shadow: $text-shadow;
-//   transition: text-shadow 3s ease-in-out; 
-// }
-
-// @keyframes rotate-dots {
-//   0% { transform: rotate(0deg) scale(1); }
-//   25% { transform: rotate(180deg) scale(1.2); }
-//   50% { transform: rotate(0deg) scale(1); }
-//   75% { transform: rotate(-180deg) scale(1); }
-//   100% { transform: rotate(0deg) scale(1); }
-// }
-
-// @keyframes pulse-dots {
-//   0%, 100% { text-shadow: 0 0 7px hsla(var(--dot-hue, 0), 100%, 50%, 0.6); }
-//   50% { text-shadow: 0 0 14px hsla(var(--dot-hue, 0), 100%, 50%, 0.8); } 
-// }
-
-// body::before,
-// body::after,
-// head::before,
-// head::after {
-//   @include dots(40);
-//   animation: rotate-dots 44s infinite linear, pulse-dots 3s ease-in-out infinite alternate;
-//   animation-delay: -27s;
-//   transition: all 3s ease-in-out; 
-// }
-
-
-// body:hover::before,
-// body:hover::after,
-// head:hover::before,
-// head:hover::after {
-//   @include dots(10);
-//   animation-duration: 30s; 
-//   filter: blur(1px);
-// }
-  
 html {
-  background: rgb(0, 0, 0) !important;
+  background: linear-gradient(
+    to bottom,
+    oklch(18.5% 0.006 70),
+    oklch(10% 0.004 70)
+  )
 }
 
 body {
-  background-color: transparent;
-  height: 100%;
+  @apply bg-transparent h-full;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
@@ -70,54 +27,6 @@ body, head {
   display: block;
   color: transparent;
 }
-
-// head::before, head::after,
-// body::before, body::after {
-//   z-index: -1 !important;
-//   position: fixed !important;
-//   top: 50% !important;
-//   left: 50% !important;
-//   width: 3em !important;
-//   height: 3em !important;
-//   content: '.';
-//   animation: 44s -27s move infinite ease-in-out alternate;
-//   color: transparent
-// }
-
-
-// body::before {
-//   @include dots(40);
-//   animation-duration: 44s;
-//   animation-delay: -27s;
-// }
-
-// body::after {
-//   @include dots(40);
-//   animation-duration: 43s;
-//   animation-delay: -32s;
-// }
-
-// head::before {
-//   @include dots(40);
-//   animation-duration: 42s;
-//   animation-delay: -23s;
-// }
-
-// head::after {
-//   @include dots(40);
-//   animation-duration: 41s;
-//   animation-delay: -19s;
-// }
-
-
-// @keyframes move {
-//   from {
-//     transform: rotate(0deg) scale(12) translateX(-20px);
-//   }
-//   to {
-//     transform: rotate(360deg) scale(18) translateX(20px);
-//   }
-// }
 
 main {
   color: white;
@@ -173,8 +82,6 @@ h5 {
 div:not(nav *) {
   opacity: .99 !important;
 }
-
-
 
 @layer base {
   :root {

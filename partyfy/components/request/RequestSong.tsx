@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TiArrowBack } from "react-icons/ti";
 
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
@@ -29,11 +30,32 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     }
 
     const { user } = useContext(UserContext);
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
-    const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
     const [nowPlaying, setNowPlaying] = useState<any>(null);
+
+    // Get tab from URL params, default to Search
+    const tabParam = searchParams.get('tab');
+    const getRequestPageView = () => {
+        if (tabParam === 'session') return RequestPageView.TheirSession;
+        if (tabParam === 'playlists' && !temporarySession) return RequestPageView.YourPlaylists;
+        return RequestPageView.Search;
+    };
+    const requestPageView = getRequestPageView();
+
+    const setRequestPageView = (view: RequestPageView) => {
+        const tabMap = {
+            [RequestPageView.Search]: 'search',
+            [RequestPageView.TheirSession]: 'session',
+            [RequestPageView.YourPlaylists]: 'playlists'
+        };
+        const newTab = tabMap[view];
+        const currentPath = window.location.pathname;
+        router.push(`${currentPath}?tab=${newTab}`, { scroll: false });
+    };
 
     const RGBtoHSL = (r, g, b) => {
         r /= 255;

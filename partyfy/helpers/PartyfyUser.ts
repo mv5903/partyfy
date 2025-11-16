@@ -3,6 +3,7 @@ import { Users } from "@prisma/client";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { PartyfyProductType } from "./PartyfyProductType";
 import { SpotifyAuth } from "./SpotifyAuth";
+import { OAuthRedirect } from "./OAuthRedirect";
 
 export default class PartyfyUser {
     /**
@@ -99,7 +100,10 @@ export default class PartyfyUser {
                         RefreshToken: data.refresh_token
                     })
                 });
-                window.location.href = window.location.origin;
+                // Redirect back to the stored origin (or current origin if not stored)
+                const redirectOrigin = OAuthRedirect.getStoredOrigin();
+                OAuthRedirect.clearStoredOrigin(); // Clean up after use
+                window.location.href = redirectOrigin;
                 return true;
             }
         }

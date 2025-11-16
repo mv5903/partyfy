@@ -25,6 +25,7 @@
     "@supabase/supabase-js": "^2.42.4",
     "@sweetalert2/theme-dark": "^5.0.15",
     "@sweetalert2/themes": "^5.0.15",
+    "@tanstack/react-query": "^5.90.10",
     "@types/mssql": "^8.1.2",
     "@types/mysql": "^2.15.21",
     "@types/react-infinite-scroll-component": "^5.0.0",

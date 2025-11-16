@@ -7,13 +7,13 @@ import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
 import { Users } from "@prisma/client";
 import { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FaCog, FaSave } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
-import RequestSong from "./RequestSong";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,11 +23,11 @@ import { Separator } from "@/components/ui/separator";
 
 const SelectFriend = () => {
     const { user } = useContext(UserContext);
+    const router = useRouter();
 
     const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
     const [friendsList, setFriendsList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentFriend, setCurrentFriend] = useState<Users>(null);
     const [uqLoading, setUQLoading] = useState(false);
     const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
     const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
@@ -37,7 +37,6 @@ const SelectFriend = () => {
 
     async function fetchFriends() {
         setRefreshingFriendsLoading(true);
-        if (currentFriend) return;
         const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
         let data = await response.json();
         // Show users who have functionality enabled first
@@ -47,7 +46,6 @@ const SelectFriend = () => {
         setFriendsList(data);
     }
     async function fetchUQStatus() {
-        if (currentFriend) return;
         const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
         const data = await response.json();
         if (data) {
@@ -85,7 +83,7 @@ const SelectFriend = () => {
         getFriendPlayingStatus();
         const interval = setInterval(getFriendPlayingStatus, 10000);
         return () => clearInterval(interval);
-    }, [currentFriend, friendsList]);
+    }, [friendsList]);
 
     useEffect(() => {
         fetch('api/database/users?UserID=' + user.getUserID())
@@ -328,42 +326,37 @@ const SelectFriend = () => {
 
     return (
         <div className="grow h-full flex flex-col">
-            {
-                !currentFriend &&
-                <>
-                    <div className="text-center">
-                        {
-                            isUnattendedQueuesEnabled === null || uqLoading
-                            ?
-                            <div className="h-[10vh]">
-                                <LoadingDots className="mt-4" />
-                            </div>
-                            :
-                            <div className="h-[10vh]">
-                                <div className="flex justify-center place-items-center">
-                                    <Button
-                                        variant={isUnattendedQueuesEnabled ? "success" : "warning"}
-                                        className="m-2"
-                                        onClick={() => unattendedQueues()}
-                                    >
-                                        {isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}
-                                    </Button>
-                                    {
-                                        user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
-                                        <Button className="p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></Button>
-                                    }
-                                </div>
-                                <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
-                            </div>
-                        }
+            <div className="text-center">
+                {
+                    isUnattendedQueuesEnabled === null || uqLoading
+                    ?
+                    <div className="h-[10vh]">
+                        <LoadingDots className="mt-4" />
                     </div>
-                    <div className="flex items-center m-4">
-                        <Separator className="flex-1" />
-                        <span className="px-4 text-muted-foreground">OR</span>
-                        <Separator className="flex-1" />
+                    :
+                    <div className="h-[10vh]">
+                        <div className="flex justify-center place-items-center">
+                            <Button
+                                variant={isUnattendedQueuesEnabled ? "success" : "warning"}
+                                className="m-2"
+                                onClick={() => unattendedQueues()}
+                            >
+                                {isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}
+                            </Button>
+                            {
+                                user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
+                                <Button className="p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></Button>
+                            }
+                        </div>
+                        <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
                     </div>
-                </>
-            }
+                }
+            </div>
+            <div className="flex items-center m-4">
+                <Separator className="flex-1" />
+                <span className="px-4 text-muted-foreground">OR</span>
+                <Separator className="flex-1" />
+            </div>
             <div className="grow text-center mx-2 flex flex-col gap-3">
                 {
                     loading &&
@@ -387,7 +380,7 @@ const SelectFriend = () => {
                     </div>
                 }
                 {
-                    !currentFriend && !loading && friendsList.length > 0 &&
+                    !loading && friendsList.length > 0 &&
                     <>
                         <h3 className="text-2xl font-semibold text-white">Add to:</h3>
                         <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends()}>
@@ -438,7 +431,8 @@ const SelectFriend = () => {
                                                     });
                                                     return;
                                                 }
-                                                setCurrentFriend(friend);
+                                                // Navigate to request page with friend ID
+                                                router.push(`/request/${friend.UserID}`);
                                             } }
                                             disabled={!friendIsActive}
                                             className={`w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300 text-white
@@ -474,11 +468,6 @@ const SelectFriend = () => {
                             }
                         </div>
                     </>
-
-                }
-                {
-                    currentFriend != null &&
-                    <RequestSong currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} temporarySession={null} exitSession={null} />
                 }
             </div>
         </div>

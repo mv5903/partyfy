@@ -207,12 +207,12 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                         <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
                             <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
                             <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
-                            <Card className='w-auto p-2 bg-white'>
-                                <QRCode ref={qrRef} value={qrCodeURL} size={192} />
-                            </Card>
+                            <div className='w-auto p-2 border-white border-4 rounded-md'>
+                                <QRCode bgColor='transparent' fgColor='white' ref={qrRef} value={qrCodeURL} size={192} />
+                            </div>
                             <div className='flex gap-2'>
-                                <Button onClick={() => saveQR()}><FaSave /></Button>
-                                <Button onClick={() => copyLinkToClipboard()}><FaCopy /></Button>
+                                <Button variant='secondary' onClick={() => saveQR()}><FaSave /></Button>
+                                <Button variant='secondary' onClick={() => copyLinkToClipboard()}><FaCopy /></Button>
                                 <Button variant="destructive" onClick={() => deleteSession(true)}><FaTrash /></Button>
                             </div>
                         </div>

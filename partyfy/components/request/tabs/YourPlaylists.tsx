@@ -8,6 +8,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 import { CONSTANTS } from "@/assets/Constants";
+import { OAuthRedirect } from "@/helpers/OAuthRedirect";
 import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
@@ -119,6 +120,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             cancelButtonText: 'Cancel'
         }).then(async (result) => {
             if (result.isConfirmed) {
+                // Store the current origin before redirecting to Spotify
+                OAuthRedirect.storeOrigin();
                 window.location.href = CONSTANTS.SPOTIFY_AUTH_URL;
             }
         })

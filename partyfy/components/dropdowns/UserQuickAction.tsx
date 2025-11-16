@@ -1,6 +1,7 @@
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaBars, FaEdit, FaTrash } from 'react-icons/fa';
 import { FaLinkSlash, FaPersonWalkingArrowRight, FaRightFromBracket } from "react-icons/fa6";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
@@ -17,6 +18,7 @@ import {
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
 
     const { user } = useContext(UserContext);
+    const router = useRouter();
 
     async function checkUsername(username) {
         if (username.length < 1 || username.length > 16) return false;
@@ -54,7 +56,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                 }
             });
             if (res.ok) {
-                window.location.href = '/api/auth/logout';
+                router.push('/api/auth/logout');
             }
         }
     }
@@ -124,7 +126,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                     })     
                     // Refetch User details to show that the username has changed on top of screen
                     getUser();
-                    window.location.reload();
+                    router.refresh();
                 })
               return;
             }
