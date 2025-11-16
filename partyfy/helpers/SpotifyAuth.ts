@@ -24,7 +24,8 @@ export class SpotifyAuth {
     async getRefreshToken(authorizationCode: string) {
         if (authorizationCode === '') return;
         let returnedData = null;
-        await fetch('/api/spotify/refreshtoken?code=' + authorizationCode)
+        const redirectUri = window.location.origin;
+        await fetch('/api/spotify/refreshtoken?code=' + authorizationCode + '&redirect_uri=' + encodeURIComponent(redirectUri))
             .then(res => res.json())
             .then(data => {
                 if (data.refresh_token) {
