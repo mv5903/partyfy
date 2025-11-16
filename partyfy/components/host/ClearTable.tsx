@@ -1,6 +1,7 @@
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
 
 const ClearTable = ({ table } : { table: string }) => {
 
@@ -40,7 +41,7 @@ const ClearTable = ({ table } : { table: string }) => {
 
     return (
         <>
-            <button className="btn btn-danger m-2" onClick={clearTable}>{`Clear ${table}`}</button>
+            <Button variant="destructive" className="m-2" onClick={clearTable}>{`Clear ${table}`}</Button>
         </>
     );
 }

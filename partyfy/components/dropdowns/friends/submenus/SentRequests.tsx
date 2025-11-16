@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { GiCancel } from 'react-icons/gi';
+import { FaRegTrashAlt } from 'react-icons/fa';
 
 import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
@@ -59,28 +61,28 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     }
 
     return (
-        <div>
-            <h1 className='mt-3 mb-6'>Outgoing Requests</h1>
+        <div className="text-white">
+            <h1 className='mt-3 mb-6 text-xl font-semibold'>Outgoing Requests</h1>
             <div className='overflow-y-scroll max-h-[65vh]'>
                 {
-                    loading 
+                    loading
                     ?
                     <Loading />
                     :
                         usersReturned.length === 0 || !usersReturned
                         ?
                         <div>
-                            <h5 className="text-xl text-center">You have not sent any friend requests.</h5>
+                            <h5 className="text-xl text-center text-white">You have not sent any friend requests.</h5>
                         </div>
                         :
                         usersReturned.map((user, index) => {
                             return (
-                                <div key={index} className="card bg-primary p-2 mt-3">
+                                <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                                     <div className="flex place-items-center justify-between">
-                                        <h5 className="text-lg">{user.Username}</h5>
-                                        <button className="btn btn-sm bg-red-8" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><GiCancel /></button>
+                                        <h5 className="text-lg text-white">{user.Username}</h5>
+                                        <Button size="sm" variant="ghost" onClick={() => cancelFriendRequest(user.UserID, user.Username)}><FaRegTrashAlt className='text-red-500' /></Button>
                                     </div>
-                                </div>
+                                </Card>
                             );
                         })
                 }

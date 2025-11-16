@@ -1,17 +1,20 @@
-import { BsFillPersonFill } from 'react-icons/bs';
-import { IoMdArrowDropdown } from 'react-icons/io';
-
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
-import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
 import { useContext } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { FaLinkSlash, FaPersonWalkingArrowRight } from "react-icons/fa6";
+import { FaBars, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaLinkSlash, FaPersonWalkingArrowRight, FaRightFromBracket } from "react-icons/fa6";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
-
-    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
 
     const { user } = useContext(UserContext);
 
@@ -142,28 +145,66 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
     }
 
     return (
-        <div ref={ref}>
-            <div id="user-quick-action-btn" className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
-                <BsFillPersonFill size={40} />
-                <IoMdArrowDropdown className='mt-2' size={25} />
-            </div>
-            {
-                isComponentVisible &&
-                <div className='z-[2] p-3 min-w-40 absolute right-0 mr-2 bg-zinc-800 rounded-md flex flex-col gap-2 shadow-lg'>
-                    {
-                        user &&
-                        <div>
-                            <h3 className="text-center mb-2 text-xl">Quick Actions</h3>
-                            <p className="text-center">User type: {getProductTypeAsString(user.getProductType())}</p>
-                        </div>
-                    }
-                    <button id="delete-account-btn" className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
-                    <button id="change-username-btn" className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
-                    <button id="unlink-spotify-btn" className="btn bg-green-700 flex justify-start" onClick={() => unlinkSpotify()}><FaLinkSlash className='mr-2'/> Unlink Spotify</button>
-                    <a id="logout-btn" href="/api/auth/logout" className="btn btn-primary flex justify-start" onClick={() => setIsComponentVisible(!isComponentVisible)}><FaPersonWalkingArrowRight className='mr-2' />Log Out {user.db.Username}</a>
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button
+                    id="user-quick-action-btn"
+                    className="flex align-center mr-2 cursor-pointer mt-2 rounded-lg shadow-md"
+                >
+                    <FaBars size={18} />
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="flex flex-col gap-4 bg-stone-900 border-stone-700">
+                <SheetHeader>
+                    <SheetTitle className="text-white">Settings</SheetTitle>
+                    {user && user.db && (
+                        <SheetDescription>
+                            User type: {getProductTypeAsString(user.getProductType())}
+                        </SheetDescription>
+                    )}
+                </SheetHeader>
+                <div className="flex flex-col gap-3 justify-between h-full">
+                  <div className="flex flex-col gap-3 mt-4">
+                    <Button
+                        id="delete-account-btn"
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => deleteAccount()}
+                    >
+                        <FaTrash className='mr-2'/> Delete Account
+                    </Button>
+                    <Button
+                        id="change-username-btn"
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => changeUsername()}
+                    >
+                        <FaEdit className='mr-2' /> Change Username
+                    </Button>
+                    <Button
+                        id="unlink-spotify-btn"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => unlinkSpotify()}
+                    >
+                        <FaLinkSlash className='mr-2'/> Unlink Spotify
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                        id="logout-btn"
+                        asChild
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-700 text-white"
+                    >
+                        <a href="/api/auth/logout">
+                            <FaRightFromBracket className='mr-2' />
+                            Log Out {user?.db?.Username}
+                        </a>
+                    </Button>
+                  </div>
                 </div>
-            }
-        </div>
+            </SheetContent>
+        </Sheet>
     )
 }
 

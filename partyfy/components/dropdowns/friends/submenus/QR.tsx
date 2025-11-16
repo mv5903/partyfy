@@ -5,8 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
-const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : PartyfyUser, setIsComponentVisible: Function, setFriendsListScreen: Function } ) => {
+const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsListScreen: Function } ) => {
     const [loading, setLoading] = useState(true);
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
@@ -71,7 +73,6 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
         }
         setExpirationDate(new Date(data.expiration_date));
         setQRCodeURL("https://partyfy.mattvandenberg.com?session=" + data.session_id);
-        setIsComponentVisible(true);
         setFriendsListScreen(FriendListScreen.QR);
     }
 
@@ -96,7 +97,6 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
         })
         const data = await response.json();
         setQRCodeURL('');
-        setIsComponentVisible(true);
         setFriendsListScreen(FriendListScreen.QR);
     }
 
@@ -182,7 +182,7 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
       };
 
     return (
-        <div className='h-full'>
+        <div className='text-white'>
             <style>
                 {`
                     .swal2-input {
@@ -194,31 +194,33 @@ const QR = ({ user, setIsComponentVisible, setFriendsListScreen } : { user : Par
                     }
                 `}
             </style>
-            <h1 className='my-3'>QR</h1>
+            <h1 className='my-3 text-xl font-semibold'>QR Code</h1>
             {
-                loading 
+                loading
                 ?
                 <Loading />
                 :
                 <>
                     {
-                        qrCodeURL 
+                        qrCodeURL
                         ?
                         <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
-                            <h4 className='mt-3'>Your friends can scan this code to join your temporary session.</h4>
-                            <h4>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h4>
-                            <div className='card w-auto p-3 bg-white' >
-                                <QRCode ref={qrRef} value={qrCodeURL} />
+                            <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
+                            <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
+                            <Card className='w-auto p-2 bg-white'>
+                                <QRCode ref={qrRef} value={qrCodeURL} size={192} />
+                            </Card>
+                            <div className='flex gap-2'>
+                                <Button onClick={() => saveQR()}><FaSave /></Button>
+                                <Button onClick={() => copyLinkToClipboard()}><FaCopy /></Button>
+                                <Button variant="destructive" onClick={() => deleteSession(true)}><FaTrash /></Button>
                             </div>
-                            <button className='btn btn-primary p-3' onClick={() => saveQR()}><FaSave className='mr-2'/> Save QR Image</button>
-                            <button className='btn btn-secondary p-3' onClick={() => copyLinkToClipboard()}><FaCopy className='mr-2' /> Copy Link to Clipboard</button>
-                            <button className='btn btn-error p-3' onClick={() => deleteSession(true)}><FaTrash className='mr-2' /> Delete Session</button>
                         </div>
                         :
                         <div>
                             <div className='w-full flex flex-col place-items-center gap-6'>
-                                <h4 className='text-xl text-center mt-3'>You can now create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
-                                <button className='btn btn-primary' onClick={getNewSession}><FaPlus className='mr-2' /> Create</button>
+                                <h4 className='text-md text-center mt-3 text-white'>You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
+                                <Button variant='secondary' onClick={getNewSession}><FaPlus className="mr-2" /> Create Session</Button>
                             </div>
                             {
                                 loading && <Loading />

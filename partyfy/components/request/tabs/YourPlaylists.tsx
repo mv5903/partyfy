@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
-import { FaExclamationCircle, FaEye, FaHeart, FaHistory, FaPlusCircle, FaSpotify } from "react-icons/fa";
+import { FaExclamationCircle, FaEye, FaHeart, FaHistory, FaPlusCircle, FaRegEye, FaSpotify } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
+import { Button } from "@/components/ui/button";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
@@ -183,10 +184,10 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                             imgSrc: playlist.images && playlist.images.length > 0
                                                 ? <img src={playlist.images[0].url} width={'50px'} height={'50px'} />
                                                 : isLikedSongs
-                                                ? <FaHeart size={50} />
+                                                ? <FaHeart size={50} className="text-white" />
                                                 : isRecentSongs
-                                                ? <FaHistory size={50} />
-                                                : <FaSpotify size={50} />, 
+                                                ? <FaHistory size={50} className="text-white" />
+                                                : <FaSpotify size={50} className="text-white" />, 
                                         
                                             // Spotify link (only for non-liked, non-recent songs)
                                             spotifyLinkBack: 
@@ -197,9 +198,9 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                             // Primary content including title and icons
                                             primaryContent: (
                                                 <>
-                                                    <h6 className="p-2">{playlist.name}</h6>
-                                                    {playlist.collaborative && <BsPeopleFill /> }
-                                                    {playlist.public && <BsGlobe /> }
+                                                    <h6 className="p-2 text-white">{playlist.name}</h6>
+                                                    {playlist.collaborative && <BsPeopleFill className="text-white" /> }
+                                                    {playlist.public && <BsGlobe className="text-white" /> }
                                                     {isNeedLikedSongsPermission && <FaExclamationCircle className="text-red-600" />} 
                                                 </>
                                             ),
@@ -217,7 +218,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                 },
 
                                             // Button icon (Spotify login or view)
-                                            btnIcon: isNeedLikedSongsPermission ? <FaSpotify /> : <FaEye />,
+                                            btnIcon: isNeedLikedSongsPermission ? <FaSpotify /> : <FaRegEye />,
                                         
                                             // Button styling class
                                             btnColorClass: isNeedLikedSongsPermission ? 'bg-green-600' : 'btn-primary',
@@ -243,7 +244,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     <div className="w-full flex flex-col items-center">
                         <div className="flex justify-center items-center mt-4">
                             <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
-                            <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack size={30}/></button>
+                            <Button onClick={() => setActivePlaylist(null)}><TiArrowBack size={30}/></Button>
                         </div>
                         <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {

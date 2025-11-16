@@ -12,6 +12,9 @@ import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 
 const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
@@ -109,8 +112,8 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         nowPlaying 
                         ?                            
                         <>
-                            <div ref={nowPlayingRef} className="card bg-primary p-2 my-2 flex justify-center w-full">
-                                <div className="flex gap-2">
+                            <div ref={nowPlayingRef} className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
+                                <div className="flex gap-2 w-full">
                                     <div className="flex flex-col">
                                         {
                                             nowPlaying.currently_playing_type == 'track'
@@ -188,7 +191,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 <h6>?</h6>
                                             }
                                         </div>
-                                            <progress className="progress progress-flat-primary w-full" value={nowPlaying.progress_ms} max={nowPlaying.item ? nowPlaying.item.duration_ms : ''}></progress>
+                                            <progress className="progress progress-flat-primary w-full bg-stone-800 text-white" value={nowPlaying.progress_ms} max={nowPlaying.item ? nowPlaying.item.duration_ms : ''}></progress>
                                         </div>
                                         <div className="flex flex-col justify-between my-1 text-white w-[5%] gap-3">
                                             { nowPlaying?.repeat_state == "off" && <TbRepeatOff /> }
@@ -218,25 +221,17 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                 ?
                                 <h3 className="text-center mt-4">Nothing is playing.</h3>
                                 :
-                                <div className="card bg-primary p-2 my-2 w-full h-[15vh] flex justify-center place-items-center">
-                                    <div className="spinner-wave">
-                                        <div className="spinner-wave-dot"></div>
-                                        <div className="spinner-wave-dot"></div>
-                                        <div className="spinner-wave-dot"></div>
-                                        <div className="spinner-wave-dot"></div>
-                                    </div>
+                                <div className="bg-stone-900 p-2 my-2 w-full h-[15vh] flex justify-center place-items-center rounded-md">
+                                    <Card className="bg-stone-800 border-stone-700">
+                                        <Spinner variant="wave" className="text-stone-400" />
+                                    </Card>
                                 </div>
                             }
-                        </> 
+                        </>
                     }
                 </div>
-                <h4 className="mt-2 text-2xl">Up Next</h4>
-                {
-                    queue != null && Array.isArray(queue) && queue.length > 0 &&
-                    <h6 className="text-gray-600 mt-2" onClick={() => showQueueDisclaimer()}>Why is the queue inaccurate?</h6>
-                }
+                <h4 className="my-2 text-2xl">Next</h4>
                 <div className="overflow-auto" style={{ maxHeight: `${queueHeight}px` }} ref={queueRef} >
-                    <div className="table table-dark mt-3 w-full">
                         {
                             queue != null && Array.isArray(queue) &&
                             queue.map((item: any, index: number) => {
@@ -266,13 +261,12 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                         </div>
                                         {
                                             index < queue.length - 1 &&
-                                            <div className="divider divider-horizontal"></div>
+                                            <Separator className="my-2" />
                                         }
                                     </div>
                                 );
                             })
                         }
-                    </div>
                 </div>
             </div>
             {
@@ -285,7 +279,8 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         <h3 className="text-center mt-4">No queue available. Potential Reasons: </h3>
                         <h4 className="text-center text-gray-400">[because of Spotify API Limitations]</h4>
                         <h3 className="text-center mt-8">{`${friend.Username} is listening to a local file`}</h3>
-                        <div className="divider">AND / OR</div>
+                        <Separator className="my-4" />
+                        <p className="text-center">AND / OR</p>
                         <h3 className="text-center mt-4">{`${friend.Username} has a Spotify free account`}</h3>
                     </>
                 }

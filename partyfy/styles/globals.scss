@@ -4,55 +4,54 @@
 @tailwind components;
 @tailwind utilities;
 
-$title-font: 'Libre Franklin', sans-serif;
-$body-font: 'Montserrat', sans-serif;
+$title-font: 'Inter', sans-serif;
+$body-font: 'Inter', sans-serif;
 
-@mixin dots($count) {
-  $text-shadow: ();
-  @for $i from 0 through $count {
-    $text-shadow: $text-shadow,
-                 (-.5 + (random()) * 3) + em
-                 (-.5 + (random()) * 3) + em
-                 7px
-                 hsla(var(--dot-hue, 0), 100%, 50%, .6); // Global CSS variable for color hue
-  }
-  text-shadow: $text-shadow;
-  transition: text-shadow 3s ease-in-out; // Smooth transition for color change
-}
+// @mixin dots($count) {
+//   $text-shadow: ();
+//   @for $i from 0 through $count {
+//     $text-shadow: $text-shadow,
+//                  (-.5 + (random()) * 3) + em
+//                  (-.5 + (random()) * 3) + em
+//                  7px
+//                  hsla(var(--dot-hue, 0), 100%, 50%, .6); 
+//   }
+//   text-shadow: $text-shadow;
+//   transition: text-shadow 3s ease-in-out; 
+// }
 
-// Keyframes for rotating and pulsating effects
-@keyframes rotate-dots {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(180deg) scale(1.2); } // Slight scale to give depth
-  50% { transform: rotate(0deg) scale(1); }
-  75% { transform: rotate(-180deg) scale(1); }
-  100% { transform: rotate(0deg) scale(1); }
-}
+// @keyframes rotate-dots {
+//   0% { transform: rotate(0deg) scale(1); }
+//   25% { transform: rotate(180deg) scale(1.2); }
+//   50% { transform: rotate(0deg) scale(1); }
+//   75% { transform: rotate(-180deg) scale(1); }
+//   100% { transform: rotate(0deg) scale(1); }
+// }
 
-@keyframes pulse-dots {
-  0%, 100% { text-shadow: 0 0 7px hsla(var(--dot-hue, 0), 100%, 50%, 0.6); }
-  50% { text-shadow: 0 0 14px hsla(var(--dot-hue, 0), 100%, 50%, 0.8); } // Pulse glow effect
-}
+// @keyframes pulse-dots {
+//   0%, 100% { text-shadow: 0 0 7px hsla(var(--dot-hue, 0), 100%, 50%, 0.6); }
+//   50% { text-shadow: 0 0 14px hsla(var(--dot-hue, 0), 100%, 50%, 0.8); } 
+// }
 
-body::before,
-body::after,
-head::before,
-head::after {
-  @include dots(40);
-  animation: rotate-dots 44s infinite linear, pulse-dots 3s ease-in-out infinite alternate;
-  animation-delay: -27s;
-  transition: all 3s ease-in-out; // Smooth transition when changing properties
-}
+// body::before,
+// body::after,
+// head::before,
+// head::after {
+//   @include dots(40);
+//   animation: rotate-dots 44s infinite linear, pulse-dots 3s ease-in-out infinite alternate;
+//   animation-delay: -27s;
+//   transition: all 3s ease-in-out; 
+// }
 
-// Adding hover effect to enhance interaction
-body:hover::before,
-body:hover::after,
-head:hover::before,
-head:hover::after {
-  @include dots(10);
-  animation-duration: 30s; // Speed up rotation on hover
-  filter: blur(1px); // Adding a subtle blur on hover for depth
-}
+
+// body:hover::before,
+// body:hover::after,
+// head:hover::before,
+// head:hover::after {
+//   @include dots(10);
+//   animation-duration: 30s; 
+//   filter: blur(1px);
+// }
   
 html {
   background: rgb(0, 0, 0) !important;
@@ -72,53 +71,53 @@ body, head {
   color: transparent;
 }
 
-head::before, head::after,
-body::before, body::after {
-  z-index: -1 !important;
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 3em !important;
-  height: 3em !important;
-  content: '.';
-  animation: 44s -27s move infinite ease-in-out alternate;
-  color: transparent
-}
+// head::before, head::after,
+// body::before, body::after {
+//   z-index: -1 !important;
+//   position: fixed !important;
+//   top: 50% !important;
+//   left: 50% !important;
+//   width: 3em !important;
+//   height: 3em !important;
+//   content: '.';
+//   animation: 44s -27s move infinite ease-in-out alternate;
+//   color: transparent
+// }
 
 
-body::before {
-  @include dots(40);
-  animation-duration: 44s;
-  animation-delay: -27s;
-}
+// body::before {
+//   @include dots(40);
+//   animation-duration: 44s;
+//   animation-delay: -27s;
+// }
 
-body::after {
-  @include dots(40);
-  animation-duration: 43s;
-  animation-delay: -32s;
-}
+// body::after {
+//   @include dots(40);
+//   animation-duration: 43s;
+//   animation-delay: -32s;
+// }
 
-head::before {
-  @include dots(40);
-  animation-duration: 42s;
-  animation-delay: -23s;
-}
+// head::before {
+//   @include dots(40);
+//   animation-duration: 42s;
+//   animation-delay: -23s;
+// }
 
-head::after {
-  @include dots(40);
-  animation-duration: 41s;
-  animation-delay: -19s;
-}
+// head::after {
+//   @include dots(40);
+//   animation-duration: 41s;
+//   animation-delay: -19s;
+// }
 
 
-@keyframes move {
-  from {
-    transform: rotate(0deg) scale(12) translateX(-20px);
-  }
-  to {
-    transform: rotate(360deg) scale(18) translateX(20px);
-  }
-}
+// @keyframes move {
+//   from {
+//     transform: rotate(0deg) scale(12) translateX(-20px);
+//   }
+//   to {
+//     transform: rotate(360deg) scale(18) translateX(20px);
+//   }
+// }
 
 main {
   color: white;
@@ -173,4 +172,137 @@ h5 {
 
 div:not(nav *) {
   opacity: .99 !important;
+}
+
+
+
+@layer base {
+  :root {
+
+    --background: 0 0% 100%;
+
+    --foreground: 20 14.3% 4.1%;
+
+    --card: 0 0% 100%;
+
+    --card-foreground: 20 14.3% 4.1%;
+
+    --popover: 0 0% 100%;
+
+    --popover-foreground: 20 14.3% 4.1%;
+
+    --primary: 24 9.8% 10%;
+
+    --primary-foreground: 60 9.1% 97.8%;
+
+    --secondary: 60 4.8% 95.9%;
+
+    --secondary-foreground: 24 9.8% 10%;
+
+    --muted: 60 4.8% 95.9%;
+
+    --muted-foreground: 25 5.3% 44.7%;
+
+    --accent: 60 4.8% 95.9%;
+
+    --accent-foreground: 24 9.8% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+
+    --destructive-foreground: 60 9.1% 97.8%;
+
+    --border: 20 5.9% 90%;
+
+    --input: 20 5.9% 90%;
+
+    --ring: 20 14.3% 4.1%;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
+
+    --radius: 0.5rem;
+  }
+  .dark {
+
+    --background: 20 14.3% 4.1%;
+
+    --foreground: 60 9.1% 97.8%;
+
+    --card: 20 14.3% 4.1%;
+
+    --card-foreground: 60 9.1% 97.8%;
+
+    --popover: 20 14.3% 4.1%;
+
+    --popover-foreground: 60 9.1% 97.8%;
+
+    --primary: 60 9.1% 97.8%;
+
+    --primary-foreground: 24 9.8% 10%;
+
+    --secondary: 12 6.5% 15.1%;
+
+    --secondary-foreground: 60 9.1% 97.8%;
+
+    --muted: 12 6.5% 15.1%;
+
+    --muted-foreground: 24 5.4% 63.9%;
+
+    --accent: 12 6.5% 15.1%;
+
+    --accent-foreground: 60 9.1% 97.8%;
+
+    --destructive: 0 62.8% 30.6%;
+
+    --destructive-foreground: 60 9.1% 97.8%;
+
+    --border: 12 6.5% 15.1%;
+
+    --input: 12 6.5% 15.1%;
+
+    --ring: 24 5.7% 82.9%;
+
+    --chart-1: 220 70% 50%;
+
+    --chart-2: 160 60% 45%;
+
+    --chart-3: 30 80% 55%;
+
+    --chart-4: 280 65% 60%;
+
+    --chart-5: 340 75% 55%;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes wave {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-0.5rem);
+    }
+  }
+
+  .animate-wave {
+    animation: wave 1s ease-in-out infinite;
+  }
 }

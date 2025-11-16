@@ -3,6 +3,9 @@ import PartyfyUser from '@/helpers/PartyfyUser';
 import { useState } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 const Search = ({ user } : { user : PartyfyUser } ) => {
     const [usersReturned, setUsersReturned] = useState([]);
@@ -67,20 +70,20 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
     }
 
     return (
-        <div>
-            <h1 className='mt-3 mb-6'>Find Someone</h1>
+        <div className="text-white">
+            <h1 className='mt-3 mb-6 text-xl font-semibold'>Find Someone</h1>
             <div className='flex justify-center'>
-                <input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="textarea textarea-primary me-2 w-full p-2"/>
+                <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
             </div>
             <div>
                 {!loading && usersReturned.map((user, index) => {
                     return (
-                        <div key={index} className="card bg-primary p-2 mt-3">
+                        <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                             <div className="flex place-items-center justify-between">
-                                <h5 className="text-lg">{user.Username}</h5>
-                                <button className="btn btn-sm btn-success" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane className="me-1"/> Send Request</button>
+                                <h5 className="text-lg text-white">{user.Username}</h5>
+                                <Button size="sm" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane /></Button>
                             </div>
-                        </div>
+                        </Card>
                     );
                 })}
                 {

@@ -5,6 +5,8 @@ import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import Loading from "../misc/Loading";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import BackgroundEffectColor from "@/helpers/BackgroundEffectColor";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
@@ -289,30 +291,19 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     let expirationDate = temporarySession ? new Date(temporarySession.expiration_date) : null;
 
-    const currentView = () => {
-        switch (requestPageView) {
-            case RequestPageView.Search:
-                return <Search you={temporarySession ? currentFriend : user} spotifyAuth={temporarySession ? friendSpotifyAuth : user.spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />;
-            case RequestPageView.TheirSession:
-                return <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
-            case RequestPageView.YourPlaylists:
-                return <YourPlaylists you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />;
-        }
-    }
-
     return (
-        <div>
+        <div className="text-white">
             {
                 !friendSpotifyAuth ? <Loading /> :
                 <>
                     <div className="flex items-center justify-between place-content-center p-2 mb-4">
-                        <h3 className="text-xl me-2 pt-2 mb-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
+                        <h3 className="text-xl me-2 pt-2 mb-2 text-white">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
                         {
-                            temporarySession 
+                            temporarySession
                             ?
-                            <button className="btn btn-error p-3" onClick={() => exitSession()}><TiArrowBack className="mr-2" size={25}/> Leave Session</button>
+                            <Button variant="destructive" className="p-3" onClick={() => exitSession()}><TiArrowBack className="mr-2" size={25}/> Leave Session</Button>
                             :
-                            <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                            <Button onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></Button>
                         }
                     </div>
                     {
@@ -321,24 +312,41 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     {
                         temporarySession &&
-                        <h3 className="text-center mb-4">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                        <h3 className="text-center mb-4 text-white">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
                     }
                     {
                         friendUserObject && friendUserObject.options && friendUserObject.options["queueLimitTimeRestriction"] && friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount > 0 &&
-                        <h3 className="text-center mb-4">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
+                        <h3 className="text-center mb-4 text-white">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
                     }
                     <div className="flex flex-col items-center">
-                        <div role="tablist" className="tabs tabs-boxed bg-primary p-0">
-                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.Search ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.Search)}><FaSearch className="mr-2" size={10} />Search</button>
+                        <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className="w-full">
+                            <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
+                                <TabsTrigger value={RequestPageView.Search.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                    <FaSearch size={10} />Search
+                                </TabsTrigger>
+                                {
+                                    !temporarySession &&
+                                    <TabsTrigger value={RequestPageView.YourPlaylists.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                        <FaList size={10} />Your Music
+                                    </TabsTrigger>
+                                }
+                                <TabsTrigger value={RequestPageView.TheirSession.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                    <FaMusic size={10}/>Session
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value={RequestPageView.Search.toString()} className="w-full">
+                                <Search you={temporarySession ? currentFriend : user} spotifyAuth={temporarySession ? friendSpotifyAuth : user.spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />
+                            </TabsContent>
                             {
-                                !temporarySession && 
-                                <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Music</button>
+                                !temporarySession &&
+                                <TabsContent value={RequestPageView.YourPlaylists.toString()} className="w-full">
+                                    <YourPlaylists you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />
+                                </TabsContent>
                             }
-                            <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Session</button>
-                        </div>
-                        <div className="w-full">
-                            { currentView() }
-                        </div>
+                            <TabsContent value={RequestPageView.TheirSession.toString()} className="w-full">
+                                <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </>
             }

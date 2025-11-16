@@ -3,6 +3,7 @@ import { FaPlusCircle } from "react-icons/fa";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import ListContentCard, { ListContentCardProps } from "@/components/misc/ListContentCard";
+import { Input } from "@/components/ui/input";
 
 const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: any, spotifyAuth: SpotifyAuth, addToQueue: Function, isTemporarySession: boolean }) => {
 
@@ -40,8 +41,8 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
     return (
         <>
             <div className="w-full flex flex-col items-center">
-                <h4 className="text-2xl my-4">Add Song</h4>
-                <input className="input w-3/4 p-2 mt-2" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
+                <h4 className="text-2xl my-4 text-white">Add Song</h4>
+                <Input className="w-3/4 mt-2 bg-stone-800 border-stone-700 text-white" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
             </div>
             {
                 searchResults.length > 0 &&

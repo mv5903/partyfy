@@ -3,16 +3,17 @@ import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { useEffect, useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
+import { FaPlus, FaRegTrashAlt, FaTrash, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
-const List = ({ user, isComponentVisible, setFriendListScreen } : { user : PartyfyUser, isComponentVisible: boolean, setFriendListScreen: Function } ) => {
+const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendListScreen: Function } ) => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchFriends() {
-            if (!isComponentVisible) return;
             const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
             const data = await response.json();
             setLoading(false);
@@ -72,10 +73,10 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : Party
     }
     
     return (
-        <div>
-            <h1 className='mt-3 mb-6'>Friends</h1>
+        <div className="text-white">
+            <h1 className='mt-3 mb-6 text-xl font-semibold'>Friends</h1>
             {
-                loading 
+                loading
                 ?
                 <Loading />
                 :
@@ -84,20 +85,20 @@ const List = ({ user, isComponentVisible, setFriendListScreen } : { user : Party
                         friends.length === 0 || !friends
                         ?
                         <div>
-                            <h5 className="text-xl text-center">You have no friends yet.</h5>
+                            <h5 className="text-xl text-center text-white">You have no friends yet.</h5>
                             <div className='flex justify-center'>
-                                <button className='btn btn-primary mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}>Add a Friend</button>
+                                <Button className='mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaPlus className="mr-2" /> Add Friends</Button>
                             </div>
                         </div>
                         :
                         friends.map((user, index) => {
                             return (
-                                <div key={index} className="card bg-primary p-2 mt-3">
+                                <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                                     <div className="flex place-items-center justify-between">
-                                        <h3 className="text-lg">{user.Username}</h3>
-                                        <button className="btn btn-sm bg-red-8" onClick={() => removeFriend(user.UserID, user.Username)}><FaTrash /></button>
+                                        <h3 className="text-lg text-white">{user.Username}</h3>
+                                        <Button size="sm" variant="ghost" onClick={() => removeFriend(user.UserID, user.Username)}><FaRegTrashAlt className='text-red-500' /></Button>
                                     </div>
-                                </div>
+                                </Card>
                             );
                         })
                     }

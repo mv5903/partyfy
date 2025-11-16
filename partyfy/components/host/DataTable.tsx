@@ -1,6 +1,7 @@
 import e from '@/pages/assets/e.png';
 import UserContext from '@/providers/UserContext';
 import { useContext, useEffect, useState } from 'react';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
 const DataTable = ({ title } : { title: string }) => {
     const { user } = useContext(UserContext);
@@ -54,74 +55,74 @@ const DataTable = ({ title } : { title: string }) => {
 
     return (
     <div>
-        <h3 className="text-center">{title === "Queue" ? "Up Next" : title}</h3> 
-        <table className='table table-dark'>
-            <thead>
-                <tr className='w-40'>
-                    { 
-                        title === "Recently Played" && 
+        <h3 className="text-center">{title === "Queue" ? "Up Next" : title}</h3>
+        <Table>
+            <TableHeader>
+                <TableRow className='w-40'>
+                    {
+                        title === "Recently Played" &&
                         <>
-                            <th scope='col'>Name</th>
-                            <th scope='col'>Artist</th>
-                            <th scope='col'>Album</th>
-                            <th scope='col'>Played At</th>
+                            <TableHead scope='col'>Name</TableHead>
+                            <TableHead scope='col'>Artist</TableHead>
+                            <TableHead scope='col'>Album</TableHead>
+                            <TableHead scope='col'>Played At</TableHead>
                         </>
                     }
                     {
                         title === "Queue" &&
                         <>
-                            <th scope='col'>Name</th>
-                            <th scope='col'>Artist</th>
-                            <th scope='col'>Status</th>
+                            <TableHead scope='col'>Name</TableHead>
+                            <TableHead scope='col'>Artist</TableHead>
+                            <TableHead scope='col'>Status</TableHead>
                         </>
                     }
-                </tr>
-            </thead>
-            <tbody>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
                 {
                     title === "Recently Played" && recents && recents.length > 0 && recents.map((song, index) => {
                         let playedAt = new Date(song.PlayedAt);
                         return (
-                            <tr key={index}>
-                                <td>
+                            <TableRow key={index}>
+                                <TableCell>
                                     <div className="d-flex" style={{ width: 'auto' }}>
                                         <img src={song.SongArt} style={{ width: '3vh', height: '3vh', marginRight: '1vh' }}/>
                                         <h5>{song.SongName}</h5>
                                         {
-                                            song.SongExplicit && 
+                                            song.SongExplicit &&
                                             <img className={`ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
                                         }
                                     </div>
-                                </td>
-                                <td><h5>{song.SongArtist}</h5></td>
-                                <td><h5>{song.SongAlbum}</h5></td>
-                                <td><h5>{formatTime(playedAt)}</h5></td>
-                            </tr>
+                                </TableCell>
+                                <TableCell><h5>{song.SongArtist}</h5></TableCell>
+                                <TableCell><h5>{song.SongAlbum}</h5></TableCell>
+                                <TableCell><h5>{formatTime(playedAt)}</h5></TableCell>
+                            </TableRow>
                         )
                     })
                 }
                 {
                     title === "Queue" && queue && queue.length > 0 && queue.map((song, index) => {
                         return (
-                            <tr key={index}>
-                                <td>
+                            <TableRow key={index}>
+                                <TableCell>
                                     <div className="d-flex" style={{ width: 'auto' }}>
                                         <img src={song.album.images[2].url} style={{ width: '3vh', height: '3vh', marginRight: '1vh' }}/>
                                         <h5>{song.name}</h5>
                                         {
-                                            song.explicit && 
+                                            song.explicit &&
                                             <img className={` ms-2 mt-1`} src={e.src} style={{ width: '1.5vh', height: '1.5vh' }}/>
                                         }
                                     </div>
-                                </td>
-                                <td><h5>{song.artists.map((artist : any) => artist.name).join(", ")}</h5></td>
-                                <td><h5>From Spotify</h5></td>
-                            </tr>
+                                </TableCell>
+                                <TableCell><h5>{song.artists.map((artist : any) => artist.name).join(", ")}</h5></TableCell>
+                                <TableCell><h5>From Spotify</h5></TableCell>
+                            </TableRow>
                         )
                     })
                 }
-            </tbody>
-        </table>
+            </TableBody>
+        </Table>
     </div>
     );
 }

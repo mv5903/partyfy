@@ -1,5 +1,7 @@
 import { BsExplicitFill } from "react-icons/bs";
 import SpotifyLinkBack from "./SpotifyLinkBack";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 interface ListContentCardProps {
     imgSrc: string | JSX.Element;
@@ -29,8 +31,19 @@ function ListContentCard(props: ListContentCardProps) {
         position
     } = props;
 
+    // Map RippleUI button classes to shadcn button variants
+    const getButtonVariant = (colorClass: string) => {
+        if (!colorClass) return "default";
+        if (colorClass.includes('btn-primary') || colorClass.includes('bg-blue')) return "default";
+        if (colorClass.includes('btn-success') || colorClass.includes('bg-green')) return "success";
+        if (colorClass.includes('btn-warning')) return "warning";
+        if (colorClass.includes('btn-secondary')) return "secondary";
+        if (colorClass.includes('btn-error') || colorClass.includes('btn-danger')) return "destructive";
+        return "default";
+    };
+
     return (
-        <div className="card my-2 bg-primary w-full shadow-md rounded-md">
+        <Card className="my-2 bg-stone-800 w-full shadow-md rounded-md border-stone-700">
             <div className="flex items-center p-2 gap-2">
                 {position && <span className="text-white text-xs rounded-md px-1">{position}</span>}
                 <div className="flex-shrink-0 mr-2">
@@ -48,7 +61,7 @@ function ListContentCard(props: ListContentCardProps) {
                         {
                             typeof primaryContent === 'string'
                             ?
-                            <span>{primaryContent}</span>
+                            <span className="text-white">{primaryContent}</span>
                             :
                             primaryContent
                         }
@@ -57,16 +70,17 @@ function ListContentCard(props: ListContentCardProps) {
                     <p className="text-xs text-gray-400 italic mt-0.5">{secondaryContent}</p>
                 </div>
                 <div className="flex-shrink-0">
-                    <button 
-                        className={`btn ${btnColorClass} flex items-center gap-1`} 
+                    <Button
+                        variant={getButtonVariant(btnColorClass)}
+                        className="flex items-center gap-1"
                         onClick={btnOnClick}
                     >
                         {btnIcon && <span>{btnIcon}</span>}
                         {btnContent}
-                    </button>
+                    </Button>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }
 
