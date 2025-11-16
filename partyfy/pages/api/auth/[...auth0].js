@@ -1,4 +1,4 @@
-import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0';
+import { handleAuth, handleLogin, handleCallback, handleLogout } from '@auth0/nextjs-auth0';
 
 export default handleAuth({
   login: handleLogin({
@@ -18,6 +18,14 @@ export default handleAuth({
       const protocol = req.headers['x-forwarded-proto'] || (req.connection.encrypted ? 'https' : 'http');
       const host = req.headers['x-forwarded-host'] || req.headers['host'];
       return `${protocol}://${host}/api/auth/callback`;
+    }
+  }),
+  logout: handleLogout({
+    returnTo: (req) => {
+      // Redirect to the same domain after logout
+      const protocol = req.headers['x-forwarded-proto'] || (req.connection.encrypted ? 'https' : 'http');
+      const host = req.headers['x-forwarded-host'] || req.headers['host'];
+      return `${protocol}://${host}`;
     }
   })
 }); 
