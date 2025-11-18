@@ -66,7 +66,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       return hasSpotifyAuth;
     } catch (error) {
       console.error('[UserStore] Error initializing user:', error);
-      set({ error: error.message, isLoading: false });
+      set({ isLoading: false });
       return false;
     }
   },
@@ -87,7 +87,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       });
     } catch (error) {
       console.error('[UserStore] Error refetching user:', error);
-      set({ error: error.message, isLoading: false });
+      set({ isLoading: false });
     }
   },
 
