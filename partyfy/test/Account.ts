@@ -3,7 +3,6 @@ import { TEST_BASE_URL, USERNAME, PASSWORD } from './constants';
 
 test('Can log in to existing account', async ({ page }) => {
   await page.goto(TEST_BASE_URL);
-  await page.getByText()
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/Playwright/);
