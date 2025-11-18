@@ -1,6 +1,8 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import '../styles/globals.scss';
 import ClientLayout from './ClientLayout';
 
@@ -41,13 +43,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -60,9 +65,11 @@ export default function RootLayout({
       </head>
       <body>
         <UserProvider>
-          <ClientLayout>
-            {children}
-          </ClientLayout>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </NextIntlClientProvider>
           <Analytics />
         </UserProvider>
       </body>
