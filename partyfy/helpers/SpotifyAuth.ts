@@ -23,11 +23,18 @@ export class SpotifyAuth {
 
     async getRefreshToken(authorizationCode: string) {
         if (authorizationCode === '') return;
+        console.log('[SpotifyAuth] Exchanging authorization code for refresh token...');
         let returnedData = null;
         const redirectUri = window.location.origin;
+        console.log('[SpotifyAuth] Using redirect URI:', redirectUri);
         await fetch('/api/spotify/refreshtoken?code=' + authorizationCode + '&redirect_uri=' + encodeURIComponent(redirectUri))
             .then(res => res.json())
             .then(data => {
+                if (data.error) {
+                    console.error('[SpotifyAuth] Error response from /refreshtoken endpoint:', data);
+                    return;
+                }
+                console.log('[SpotifyAuth] Received data from /refreshtoken endpoint:', data);
                 if (data.refresh_token) {
                     this.accessToken = data.access_token;
                     this.refreshToken = data.refresh_token;
@@ -35,9 +42,11 @@ export class SpotifyAuth {
                 }
             })
             .catch(err => {
+                console.error('[SpotifyAuth] Error exchanging authorization code for refresh token:', err);
                 return;
             });
         if (returnedData) {
+            console.log('[SpotifyAuth] Successfully obtained refresh token from Spotify', returnedData);
             this.lastRefresh = new Date();
             return returnedData;
         }

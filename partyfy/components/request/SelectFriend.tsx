@@ -6,11 +6,11 @@ import { Supabase } from "@/helpers/SupabaseHelper";
 import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
 import { Users } from "@prisma/client";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FaCog, FaSave } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from "@/hooks/useAlert";
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
@@ -20,59 +20,47 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { FaArrowRotateRight } from "react-icons/fa6";
+import { useFriendsStore } from "@/stores/useFriendsStore";
+import { useUnattendedQueuesStore } from "@/stores/useUnattendedQueuesStore";
 
 const SelectFriend = () => {
     const { user } = useContext(UserContext);
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const alert = useAlert();
 
-    const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
-    const [friendsList, setFriendsList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [uqLoading, setUQLoading] = useState(false);
-    const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
-    const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
+    // Use Zustand store for friends data
+    const { friends: friendsList, spotifyStatuses, isLoading: loading, isRefreshing: refreshingFriendsLoading, fetchFriends, updateSpotifyStatuses } = useFriendsStore();
+
+    // Use Zustand store for unattended queues status
+    const { isEnabled: isUnattendedQueuesEnabled, isLoading: uqLoading, fetchStatus: fetchUQStatus, updateStatus: updateUQStatus } = useUnattendedQueuesStore();
     const [commercialOptionsVisible, setCommercialOptionsVisible] = useState(false);
     const [originalOptions, setOriginalOptions] = useState(null);
     const [hadQueueLimit, setHadQueueLimit] = useState(false);
 
-    async function fetchFriends() {
-        setRefreshingFriendsLoading(true);
-        const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
-        let data = await response.json();
-        // Show users who have functionality enabled first
-        data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
-        setRefreshingFriendsLoading(false);
-        setLoading(false);
-        setFriendsList(data);
-    }
-    async function fetchUQStatus() {
-        const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
-        const data = await response.json();
-        if (data) {
-            setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
-        }
-    }
-
     async function getFriendPlayingStatus() {
+        if (friendsList.length === 0) return;
+
         try {
             // Fetch the status for each friend
             const statusPromises = friendsList.map(async friend => {
                 let spotifyAuth = new SpotifyAuth(friend.RefreshToken);
                 let accessToken = await spotifyAuth.getAccessToken();
                 if (!accessToken) return null;
-    
+
                 const response = await fetch(`/api/spotify/nowplaying?access_token=${accessToken}`);
                 if (response.status === 204) return null;
-    
+
                 const data = await response.json();
                 return data && data.is_playing ? { isActive: true, data, UserID: friend.UserID } : null;
             });
-    
+
             // Wait for all promises to resolve and filter out nulls
             const results = (await Promise.all(statusPromises)).filter(status => status !== null);
-    
-            // Update the state with the new statuses
-            setSpotifyStatuses(results);
+
+            // Update the Zustand store with the new statuses
+            updateSpotifyStatuses(results);
         } catch (error) {
             console.error('Error fetching playing statuses:', error);
         }
@@ -81,7 +69,8 @@ const SelectFriend = () => {
     useEffect(() => {
         BackgroundEffectColor.removeBackgroundEffectColor();
         getFriendPlayingStatus();
-        const interval = setInterval(getFriendPlayingStatus, 10000);
+        // Reduced from 10s to 15s for better performance
+        const interval = setInterval(getFriendPlayingStatus, 15000);
         return () => clearInterval(interval);
     }, [friendsList]);
 
@@ -112,18 +101,19 @@ const SelectFriend = () => {
     
 
     useEffect(() => {
-        fetchFriends();
-        fetchUQStatus();
+        // Fetch friends using Zustand store (will use cache if available)
+        fetchFriends(user.getUserID());
+        fetchUQStatus(user.getUserID());
 
         Supabase
             .channel('RequestPage')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                fetchFriends();
-                fetchUQStatus();
+                fetchFriends(user.getUserID(), false);
+                fetchUQStatus(user.getUserID(), false);
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
-                fetchFriends();
-                fetchUQStatus();
+                fetchFriends(user.getUserID(), false);
+                fetchUQStatus(user.getUserID(), false);
             })
             .subscribe();
 
@@ -133,21 +123,8 @@ const SelectFriend = () => {
     }, []);
 
     async function unattendedQueues() {
-        setUQLoading(true);
-        const response = await fetch('/api/database/unattendedqueues', {
-            method: "PATCH",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                UserID: user.getUserID(),
-                enable: !isUnattendedQueuesEnabled
-            })
-        });
-        setUQLoading(false);
-        if (response.ok) {
-            setIsUnattendedQueuesEnabled(!isUnattendedQueuesEnabled);
-        }
+        // Use the store's updateStatus method which handles loading state and caching
+        await updateUQStatus(user.getUserID(), !isUnattendedQueuesEnabled);
     }
 
     const [maxQueueCount, setMaxQueueCount] = useState(5);
@@ -156,85 +133,77 @@ const SelectFriend = () => {
     const [queueLimitEnabled, setQueueLimitEnabled] = useState(false);
     
     if (commercialOptionsVisible) {
-        const saveCommercialOptions = () => {
+        const saveCommercialOptions = async () => {
             // Save the commercial options
             if (queueLimitEnabled && maxQueueCount < 1 || intervalValue < 1) {
-                Swal.fire({
+                await alert.fire({
                     title: 'Error!',
                     text: 'Please enter a value greater than 0 for both fields.',
                     icon: 'error'
                 });
                 return;
             }
-            
-            Swal.fire({
+
+            const result = await alert.fire({
                 title: 'Are you sure?',
                 text: 'This will save your selected options.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, save it!',
-                cancelButtonText: 'No, cancel!',
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Saving...',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    const response = await fetch('/api/database/users', {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            UserID: user.getUserID(),
-                            setOptions: 
-                                queueLimitEnabled === true
-                                ?
-                                JSON.stringify({
-                                    queueLimitTimeRestriction: {
-                                        maxQueueCount,
-                                        intervalValue,
-                                        intervalUnit
-                                    }
-                                })
-                                :
-                                JSON.stringify({})
-                        })
-                    });
-                    if (response.ok) {
-                        Swal.fire({
-                            title: 'Saved!',
-                            text: 'Your commercial options have been saved.',
-                            icon: 'success'
-                        });
-                        setHadQueueLimit(queueLimitEnabled);
-                        if (queueLimitEnabled) {
-                            setOriginalOptions({
+                cancelButtonText: 'No, cancel!'
+            });
+
+            if (result.isConfirmed) {
+                alert.showLoading();
+
+                const response = await fetch('/api/database/users', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        UserID: user.getUserID(),
+                        setOptions:
+                            queueLimitEnabled === true
+                            ?
+                            JSON.stringify({
                                 queueLimitTimeRestriction: {
                                     maxQueueCount,
                                     intervalValue,
                                     intervalUnit
                                 }
                             })
-                        }
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'There was an error saving your commercial options.',
-                            icon: 'error'
-                        });
+                            :
+                            JSON.stringify({})
+                    })
+                });
+
+                alert.close();
+
+                if (response.ok) {
+                    await alert.fire({
+                        title: 'Saved!',
+                        text: 'Your commercial options have been saved.',
+                        icon: 'success'
+                    });
+                    setHadQueueLimit(queueLimitEnabled);
+                    if (queueLimitEnabled) {
+                        setOriginalOptions({
+                            queueLimitTimeRestriction: {
+                                maxQueueCount,
+                                intervalValue,
+                                intervalUnit
+                            }
+                        })
                     }
+                } else {
+                    await alert.fire({
+                        title: 'Error!',
+                        text: 'There was an error saving your commercial options.',
+                        icon: 'error'
+                    });
                 }
-            
-            })
+            }
         }
 
 
@@ -278,22 +247,21 @@ const SelectFriend = () => {
                         </CardContent>
                     </Card>
                     <div className="absolute bottom-[5%] flex justify-center gap-12 w-full">
-                        <Button onClick={() => {
+                        <Button onClick={async () => {
                             let options = { maxQueueCount, intervalValue, intervalUnit };
 
-                            function confirmBackPress() {
-                                Swal.fire({
+                            async function confirmBackPress() {
+                                const result = await alert.fire({
                                     title: 'Are you sure?',
                                     text: 'You have unsaved changes. Are you sure you want to go back?',
                                     icon: 'warning',
                                     showCancelButton: true,
                                     confirmButtonText: 'Yes, go back!',
                                     cancelButtonText: 'No, cancel!'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        setCommercialOptionsVisible(false);
-                                    }
                                 });
+                                if (result.isConfirmed) {
+                                    setCommercialOptionsVisible(false);
+                                }
                             }
 
                             if (hadQueueLimit == queueLimitEnabled)  {
@@ -302,18 +270,18 @@ const SelectFriend = () => {
                             }
 
                             if ( hadQueueLimit != queueLimitEnabled ) {
-                                confirmBackPress();
-                                return; 
-                            } 
-                                
-                            else if (originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount 
-                                || originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue 
+                                await confirmBackPress();
+                                return;
+                            }
+
+                            else if (originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount
+                                || originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue
                                 || originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit)
                                 {
-                                    confirmBackPress();
+                                    await confirmBackPress();
                                     return;
                                 }
-                        
+
                             else setCommercialOptionsVisible(false);
 
                         }}><TiArrowBack size={25}/></Button>
@@ -359,37 +327,38 @@ const SelectFriend = () => {
             </div>
             <div className="grow text-center mx-2 flex flex-col gap-3">
                 {
-                    loading &&
+                    loading && friendsList.length === 0 &&
                     <Loading />
                 }
+                {isPending && (
+                    <div className="fixed inset-0 bg-black bg-opacity-70 z-[9999] flex items-center justify-center">
+                        <Loading />
+                    </div>
+                )}
                 {
                     !loading && friendsList.length === 0 &&
                     <div>
-                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
+                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
                             {
                                 refreshingFriendsLoading === true
-                                ?
+                                &&
                                 <div className="">
                                     <LoadingDots />
                                 </div>
-                                :
-                                <i>Tap here to refresh</i>
                             }
                         </h6>
-                        <h3>No friends found. Add some through the friends menu.</h3>
+                        <h3 className="mx-3">No friends found. Add some through the friends menu.</h3>
                     </div>
                 }
                 {
                     !loading && friendsList.length > 0 &&
                     <>
                         <h3 className="text-2xl font-semibold text-white">Add to:</h3>
-                        <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends()}>
+                        <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
                             {
                                 refreshingFriendsLoading === true
-                                ?
+                                &&
                                 <LoadingDots />
-                                :
-                                <i>Tap here to refresh</i>
                             }
                         </h6>
                         <div className="h-[68vh] overflow-y-scroll flex flex-col gap-3">
@@ -421,20 +390,22 @@ const SelectFriend = () => {
                                     return (
                                         <button
                                             key={index}
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 if (!friendIsActive) return;
                                                 if (!isQueueEnabled) {
-                                                    Swal.fire({
+                                                    await alert.fire({
                                                         title: 'Error!',
                                                         text: `${friend.Username} does not have unattended queues enabled. Ask them to enable it if you want to queue songs.`,
                                                         icon: 'error'
                                                     });
                                                     return;
                                                 }
-                                                // Navigate to request page with friend ID
-                                                router.push(`/request/${friend.UserID}`);
+                                                // Use transition for smoother navigation
+                                                startTransition(() => {
+                                                    router.push(`/request/${friend.UserID}`);
+                                                });
                                             } }
-                                            disabled={!friendIsActive}
+                                            disabled={!friendIsActive || isPending}
                                             className={`w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300 text-white
                                                         ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600' : 'bg-stone-800'}
                                                         ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
@@ -470,6 +441,7 @@ const SelectFriend = () => {
                     </>
                 }
             </div>
+            <alert.AlertComponent />
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import { BsExplicitFill } from "react-icons/bs";
 import SpotifyLinkBack from "./SpotifyLinkBack";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 interface ListContentCardProps {
@@ -24,61 +23,45 @@ function ListContentCard(props: ListContentCardProps) {
         primaryContent,
         secondaryContent,
         explicit,
-        btnContent,
-        btnOnClick,
-        btnIcon,
-        btnColorClass,
-        position
+        btnOnClick
     } = props;
 
-    // Map RippleUI button classes to shadcn button variants
-    const getButtonVariant = (colorClass: string) => {
-        if (!colorClass) return "default";
-        if (colorClass.includes('btn-primary') || colorClass.includes('bg-blue')) return "default";
-        if (colorClass.includes('btn-success') || colorClass.includes('bg-green')) return "success";
-        if (colorClass.includes('btn-warning')) return "warning";
-        if (colorClass.includes('btn-secondary')) return "secondary";
-        if (colorClass.includes('btn-error') || colorClass.includes('btn-danger')) return "destructive";
-        return "default";
-    };
-
     return (
-        <Card className="my-2 bg-stone-800 w-full shadow-md rounded-md border-stone-700">
-            <div className="flex items-center p-2 gap-2">
-                {position && <span className="text-white text-xs rounded-md px-1">{position}</span>}
-                <div className="flex-shrink-0 mr-2">
-                    {
-                        typeof imgSrc === 'string' 
-                        ?
-                        <img src={imgSrc} className="w-12 h-12 object-contain" alt="Thumbnail" />
-                        :
-                        imgSrc
-                    }
-                    { spotifyLinkBack && <SpotifyLinkBack link={spotifyLinkBack} /> }
-                </div>
-                <div className="flex-grow">
-                    <div className="text-base font-medium flex items-center justify-center">
+        <Card
+            className="bg-stone-800 border-stone-800 mx-auto w-[92vw] cursor-pointer transition-colors group"
+            onClick={btnOnClick}
+        >
+            <div className="flex items-center justify-between p-4 gap-4 w-full">
+                {
+                    typeof imgSrc === 'string'
+                    ?
+                    <img src={imgSrc} className="w-16 h-16 object-cover" alt="Thumbnail" />
+                    :
+                    <div className="w-16 h-16 overflow-hidden">
+                        {imgSrc}
+                    </div>
+                }
+                <div className="flex-grow min-w-0">
+                    <div className="flex items-center justify-center gap-2">
                         {
                             typeof primaryContent === 'string'
                             ?
-                            <span className="text-white">{primaryContent}</span>
+                            <h4 className="text-white font-medium text-base line-clamp-1">{primaryContent}</h4>
                             :
-                            primaryContent
+                            <div className="text-white font-medium text-base line-clamp-1">{primaryContent}</div>
                         }
-                        {explicit && <BsExplicitFill className="ms-2 text-white" />}
+                        {explicit && <BsExplicitFill className="text-gray-400 flex-shrink-0" size={16} />}
                     </div>
-                    <p className="text-xs text-gray-400 italic mt-0.5">{secondaryContent}</p>
+                    <p className="text-sm text-gray-400 line-clamp-1 mt-1.5">{secondaryContent}</p>
                 </div>
-                <div className="flex-shrink-0">
-                    <Button
-                        variant={getButtonVariant(btnColorClass)}
-                        className="flex items-center gap-1"
-                        onClick={btnOnClick}
+                { spotifyLinkBack &&
+                    <div
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        {btnIcon && <span>{btnIcon}</span>}
-                        {btnContent}
-                    </Button>
-                </div>
+                        <SpotifyLinkBack link={spotifyLinkBack} />
+                    </div>
+                }
             </div>
         </Card>
     );

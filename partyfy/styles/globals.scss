@@ -1,5 +1,3 @@
-@import '@sweetalert2/themes/dark/dark.scss';
-@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin&family=Montserrat&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,11 +6,12 @@ $title-font: 'Inter', sans-serif;
 $body-font: 'Inter', sans-serif;
 
 html {
+  @apply h-full;
   background: linear-gradient(
     45deg,
     oklch(25% 0.006 70),
     oklch(10% 0.002 70)
-  )
+  );
 }
 
 body {
@@ -81,6 +80,12 @@ h5 {
 
 div:not(nav *) {
   opacity: .99 !important;
+}
+
+/* Override opacity for AlertDialog to prevent shake */
+[data-radix-alert-dialog-content],
+[data-radix-alert-dialog-content] * {
+  opacity: 1 !important;
 }
 
 @layer base {
@@ -168,7 +173,7 @@ div:not(nav *) {
 
     --destructive: 0 62.8% 30.6%;
 
-    --destructive-foreground: 60 9.1% 97.8%;
+    --destructive-foreground: 60 9.1% 5173/api/proxy?url=https%3A%2F%2Fgg.poocloud.in%2Fhoustontexans%2Findex.m3u897.8%;
 
     --border: 12 6.5% 15.1%;
 

@@ -7,7 +7,7 @@ import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from "@/hooks/useAlert";
 
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
@@ -15,9 +15,11 @@ import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icon
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
+    const alert = useAlert();
     const [queue, setQueue] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
 
@@ -41,18 +43,18 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         }
 
         handleResize();
-        const interval = setInterval(handleResize, 1000);
-        
-        return () => clearInterval(interval);
+        // Window resize doesn't need to be checked every second - use window event listener instead
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
     }, [queueRef, nowPlayingRef]);
 
 
     async function showQueueDisclaimer() {
-        await Swal.fire({
-            html: 
-            `
-            <p>Please be aware that Partyfy uses Spotify's "Get The User's Queue" API, which currently does not differentiate between your manually curated queue and Spotify's 'Next From' recommendations. This limitation prevents us from distinguishing the tracks you've personally queued from those recommended by Spotify. However, songs queued from Partyfy will always appear first, despite this limitation. We appreciate your understanding as we continue to provide the best possible Partyfy experience within these constraints.</p>
-            `
+        await alert.fire({
+            title: 'Queue Information',
+            text: "Please be aware that Partyfy uses Spotify's \"Get The User's Queue\" API, which currently does not differentiate between your manually curated queue and Spotify's 'Next From' recommendations. This limitation prevents us from distinguishing the tracks you've personally queued from those recommended by Spotify. However, songs queued from Partyfy will always appear first, despite this limitation. We appreciate your understanding as we continue to provide the best possible Partyfy experience within these constraints.",
+            icon: 'info'
         });
     }
 
@@ -87,9 +89,10 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         const fetchData = async () => {
             await Promise.all([showFullQueue(), showNowPlaying()]);
         };
-        
+
         fetchData();
-        const interval = setInterval(fetchData, 1000); // Adjust the interval as necessary
+        // Reduced from 1s to 5s - better balance between UX and API load
+        const interval = setInterval(fetchData, 5000);
 
         return () => clearInterval(interval);
     }, []);
@@ -105,38 +108,36 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
     return (
         <div>
             <div className="w-full">
-                <h5 className="mt-2 text-lg">Their Session</h5>
                 <div className="flex flex-col items-center">
-                    <h3 className="text-3xl">Now Playing</h3>
                     { 
                         nowPlaying 
                         ?                            
                         <>
                             <div ref={nowPlayingRef} className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
                                 <div className="flex gap-2 w-full">
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col justify-center items-center">
                                         {
                                             nowPlaying.currently_playing_type == 'track'
                                             ?
                                             nowPlaying.item.album.images.length > 0 &&
-                                            <img className="me-4" src={nowPlaying.item.album.images[0].url} style={{ width: '75px', height: '75px' }} />
+                                            <img className="w-24" src={nowPlaying.item.album.images[0].url} />
                                             :
                                             nowPlaying.item
                                             ?
-                                            <img className="me-4" src={nowPlaying.item.images[0].url} style={{ width: '75px', height: '75px' }} />
+                                            <img className="w-24" src={nowPlaying.item.images[0].url} />
                                             :
-                                            <img className="me-4" src={"https://www.freeiconspng.com/uploads/spotify-icon-2.png"} style={{ width: '75px', height: '75px' }} />
+                                            <img className="w-24" src={"https://www.freeiconspng.com/uploads/spotify-icon-2.png"} />
                                         }
                                         {
                                             nowPlaying.item && nowPlaying.item.is_local &&
-                                            <img className="me-4" src={"https://www.freeiconspng.com/uploads/spotify-icon-2.png"} style={{ width: '75px', height: '75px' }} />
+                                            <img className="w-24" src={"https://www.freeiconspng.com/uploads/spotify-icon-2.png"} />
                                         }
                                         {
                                             nowPlaying.item && !nowPlaying.item.is_local &&
                                             <SpotifyLinkBack link={nowPlaying.item.external_urls.spotify} />
                                         }
                                     </div>
-                                    <div className="flex justify-between w-full">
+                                    <div className="flex flex-col w-full">
                                         <div className="flex flex-col items-start justify-between w-full px-2">
                                         <div className="flex justify-start gap-2">
                                             {nowPlaying.item ? (
@@ -172,8 +173,85 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
                                             }
                                         </div>
-                                        <div className="flex justify-between w-full">
+                                        <div className="flex justify-between w-full my-1">
                                             <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
+                                            <div className="flex justify-around items-center text-white gap-4">
+                                                { nowPlaying?.repeat_state == "off" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><TbRepeatOff /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat is off</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.repeat_state == "context" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><TbRepeat /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat context</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.repeat_state == "track" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><TbRepeatOnce /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat track</PopoverContent>
+                                                    </Popover>
+                                                }
+
+                                                { nowPlaying?.shuffle_state == true &&
+                                                    <Popover>
+                                                        <PopoverTrigger><TbArrowsShuffle /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Shuffle is on</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.shuffle_state == false &&
+                                                    <Popover>
+                                                        <PopoverTrigger><TbArrowsShuffle className="text-gray-400" /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Shuffle is off</PopoverContent>
+                                                    </Popover>
+                                                }
+
+                                                { nowPlaying?.device?.type == "Smartphone" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdSmartphone /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on smartphone</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.device?.type == "Speaker" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdSpeaker /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on speaker</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.device?.type == "Computer" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdComputer /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on computer</PopoverContent>
+                                                    </Popover>
+                                                }
+
+                                                { nowPlaying?.context?.type == "artist" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdPerson /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from artist</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.context?.type == "playlist" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdList /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from playlist</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.context?.type == "album" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdAlbum /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from album</PopoverContent>
+                                                    </Popover>
+                                                }
+                                                { nowPlaying?.context?.type == "show" &&
+                                                    <Popover>
+                                                        <PopoverTrigger><MdPodcasts /></PopoverTrigger>
+                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from podcast</PopoverContent>
+                                                    </Popover>
+                                                }
+                                            </div>
                                             { nowPlaying?.is_playing == false && <h6><i>Paused</i></h6> }
                                             {
                                                 nowPlaying.item
@@ -191,24 +269,12 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 <h6>?</h6>
                                             }
                                         </div>
-                                            <progress className="progress progress-flat-primary w-full bg-stone-800 text-white" value={nowPlaying.progress_ms} max={nowPlaying.item ? nowPlaying.item.duration_ms : ''}></progress>
-                                        </div>
-                                        <div className="flex flex-col justify-between my-1 text-white w-[5%] gap-3">
-                                            { nowPlaying?.repeat_state == "off" && <TbRepeatOff /> }
-                                            { nowPlaying?.repeat_state == "context" && <TbRepeat /> }
-                                            { nowPlaying?.repeat_state == "track" && <TbRepeatOnce /> }
-
-                                            { nowPlaying?.shuffle_state == true && <TbArrowsShuffle /> }
-                                            { nowPlaying?.shuffle_state == false && <TbArrowsShuffle className="text-gray-400" /> }
-
-                                            { nowPlaying?.device?.type == "Smartphone" && <MdSmartphone /> }
-                                            { nowPlaying?.device?.type == "Speaker" && <MdSpeaker /> }
-                                            { nowPlaying?.device?.type == "Computer" && <MdComputer /> }
-
-                                            { nowPlaying?.context?.type == "artist" && <MdPerson /> }
-                                            { nowPlaying?.context?.type == "playlist" && <MdList /> }
-                                            { nowPlaying?.context?.type == "album" && <MdAlbum /> }
-                                            { nowPlaying?.context?.type == "show" && <MdPodcasts /> }
+                                            <div className="w-full bg-gray-600 rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className="bg-white h-full rounded-full transition-all duration-300"
+                                                    style={{ width: `${nowPlaying.item ? (nowPlaying.progress_ms / nowPlaying.item.duration_ms) * 100 : 0}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -261,7 +327,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                         </div>
                                         {
                                             index < queue.length - 1 &&
-                                            <Separator className="my-2" />
+                                            <Separator className="my-2 bg-stone-600" />
                                         }
                                     </div>
                                 );
@@ -290,6 +356,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                     <Loading  />
                 </div>
             }
+            <alert.AlertComponent />
         </div>
     );
 }

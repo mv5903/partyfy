@@ -4,7 +4,7 @@ import { TiArrowBack } from "react-icons/ti";
 
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from "@/hooks/useAlert";
 import Loading from "../misc/Loading";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +29,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         YourPlaylists
     }
 
+    const alert = useAlert();
     const { user } = useContext(UserContext);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -36,6 +37,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
     const [nowPlaying, setNowPlaying] = useState<any>(null);
+    const [queueUsage, setQueueUsage] = useState<any>(null);
 
     // Get tab from URL params, default to Search
     const tabParam = searchParams.get('tab');
@@ -109,8 +111,18 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         }
 
         loadFriendUserObject();
-        let timeout = setInterval(loadFriendUserObject, 1000);
+        // Reduced from 1s to 10s - friend user object doesn't change frequently
+        let timeout = setInterval(loadFriendUserObject, 10000);
         return () => clearInterval(timeout);
+    }, [currentFriend])
+
+    useEffect(() => {
+        if (!currentFriend) return;
+
+        getQueueUsage();
+        // Update queue usage every 5 seconds
+        let interval = setInterval(getQueueUsage, 5000);
+        return () => clearInterval(interval);
     }, [currentFriend])
     
     async function loadFriendSpotifyAuth() {
@@ -118,9 +130,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
             setFriendSpotifyAuth(friendSpotifyAuth);
         } else {
-            Swal.fire({
+            await alert.fire({
                 title: 'No Spotify account linked',
-                html: `Your friend <strong>${currentFriend.Username}</strong> needs to link their Spotify account to account before you can request songs.`,
+                text: `Your friend ${currentFriend.Username} needs to link their Spotify account to account before you can request songs.`,
                 icon: 'error',
             });
             setCurrentFriend(null);
@@ -136,7 +148,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
                 if (response.status == 204) setNowPlaying(false);
                 const data = await response.json();
-    
+
                 // Decide background color based on album art
                 let albumArt = null;
                 if (!data?.item?.album?.images[0]?.url) return;
@@ -145,9 +157,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 fac.getColorAsync(albumArt).then(color => {
                     let rgb = color.value;
                     let [h, s, l] = RGBtoHSL(rgb[0], rgb[1], rgb[2]);
-                    BackgroundEffectColor.setBackgroundEffectColor(h); 
+                    BackgroundEffectColor.setBackgroundEffectColor(h);
                 });
-    
+
                 if (data) {
                     setNowPlaying(data);
                 }
@@ -155,31 +167,31 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 console.error(e);
             }
         }
-    
+
         getNowPlaying();
-        let interval = setInterval(getNowPlaying, 1000);
+        // Reduced from 1s to 5s - better balance between UX and API load
+        let interval = setInterval(getNowPlaying, 5000);
         return () => clearInterval(interval);
     }, [friendSpotifyAuth]);    
 
     async function addToQueue(song: any) {
-        let result = await Swal.fire({
+        console.log("SONG", song)
+        let result = await alert.fire({
             title: 'Queue Confirmation',
-            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${getArtistList(song.artists)}</i> to ${currentFriend.Username}'s queue.`,
+            text: `You're about to add ${song.name}${song.explicit ? ' (Explicit Version)' : ''} by ${getArtistList(song.artists)} to ${currentFriend.Username}'s queue.`,
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Add it!',
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
+            html: ` <div className="">
+                        <img src="${song.album.images[0].url}" style="width: 6rem; margin-left: auto; margin-right: auto;"  />
+                        <p style="margin-top: 10px;">You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''} by ${getArtistList(song.artists)}</strong> to <i>${currentFriend.Username}</i>'s queue.</p>
+                    </div>`
         });
 
         if (result.isConfirmed) {
             // Show loading dialog while we add the song to the queue
-            Swal.fire({
-                title: 'Sending to queue...',
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
-            });
+            alert.showLoading();
 
             // Obtain device id
             const device_id = getDeviceIdentifier();
@@ -200,42 +212,43 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 })
             });
 
+            const data = await response.json();
+
             if (response.status == 201) {
-                const data = await response.json();
-                Swal.fire({
+                await alert.fire({
                     title: 'Time Restricted',
-                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
+                    text: `You cannot add songs to ${currentFriend.Username}'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
                     icon: 'warning'
-                })
+                });
                 return;
             }
 
-            const data = await response.json(); // ERROR LINE
             // User attempts to queue to a free friend
             if (data && data.name && data.name === "Player command failed: Premium required") {
-                Swal.fire({
+                await alert.fire({
                     title: 'Error',
-                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
+                    text: `You cannot add songs to ${currentFriend.Username}'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
                     icon: 'error'
-                })
+                });
+                return;
             }
 
             // User attempts to queue when friend does not have an active Spotify session
             if (data && data.name && data.name === 'Not Found') {
-                Swal.fire({
+                await alert.fire({
                     title: 'Error',
-                    html: `${song.name} may not have added to queue. <strong>${currentFriend.Username}</strong> may have temporarily lost their internet connection. Try again in a few minutes.`,
+                    text: `${song.name} may not have added to queue. ${currentFriend.Username} may have temporarily lost their internet connection. Try again in a few minutes.`,
                     icon: 'error'
-                })   
+                });
+                return;
             }
-            // User can susccessfully queue
+
+            // User can successfully queue
             if (data && data.name && data.name === 'OK') {
-                Swal.fire({
+                await alert.fire({
                     title: song.name + ' added to queue!',
-                    icon: 'success',
-                    timer: 800,
-                    showConfirmButton: false
-                })
+                    icon: 'success'
+                });
             }
         }
     }
@@ -248,9 +261,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         if (data) {
             if (!data.UnattendedQueues)  {
                 // show warning and then exit when pressed ok
-                await Swal.fire({
+                await alert.fire({
                     title: 'Notice',
-                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled remote queues. You will no longer be able to request songs until it has been turned back on.`,
+                    text: `Your friend ${currentFriend.Username} has disabled remote queues. You will no longer be able to request songs until it has been turned back on.`,
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });
@@ -265,14 +278,14 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         if (!currentFriend) return;
         const response = await fetch(`/api/database/friends?action=isFriend&UserID=${user.getUserID()}&FriendUserID=${currentFriend.UserID}`);
         const data = await response.json();
-        
+
         if (!data) {
             setCurrentFriend(null);
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your friend <strong>${currentFriend.Username}</strong> has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
+                text: `Your friend ${currentFriend.Username} has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
                 icon: 'warning'
-            })
+            });
         }
     }
 
@@ -280,9 +293,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         if (!temporarySession) return;
         const expirationDate = new Date(temporarySession.expiration_date);
         if (expirationDate < new Date()) {
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your temporary session with <strong>${currentFriend.Username}</strong> has expired. You will no longer be able to request songs until they create a new session.`,
+                text: `Your temporary session with ${currentFriend.Username} has expired. You will no longer be able to request songs until they create a new session.`,
                 icon: 'warning'
             });
             setTimeout(exitSession, 3000);
@@ -291,12 +304,34 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         const response = await fetch(`/api/database/sessions?UserID=${currentFriend.UserID}`);
         const data = await response.json();
         if (!data) {
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your friend <strong>${currentFriend.Username}</strong> has ended the session. You will no longer be able to request songs until they create a new session.`,
+                text: `Your friend ${currentFriend.Username} has ended the session. You will no longer be able to request songs until they create a new session.`,
                 icon: 'warning'
             });
             setTimeout(exitSession, 3000);
+        }
+    }
+
+    async function getQueueUsage() {
+        if (!currentFriend) return;
+        const deviceId = getDeviceIdentifier();
+        const userId = temporarySession ? null : user.getUserID();
+
+        const params = new URLSearchParams({
+            FriendUserID: currentFriend.UserID,
+            DeviceID: deviceId
+        });
+
+        if (userId) {
+            params.append('UserID', userId);
+        }
+
+        const response = await fetch(`/api/database/queueusage?${params.toString()}`);
+        const data = await response.json();
+
+        if (data) {
+            setQueueUsage(data);
         }
     }
 
@@ -337,11 +372,22 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                         <h3 className="text-center mb-4 text-white">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
                     }
                     {
-                        friendUserObject && friendUserObject.options && friendUserObject.options["queueLimitTimeRestriction"] && friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount > 0 &&
-                        <h3 className="text-center mb-4 text-white">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
+                        queueUsage && queueUsage.hasRestriction && (
+                            <div className="text-center mb-4 text-white">
+                                {queueUsage.timeUntilNextQueue ? (
+                                    <h3 className="text-yellow-400">
+                                        <strong>{queueUsage.timeUntilNextQueue}</strong> remaining until your next queue
+                                    </h3>
+                                ) : (
+                                    <h3>
+                                        <strong>{queueUsage.maxQueueCount - queueUsage.currentQueueCount}</strong> of <strong>{queueUsage.maxQueueCount}</strong> queues remaining in {currentFriend.Username}'s quota
+                                    </h3>
+                                )}
+                            </div>
+                        )
                     }
                     <div className="flex flex-col items-center">
-                        <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className="w-full">
+                        <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className={`w-full`}>
                             <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
                                 <TabsTrigger value={RequestPageView.Search.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
                                     <FaSearch size={10} />Search
@@ -372,6 +418,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     </div>
                 </>
             }
+            <alert.AlertComponent />
         </div>
     )
 }

@@ -2,12 +2,13 @@ import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { useState } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 const Search = ({ user } : { user : PartyfyUser } ) => {
+    const alert = useAlert();
     const [usersReturned, setUsersReturned] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -30,23 +31,18 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
     }
 
     async function sendFriendRequest(FriendUserID: string, FriendUsername: string) {
-        let choice = await Swal.fire({
+        let choice = await alert.fire({
             title: 'Friend Request',
-            text: `Send a friend request to ${FriendUsername}?`,
+            html: `Send a friend request to <strong>${FriendUsername}</strong>?`,
             icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
             confirmButtonText: 'Yes'
         });
 
         if (choice.isConfirmed) {
-            Swal.fire({
+            alert.fire({
                 title: 'Sending friend request...',
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
+                showConfirmButton: false
             });
             const response = await fetch('/api/database/friends', {
                 method: 'PATCH',
@@ -60,7 +56,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                 })
             });
             if (response.ok) {
-                await Swal.fire({
+                await alert.fire({
                     title: 'Success',
                     text: `Friend request sent to ${FriendUsername} successfully.`,
                     icon: 'success'
@@ -72,7 +68,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
     return (
         <div className="text-white">
             <h1 className='mt-3 mb-6 text-xl font-semibold'>Find Someone</h1>
-            <div className='flex justify-center'>
+            <div className='flex justify-center w-3/4 mx-auto'>
                 <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
             </div>
             <div>
@@ -90,6 +86,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                     loading && <Loading />
                 }
             </div>
+            <alert.AlertComponent />
         </div>
     )
 }

@@ -10,18 +10,27 @@ import UserContext from '@/providers/UserContext';
 import { CONSTANTS } from '@/assets/Constants';
 import { OAuthRedirect } from '@/helpers/OAuthRedirect';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
 import { FaSpotify } from 'react-icons/fa';
 import { isMobile } from 'react-device-detect';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
+import { useUserStore } from '@/stores/useUserStore';
+import { Button } from '@/components/ui/button';
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const alert = useAlert();
   const { user, error, isLoading } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState<boolean | null>(null);
   const [isAHost, setIsAHost] = useState<boolean>(true);
-  const [partyfyUser, setPartyfyUser] = useState<PartyfyUser | null>(null);
+
+  // Capture OAuth code from URL before it gets stripped
+  const spotifyCode = searchParams.get('code');
+
+  // Use Zustand store instead of local state
+  const { partyfyUser, initializeUser, refetchUser: refetchUserStore } = useUserStore();
 
   const handleSpotifyAuthClick = () => {
     // Store the current origin before redirecting to Spotify
@@ -29,12 +38,11 @@ export default function DashboardPage() {
     window.location.href = CONSTANTS.SPOTIFY_AUTH_URL;
   };
 
-  // Handles spotify authentication
-  async function handleSpotifyAuth() {
-    // Refresh token already in database
-    let pUser = new PartyfyUser(user);
-    setPartyfyUser(pUser);
-    return await pUser.fillUserInfoFromDB();
+  // Handles spotify authentication using Zustand store
+  async function handleSpotifyAuth(code?: string) {
+    // Use cached user data from Zustand store, pass the OAuth code if present
+    const hasSpotifyAuth = await initializeUser(user, code);
+    return hasSpotifyAuth;
   }
 
   // Normal User Handling
@@ -47,11 +55,12 @@ export default function DashboardPage() {
     }
 
     if (user) {
-      handleSpotifyAuth().then((result) => {
+      console.log('[Dashboard] Spotify code from URL:', spotifyCode);
+      handleSpotifyAuth(spotifyCode || undefined).then((result) => {
         setSpotifyAuthenticated(result || result === undefined);
       });
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, spotifyCode]);
 
   // Dashboard-specific effects
   useEffect(() => {
@@ -59,7 +68,7 @@ export default function DashboardPage() {
 
     if (!isMobile) {
       if (localStorage.getItem('betterOnMobileNotification') === null) {
-        Swal.fire({
+        alert.fire({
           title: 'Better on Mobile',
           text: 'Partyfy is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience.',
           icon: 'info',
@@ -99,11 +108,10 @@ export default function DashboardPage() {
   }, [partyfyUser]);
 
   const refetchUser = async () => {
-    if (!partyfyUser) return;
-    await partyfyUser.refetchUser();
-    setPartyfyUser(partyfyUser);
+    await refetchUserStore();
   };
 
+  // Only show loading if auth is still loading OR there's no user at all
   if (isLoading || !user) {
     return <Loading />;
   }
@@ -122,7 +130,7 @@ export default function DashboardPage() {
           ?
           <>
             {
-              user != null &&
+              user != null && partyfyUser &&
               <UserContext.Provider value={{ user: partyfyUser }}>
                 <SelectFriend />
               </UserContext.Provider>
@@ -137,13 +145,15 @@ export default function DashboardPage() {
                 <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to link your Spotify account.</i></h2>
                 <h6 className=''>You'll only have to do this once.</h6>
                 <h4 className="text-1xl m-4 text-center">Please note that due to Spotify's API policy, friends will not be able to add to your queue if you link a free account. You can still queue to your friends, though, if they have premium.</h4>
-                <button
+                <Button 
                   onClick={handleSpotifyAuthClick}
-                  className="btn btn-success btn-margin m-4 decoration-none"
-                  tabIndex={0}>
+                  className="bg-green-600 hover:bg-green-700 text-white btn-margin m-4 decoration-none"
+                  tabIndex={0}
+
+                >
                   <FaSpotify className="mr-2" />
                   Authenticate Spotify
-                </button>
+                </Button>
               </div>
             }
             {
@@ -154,6 +164,15 @@ export default function DashboardPage() {
             }
           </>
       }
+      <alert.AlertComponent />
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

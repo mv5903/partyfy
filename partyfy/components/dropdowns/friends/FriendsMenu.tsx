@@ -51,9 +51,9 @@ const FriendsMenu = () => {
                     <FaUserFriends size={fontSize + 12} />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh] bg-stone-900 border-stone-700">
+            <SheetContent side="bottom" className="h-[85vh] bg-stone-900 border-stone-900">
                 <SheetHeader>
-                    <SheetTitle className="text-white">Friends</SheetTitle>
+                    <SheetTitle className="text-white text-xl">Friends</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 h-full pt-4">
                     <div className="flex bg-stone-900 w-full gap-1">

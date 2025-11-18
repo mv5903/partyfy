@@ -9,6 +9,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Users } from '@prisma/client';
+import { useUserStore } from '@/stores/useUserStore';
 
 export default function RequestPage() {
   const { user, isLoading } = useUser();
@@ -16,12 +17,14 @@ export default function RequestPage() {
   const router = useRouter();
   const friendId = params.friendId as string;
 
-  const [partyfyUser, setPartyfyUser] = useState<PartyfyUser | null>(null);
+  // Use Zustand store for user data
+  const { partyfyUser, initializeUser, refetchUser: refetchUserStore, isLoading: userStoreLoading } = useUserStore();
+
   const [currentFriend, setCurrentFriend] = useState<Users | null>(null);
   const [friendLoading, setFriendLoading] = useState(true);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState<boolean | null>(null);
 
-  // Handle authentication
+  // Handle authentication using Zustand store
   useEffect(() => {
     if (!user && !isLoading) {
       router.push('/');
@@ -29,12 +32,8 @@ export default function RequestPage() {
     }
 
     if (user) {
-      const handleSpotifyAuth = async () => {
-        let pUser = new PartyfyUser(user);
-        setPartyfyUser(pUser);
-        await pUser.fillUserInfoFromDB();
-      };
-      handleSpotifyAuth();
+      // Use cached user data from Zustand store (async but doesn't need await here)
+      initializeUser(user);
     }
   }, [user, isLoading, router]);
 
@@ -66,12 +65,12 @@ export default function RequestPage() {
   };
 
   const refetchUser = async () => {
-    if (!partyfyUser) return;
-    await partyfyUser.refetchUser();
-    setPartyfyUser(partyfyUser);
+    await refetchUserStore();
   };
 
-  if (isLoading || !user || friendLoading || !currentFriend) {
+  // Show loading if ANY critical data is missing or still loading
+  // This ensures the loading screen shows immediately on navigation
+  if (isLoading || !user || userStoreLoading || !partyfyUser || friendLoading || !currentFriend) {
     return <Loading />;
   }
 

@@ -1,6 +1,7 @@
 import Database from '@/database/db';
 import UserOptions from '@/prisma/UserOptions';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { winston } from '@/logs/winston';
 
 type Data = {
   name: string

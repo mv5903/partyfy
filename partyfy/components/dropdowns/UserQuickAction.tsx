@@ -1,10 +1,10 @@
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import UserContext from '@/providers/UserContext';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaBars, FaEdit, FaTrash } from 'react-icons/fa';
 import { FaLinkSlash, FaPersonWalkingArrowRight, FaRightFromBracket } from "react-icons/fa6";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -17,8 +17,10 @@ import {
 
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
 
+    const alert = useAlert();
     const { user } = useContext(UserContext);
     const router = useRouter();
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     async function checkUsername(username) {
         if (username.length < 1 || username.length > 16) return false;
@@ -42,12 +44,12 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
       }
 
     const deleteAccount = async () => {
-        let confirmation = await Swal.fire({
-            title: 'Are you sure?',
+        let confirmation = await alert.fire({
+            title: 'Are you sure you want to delete your account?',
             text: "This action CANNOT be undone!",
             icon: 'warning',
             showCancelButton: true
-        })
+        });
         if (confirmation.isConfirmed) {
             const res = await fetch('/api/database/users?UserID=' + user.getUserID(), {
                 method: 'DELETE',
@@ -62,12 +64,12 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
     }
 
     const unlinkSpotify = async () => {
-        let confirmation = await Swal.fire({
+        let confirmation = await alert.fire({
             title: 'Are you sure you want to unlink your Spotify Account?',
             text: "This action CANNOT be undone!",
             icon: 'warning',
             showCancelButton: true
-        })
+        });
         if (confirmation.isConfirmed) {
             const res = await fetch('/api/database/users?action=unlink&UserID=' + user.getUserID(), {
                 method: 'DELETE',
@@ -76,33 +78,35 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                 }
             });
             setSpotifyAuthenticated(false);
+            setIsSheetOpen(false);
         }
     }
 
     const changeUsername = async () => {
         let newUsername = null;
-          let { value: username } = await Swal.fire({
+          let result = await alert.fire({
             title: 'Change Username.',
             input: 'text',
             inputLabel: 'Your new username. Choose up to 16 characters.',
             inputPlaceholder: 'johndoe24',
             showCancelButton: true,
           })
-          if (!username) return;
-          newUsername = username;
+          if (!result.value) return;
+          alert.showLoading();
+          newUsername = result.value;
           let usernameOK = false;
           while (!usernameOK) {
             if (!(await checkUsername(newUsername))) {
               let alertTitle = newUsername.length > 16 ? 'Your username is too long.' : `${newUsername} is already taken. Please try another.`;
-              let { value: userName } = await Swal.fire({
+              let retryResult = await alert.fire({
                 title: alertTitle,
                 input: 'text',
                 inputLabel: 'Your new username. Choose up to 16 characters.',
                 inputPlaceholder: 'johndoe24',
                 showCancelButton: true,
               })
-              if (!userName) return;
-              newUsername = userName;
+              if (!retryResult.value) return;
+              newUsername = retryResult.value;
             } else {
               usernameOK = true;
               fetch('/api/database/users', {
@@ -118,15 +122,15 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
               })
                 .then(response => response.json())
                 .then(data => {
-                    Swal.fire({
+                    alert.close();
+                    alert.fire({
                         title: `Username changed to ${newUsername} successfully.`,
                         icon: 'success',
-                        timer: 1000,
-                        showConfirmButton: false
-                    })     
+                    })
                     // Refetch User details to show that the username has changed on top of screen
                     getUser();
                     router.refresh();
+                    setIsSheetOpen(false);
                 })
               return;
             }
@@ -147,7 +151,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
     }
 
     return (
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
                 <Button
                     id="user-quick-action-btn"
@@ -159,11 +163,6 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
             <SheetContent side="right" className="flex flex-col gap-4 bg-stone-900 border-stone-700">
                 <SheetHeader>
                     <SheetTitle className="text-white">Settings</SheetTitle>
-                    {user && user.db && (
-                        <SheetDescription>
-                            User type: {getProductTypeAsString(user.getProductType())}
-                        </SheetDescription>
-                    )}
                 </SheetHeader>
                 <div className="flex flex-col gap-3 justify-between h-full">
                   <div className="flex flex-col gap-3 mt-4">
@@ -206,6 +205,7 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                   </div>
                 </div>
             </SheetContent>
+            <alert.AlertComponent />
         </Sheet>
     )
 }

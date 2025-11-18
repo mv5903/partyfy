@@ -5,9 +5,10 @@ import RequestSong from '@/components/request/RequestSong';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { sessions, Users } from '@prisma/client';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 
 export default function SessionPage() {
+  const alert = useAlert();
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
@@ -18,16 +19,13 @@ export default function SessionPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      // Show Swal loading
-      Swal.fire({
+      // Show alert loading
+      alert.fire({
         title: 'Joining Session',
         text: 'Please wait while we check the session...',
         allowOutsideClick: false,
         allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
+        showConfirmButton: false
       });
 
       try {
@@ -36,28 +34,26 @@ export default function SessionPage() {
 
         // Check if the session exists
         if (!data) {
-          Swal.fire({
+          await alert.fire({
             title: 'Session Not Found',
             text: 'The session you tried to join does not exist. Ask your friend to create a new one.',
             icon: 'error',
             confirmButtonText: 'OK'
-          }).then(() => {
-            router.push('/');
           });
+          router.push('/');
           return;
         }
 
         // Check if the session is active
         const expirationDate = new Date(data.expiration_date);
         if (expirationDate < new Date()) {
-          Swal.fire({
+          await alert.fire({
             title: 'Session Expired',
             text: `The session you tried to join expired at ${expirationDate.toLocaleDateString()} at ${expirationDate.toLocaleTimeString()}. Ask your friend to create a new one.`,
             icon: 'error',
             confirmButtonText: 'OK'
-          }).then(() => {
-            router.push('/');
           });
+          router.push('/');
           return;
         }
 
@@ -73,21 +69,20 @@ export default function SessionPage() {
           return;
         }
 
-        // Cancel Swal
-        Swal.close();
+        // Cancel alert
+        alert.close();
         setTemporarySessionFriend(friendData);
         setActiveTemporarySession(data);
         setLoading(false);
       } catch (error) {
         console.error('Error checking session:', error);
-        Swal.fire({
+        await alert.fire({
           title: 'Error',
           text: 'There was an error joining the session.',
           icon: 'error',
           confirmButtonText: 'OK'
-        }).then(() => {
-          router.push('/');
         });
+        router.push('/');
       }
     };
 
@@ -112,6 +107,7 @@ export default function SessionPage() {
         temporarySession={activeTemporarySession}
         exitSession={exitSession}
       />
+      <alert.AlertComponent />
     </div>
   );
 }

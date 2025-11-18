@@ -4,27 +4,24 @@ import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { useEffect, useState } from 'react';
 import { FaPlus, FaRegTrashAlt, FaTrash, FaTrashAlt } from 'react-icons/fa';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useFriendsStore } from '@/stores/useFriendsStore';
 
 const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendListScreen: Function } ) => {
-    const [friends, setFriends] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const alert = useAlert();
+    // Use Zustand store for friends data
+    const { friends, isLoading, fetchFriends } = useFriendsStore();
 
     useEffect(() => {
-        async function fetchFriends() {
-            const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
-            const data = await response.json();
-            setLoading(false);
-            setFriends(data);
-        }
+        // Fetch friends (will use cache if available)
+        fetchFriends(user.getUserID());
 
-        fetchFriends();
         Supabase
             .channel('List')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                fetchFriends();
+                fetchFriends(user.getUserID());
             })
             .subscribe();
 
@@ -33,50 +30,52 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
         }
     }, []);
 
-    function removeFriend(FriendUserID: string, FriendUsername: string) {
-        Swal.fire({
+    async function removeFriend(FriendUserID: string, FriendUsername: string) {
+        const result = await alert.fire({
             title: 'Are you sure?',
             text: `Are you sure you want to remove ${FriendUsername} from your friends list?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Remove',
             cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('/api/database/friends', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        UserID: user.getUserID(),
-                        FriendUserID: FriendUserID,
-                        action: 'DeleteFriend'
-                    }) 
-                }).then(response => {
-                    if (response.status === 200) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: `You have removed ${FriendUsername} from your friends list.`,
-                            icon: 'success'
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: `You have not removed ${FriendUsername} from your friends list.`,
-                            icon: 'error'
-                        });
-                    }
+        });
+        alert.showLoading();
+
+        if (result.isConfirmed) {
+            const response = await fetch('/api/database/friends', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    UserID: user.getUserID(),
+                    FriendUserID: FriendUserID,
+                    action: 'DeleteFriend'
+                })
+            });
+
+            if (response.status === 200) {
+                await alert.fire({
+                    title: 'Success!',
+                    text: `You have removed ${FriendUsername} from your friends list.`,
+                    icon: 'success'
+                });
+            } else {
+                await alert.fire({
+                    title: 'Error!',
+                    text: `You have not removed ${FriendUsername} from your friends list.`,
+                    icon: 'error'
                 });
             }
-        });
+        }
+        fetchFriends(user.getUserID());
     }
     
     return (
         <div className="text-white">
             <h1 className='mt-3 mb-6 text-xl font-semibold'>Friends</h1>
             {
-                loading
+                isLoading && friends.length === 0
                 ?
                 <Loading />
                 :
@@ -87,7 +86,7 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                         <div>
                             <h5 className="text-xl text-center text-white">You have no friends yet.</h5>
                             <div className='flex justify-center'>
-                                <Button className='mt-4' onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaPlus className="mr-2" /> Add Friends</Button>
+                                <Button className='mt-4 bg-white text-black' onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaPlus className="mr-2" /> Add Friends</Button>
                             </div>
                         </div>
                         :
@@ -104,6 +103,7 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                     }
                 </div>
             }
+            <alert.AlertComponent />
         </div>
     );
 }

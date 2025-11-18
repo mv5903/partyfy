@@ -33,12 +33,19 @@ export class OAuthRedirect {
   }
 
   /**
-   * Get the Spotify OAuth URL with dynamic redirect
+   * Get the Spotify OAuth URL with dynamic redirect to /dashboard
    */
   static getSpotifyAuthUrl(clientId: string, scopes: string): string {
-    // Use the current window origin, not the stored one
-    // The stored one is for after the OAuth callback
-    const redirectUri = typeof window !== 'undefined' ? window.location.origin : '';
+    // Redirect to /dashboard so useSearchParams can capture the code
+    const redirectUri = typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : '';
+
+    console.log('[OAuthRedirect] Redirect URI:', redirectUri);
+    console.log('[OAuthRedirect] Full auth URL:', 'https://accounts.spotify.com/authorize' +
+      '?response_type=code' +
+      '&client_id=' + clientId +
+      (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+      '&redirect_uri=' + encodeURIComponent(redirectUri) +
+      '&show_dialog=true');
 
     return 'https://accounts.spotify.com/authorize' +
       '?response_type=code' +

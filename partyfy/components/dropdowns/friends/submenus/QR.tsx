@@ -4,11 +4,12 @@ import PartyfyUser from '@/helpers/PartyfyUser';
 import { useEffect, useRef, useState } from 'react';
 import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsListScreen: Function } ) => {
+    const alert = useAlert();
     const [loading, setLoading] = useState(true);
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
@@ -25,11 +26,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
         
         const now = new Date();
         const oneWeekLater = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)); // One week from now
-        
+
         const currentDateTime = toLocalISOString(now);
         const maxDateTime = toLocalISOString(oneWeekLater);
-        
-        const expirationDate = await Swal.fire({
+
+        const expirationDate = await alert.fire({
             title: 'Expiration Date',
             text: 'Choose an expiration date for this session. After this date, the session will be deleted. The expiration date cannot be changed. The maximum length is one week.',
             input: 'datetime-local',
@@ -45,11 +46,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
         if (expirationDate.isDismissed) return;
         let date = new Date(expirationDate.value);
         if (date < new Date()) {
-            Swal.fire({
+            await alert.fire({
                 title: 'Invalid Date',
                 text: 'The expiration date must be in the future.',
                 icon: 'error'
-            })
+            });
             return;
         }
 
@@ -65,11 +66,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
         })
         const data = await response.json();
         if (data.name === 'Error creating session') {
-            Swal.fire({
+            await alert.fire({
                 title: 'Error',
                 text: 'There was an error creating a session. Please try again later.',
                 icon: 'error'
-            })
+            });
         }
         setExpirationDate(new Date(data.expiration_date));
         setQRCodeURL("https://partyfy.mattvandenberg.com?session=" + data.session_id);
@@ -78,13 +79,13 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
 
     async function deleteSession(withConfirmation = true) {
         if (withConfirmation) {
-            const choice = Swal.fire({
+            const choice = await alert.fire({
                 title: 'Are you sure?',
                 text: 'This will delete the session immediately and the QR code will no longer be valid. You can\'t undo this action!',
                 icon: 'warning',
                 showCancelButton: true
             })
-            if ((await choice).isDismissed) return;
+            if (choice.isDismissed) return;
         }
         const response = await fetch('/api/database/sessions', {
             method: 'DELETE',
@@ -130,13 +131,13 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
         return () => clearInterval(interval);
     }, [qrCodeURL, expirationDate])
 
-    function copyLinkToClipboard(): void {
+    async function copyLinkToClipboard(): Promise<void> {
         navigator.clipboard.writeText(qrCodeURL);
-        Swal.fire({
+        await alert.fire({
             title: 'Copied to Clipboard',
             text: 'The link has been copied to your clipboard.',
             icon: 'success'
-        })
+        });
     }
 
     function saveQR() {
@@ -172,11 +173,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
           // Revoke the object URL
           URL.revokeObjectURL(url);
 
-          Swal.fire({
+          alert.fire({
             title: 'Saved',
             text: 'The QR code has been saved successfully.',
             icon: 'success'
-          })
+          });
         };
         image.src = url;
       };
@@ -230,6 +231,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                 </>
 
             }
+            <alert.AlertComponent />
         </div>
     )
 }

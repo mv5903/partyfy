@@ -4,29 +4,24 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useFriendRequestsStore } from '@/stores/useFriendRequestsStore';
 
 const SentRequests = ({ user } : { user : PartyfyUser } ) => {
-    const [usersReturned, setUsersReturned] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const alert = useAlert();
+    // Use Zustand store for sent requests data
+    const { sentRequests: usersReturned, isLoadingSent: loading, fetchSentRequests } = useFriendRequestsStore();
 
     useEffect(() => {
-        async function loadSentFriendRequests() {
-            const response = await fetch('/api/database/friends?UserID=' + user.getUserID() + '&action=sent')
-            const data = await response.json();
-            if (data) {
-                setLoading(false);
-                setUsersReturned(data);
-            }
-        }
-        
-        loadSentFriendRequests();
+        // Fetch sent requests (will use cache if available)
+        fetchSentRequests(user.getUserID());
+
         Supabase
             .channel('SentRequests')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                loadSentFriendRequests();
+                fetchSentRequests(user.getUserID());
             })
             .subscribe();
 
@@ -36,7 +31,7 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     }, []);
 
     async function cancelFriendRequest(FriendUserID: string, FriendUsername: string) {
-        let result = await Swal.fire({
+        let result = await alert.fire({
             title: 'Are you sure?',
             text: `Are you sure you want to cancel your friend request to ${FriendUsername}?`,
             icon: 'warning',
@@ -58,6 +53,7 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
                 })
             });
         }
+        fetchSentRequests(user.getUserID(), false);
     }
 
     return (
@@ -65,7 +61,7 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
             <h1 className='mt-3 mb-6 text-xl font-semibold'>Outgoing Requests</h1>
             <div className='overflow-y-scroll max-h-[65vh]'>
                 {
-                    loading
+                    loading && usersReturned.length === 0
                     ?
                     <Loading />
                     :
@@ -87,6 +83,7 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
                         })
                 }
             </div>
+            <alert.AlertComponent />
         </div>
     )
 }
