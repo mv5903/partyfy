@@ -1,6 +1,5 @@
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import { Users } from "@prisma/client";
-import { alert as Swal } from '@/lib/alert';
 import { PartyfyProductType } from "./PartyfyProductType";
 import { SpotifyAuth } from "./SpotifyAuth";
 import { OAuthRedirect } from "./OAuthRedirect";
@@ -60,14 +59,9 @@ export default class PartyfyUser {
             console.log('[PartyfyUser] Fetching user from database...');
             const response = await fetch('/api/database/users?UserID=' + this.getUserID());
             if (response.status === 500) {
-                Swal.fire({
-                  title: 'We\'re sorry...',
-                  text: 'Our database provider (Supabase) is currently experiencing issues. We apologize for any inconvenience. Please try again later.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-                return;
-              }
+                console.error('[PartyfyUser] Database error: Supabase is experiencing issues');
+                return false;
+            }
             const data = await response.json();
             console.log('[PartyfyUser] User data from database:', {
                 Username: data?.Username,
@@ -75,9 +69,7 @@ export default class PartyfyUser {
                 RefreshTokenLength: data?.RefreshToken?.length || 0
             });
             if (!data || !data.Username) {
-                console.log('[PartyfyUser] No username found, calling setUsername()');
-                await this.setUsername();
-                console.log('[PartyfyUser] setUsername() completed');
+                console.log('[PartyfyUser] No username found - user should be prompted to set username in UI');
             }
             this.db = data as Users;
         }
@@ -125,12 +117,6 @@ export default class PartyfyUser {
 
                 if (!response.ok) {
                     console.error('[PartyfyUser] Failed to save refresh token:', response.status, responseData);
-                    await Swal.fire({
-                        title: 'Error',
-                        text: `Failed to save Spotify authentication: ${response.status}. Please try again.`,
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
                     return false;
                 }
 
@@ -153,74 +139,6 @@ export default class PartyfyUser {
 
         // Otherwise, user has never attempted to authenticate Spotify
         return false;
-    }
-
-    async setUsername(): Promise<boolean> {
-        // Push new user to db, if not exists (api handles that)
-        await fetch('/api/database/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                UserID: this.getUserID()
-            })
-        });
-
-        let isReasonDuplicate = false;
-        let firstTime = true;
-        do {
-            let { value: username } = await Swal.fire({
-                title: firstTime ? 'Welcome! Please enter a username to get started.' : isReasonDuplicate ? 'Username already taken. Please try again.' : 'Invalid username. Please try again.',
-                input: 'text',
-                inputLabel: 'Your username. Choose up to 16 characters.',
-                inputPlaceholder: 'johndoe24',
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            })
-            firstTime = false;
-
-            // If user cancels
-            if (!username) {
-                isReasonDuplicate = false;
-                continue;
-            }
-
-            // Check length
-            if (username.length < 1 || username.length > 16) {
-                isReasonDuplicate = false;
-                continue;
-            }
-
-            // Check for duplicate
-            const response = await fetch('/api/database/username', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    UserID: this.getUserID(),
-                    Username: username
-                })
-            })
-            try {
-                let data = await response.json();
-                if ('duplicate' in data && data.duplicate) {
-                    isReasonDuplicate = true;
-                    continue;
-                }
-            } catch (e) {
-                isReasonDuplicate = false;
-                continue;
-            }
-
-            // If we get here, we have a valid username, refetch user
-            await this.refetchUser();
-            break;
-
-        } while (true);
-
-        return true;
     }
 
     async refetchUser(): Promise<void> {

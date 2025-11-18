@@ -166,7 +166,7 @@ export const useAlert = () => {
                     setInputValue(e.target.value);
                     setValidationError('');
                   }}
-                  className="flex h-9 w-full rounded-md border border-stone-700 bg-stone-900 px-3 py-1 text-sm text-white shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full rounded-md border border-stone-700 bg-stone-900 px-3 py-1 text-base text-white shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   autoFocus
                   {...(config.inputAttributes || {})}
                 />
