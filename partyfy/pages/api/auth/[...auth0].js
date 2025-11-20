@@ -4,6 +4,12 @@ export default handleAuth({
   login: handleLogin({
     returnTo: '/dashboard'
   }),
+  signup: handleLogin({
+    authorizationParams: {
+      screen_hint: 'signup',
+    },
+    returnTo: '/dashboard'
+  }),
   logout: handleLogout({
     returnTo: '/'
   })

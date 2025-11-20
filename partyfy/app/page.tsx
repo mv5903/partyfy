@@ -6,6 +6,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Music2, Users, Share2, Smartphone, Sparkles, Zap } from 'lucide-react';
+import { FaToggleOff } from 'react-icons/fa';
 
 export default function LandingPage() {
   const { user, isLoading } = useUser();
@@ -27,7 +28,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className='flex flex-col items-center justify-center px-6 py-20 md:py-32 max-w-6xl mx-auto w-full'>
         <div className='flex items-center justify-center mb-8 animate-wave'>
-          <img className='object-center rounded-full shadow-2xl' src='/logo.png' width="120px" alt="Partyfy Logo" />
+          <img className='object-center rounded-full shadow-2xl bg-stone-900' src='/logo.png' width="120px" alt="Partyfy Logo" />
         </div>
 
         <h1 className='text-5xl md:text-7xl font-bold text-white text-center mb-6 bg-clip-text'>
@@ -47,7 +48,7 @@ export default function LandingPage() {
             className='bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all'
             size='lg'>
             <AnchorLink
-              href="/api/auth/login"
+              href="/api/auth/signup"
               className="text-white"
               tabIndex={0}
               testId="navbar-signup-desktop"
@@ -125,32 +126,26 @@ export default function LandingPage() {
             Beautiful, intuitive interface designed for seamless music sharing
           </p>
 
-          <div className='grid md:grid-cols-2 gap-8 mb-8'>
-            {/* PLACEHOLDER 1 - Replace with actual screenshot */}
-            <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-8 aspect-[4/3] flex items-center justify-center'>
-              <div className='text-center'>
-                <Smartphone className='w-16 h-16 text-gray-600 mx-auto mb-4' />
-                <p className='text-gray-500'>Add Screenshot Here</p>
-                <p className='text-sm text-gray-600 mt-2'>Dashboard View</p>
+          <div className="flex flex-col gap-8">
+            <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-8  flex items-center justify-center'>
+              <div className='text-center flex flex-col gap-3'>
+                <p className='text-lg text-white mt-2'><strong>Add from your music</strong></p>
+                <img className='object-center rounded-lg shadow-lg w-[80vh]' src='/music.png' alt="Dashboard Screenshot Placeholder" />
               </div>
             </div>
 
-            {/* PLACEHOLDER 2 - Replace with actual screenshot */}
-            <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-8 aspect-[4/3] flex items-center justify-center'>
-              <div className='text-center'>
-                <Music2 className='w-16 h-16 text-gray-600 mx-auto mb-4' />
-                <p className='text-gray-500'>Add Screenshot Here</p>
-                <p className='text-sm text-gray-600 mt-2'>Queue Management</p>
+            <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-8  flex items-center justify-center'>
+              <div className='text-center flex flex-col gap-3'>
+                <p className='text-lg text-white mt-2'><strong>Add your friends</strong></p>
+                <img className='object-center rounded-lg shadow-lg w-[80vh]' src='/friends.gif' alt="Dashboard Screenshot Placeholder" />
               </div>
             </div>
-          </div>
 
-          {/* PLACEHOLDER 3 - Hero screenshot */}
-          <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-12 aspect-video flex items-center justify-center'>
-            <div className='text-center'>
-              <Sparkles className='w-20 h-20 text-gray-600 mx-auto mb-4' />
-              <p className='text-gray-500 text-lg'>Add Hero Screenshot Here</p>
-              <p className='text-sm text-gray-600 mt-2'>Full Application View</p>
+            <div className='rounded-lg bg-gradient-to-br from-stone-800 to-stone-900 border border-stone-700 p-8  flex items-center justify-center'>
+              <div className='text-center flex flex-col gap-3'>
+                <p className='text-lg text-white mt-2'><strong>See your friends' queues</strong></p>
+                <img className='object-center rounded-lg shadow-lg w-[80vh]' src='/queue.png' alt="Dashboard Screenshot Placeholder" />
+              </div>
             </div>
           </div>
         </div>
@@ -180,7 +175,7 @@ export default function LandingPage() {
               </div>
               <h3 className='text-xl font-semibold text-white mb-3'>Choose Your Style</h3>
               <p className='text-gray-400'>
-                Share a QR code for one-time access, or add friends permanently
+                Share a QR code or link for one-time access, or add friends for permanent access
               </p>
             </div>
 
@@ -195,8 +190,8 @@ export default function LandingPage() {
             </div>
 
             <div className='flex flex-col items-center text-center'>
-              <div className='w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-4'>
-                🛑
+              <div className='w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-4'>
+                <FaToggleOff className='w-8 h-8' />
               </div>
               <h3 className='text-xl font-semibold text-white mb-3'>Use Kill Switch</h3>
               <p className='text-gray-400'>
@@ -222,7 +217,7 @@ export default function LandingPage() {
               className='bg-green-600 hover:bg-green-700 text-white px-10 py-7 text-xl font-semibold shadow-2xl hover:shadow-green-600/50 transition-all'
               size='lg'>
               <AnchorLink
-                href="/api/auth/login"
+                href="/api/auth/signup"
                 className="text-white"
                 tabIndex={0}
                 testId="navbar-signup-cta"
@@ -250,7 +245,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className='px-6 py-8 border-t border-stone-800 mt-auto'>
         <div className='max-w-6xl mx-auto text-center text-gray-500 text-sm'>
-          <p>&copy; 2024 Partyfy. Made for music lovers.</p>
+          <p>&copy; 2025-2026 Partyfy. Made for music lovers.</p>
         </div>
       </footer>
     </main>
