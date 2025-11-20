@@ -92,7 +92,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
 
         fetchData();
         // Reduced from 1s to 5s - better balance between UX and API load
-        const interval = setInterval(fetchData, 5000);
+        const interval = setInterval(fetchData, 1000);
 
         return () => clearInterval(interval);
     }, []);
