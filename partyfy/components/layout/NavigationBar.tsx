@@ -7,6 +7,8 @@ import PartyfyUser from '@/helpers/PartyfyUser';
 import UserContext from '@/providers/UserContext';
 import { Users } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQueueStatusStore } from '@/stores/useQueueStatusStore';
+import { FaCheck, FaSpinner } from 'react-icons/fa';
 
 interface NavigationBarProps {
   partyfyUser: PartyfyUser | null;
@@ -15,6 +17,7 @@ interface NavigationBarProps {
   setSpotifyAuthenticated?: (value: boolean) => void;
   getUser?: () => void;
   currentFriend?: Users | null;
+  queueUsage?: any;
 }
 
 export default function NavigationBar({
@@ -24,8 +27,10 @@ export default function NavigationBar({
   setSpotifyAuthenticated = () => {},
   getUser = () => {},
   currentFriend = null,
+  queueUsage = null,
 }: NavigationBarProps) {
   console.log('[DEBUG] NavigationBar render - currentFriend:', currentFriend?.Username);
+  const { status, songName } = useQueueStatusStore();
 
   return (
     <nav className='flex justify-between'>
@@ -37,18 +42,45 @@ export default function NavigationBar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`text-xl m-3 whitespace-nowrap`}
+            className={`text-lg m-3 whitespace-nowrap flex items-center gap-2`}
           >
-            {currentFriend
-              ? `to ${currentFriend.Username}`
-              : `${partyfyUser?.db?.Username ?? ''}`
-            }
+            {currentFriend ? (
+              <>
+                <span>To {currentFriend.Username}</span>
+                {queueUsage && queueUsage.hasRestriction && (
+                  <span className="text-md text-stone-400">
+                    ({queueUsage.maxQueueCount - queueUsage.currentQueueCount}/{queueUsage.maxQueueCount})
+                  </span>
+                )}
+              </>
+            ) : (
+              `${partyfyUser?.db?.Username ?? ''}`
+            )}
           </motion.h2>
         </AnimatePresence>
         {
           !currentFriend && partyfyUser && partyfyUser.db && partyfyUser.getProductType() == PartyfyProductType.COMMERCIAL &&
           <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
         }
+        {/* Queue status indicator */}
+        <AnimatePresence>
+          {status !== 'idle' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-2 ml-2"
+            >
+              {status === 'loading' && (
+                <FaSpinner className="animate-spin text-blue-400" size={16} />
+              )}
+              {status === 'success' && (
+                <FaCheck className="text-green-400" size={16} />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <UserContext.Provider value={{ user: partyfyUser }}>
         <div className="flex align-start">

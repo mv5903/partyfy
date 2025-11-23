@@ -58,9 +58,14 @@ export const useUnattendedQueuesStore = create<UnattendedQueuesState>((set, get)
 
   updateStatus: async (userId: string, enabled: boolean) => {
     console.log('[UQStore] Updating unattended queues status');
-    set({ isLoading: true });
 
     try {
+      set({
+        isEnabled: enabled,
+        lastFetch: Date.now(),
+        isLoading: false,
+      });
+
       await fetch('/api/database/unattendedqueues', {
         method: 'PATCH',
         headers: {
@@ -68,16 +73,10 @@ export const useUnattendedQueuesStore = create<UnattendedQueuesState>((set, get)
         },
         body: JSON.stringify({
           UserID: userId,
-          UnattendedQueues: enabled,
+          enable: enabled,
         }),
       });
 
-      // Update cache immediately
-      set({
-        isEnabled: enabled,
-        lastFetch: Date.now(),
-        isLoading: false,
-      });
     } catch (error) {
       console.error('[UQStore] Error updating UQ status:', error);
       set({ isLoading: false });

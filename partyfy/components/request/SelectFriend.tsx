@@ -72,7 +72,7 @@ const SelectFriend = () => {
         BackgroundEffectColor.removeBackgroundEffectColor();
         getFriendPlayingStatus();
         // Reduced from 10s to 15s for better performance
-        const interval = setInterval(getFriendPlayingStatus, 15000);
+        const interval = setInterval(getFriendPlayingStatus, 5000);
         return () => clearInterval(interval);
     }, [friendsList]);
 
@@ -111,11 +111,10 @@ const SelectFriend = () => {
             .channel('RequestPage')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 fetchFriends(user.getUserID(), false);
-                fetchUQStatus(user.getUserID(), false);
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
+                if (payload.new?.Username == user.db.Username) return; // Skip if the change is for the current user to avoid unnecessary fetch
                 fetchFriends(user.getUserID(), false);
-                fetchUQStatus(user.getUserID(), false);
             })
             .subscribe();
 

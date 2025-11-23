@@ -8,6 +8,8 @@ import { useAlert } from "@/hooks/useAlert";
 import Loading from "../misc/Loading";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useQueueStatusStore } from "@/stores/useQueueStatusStore";
 
 import BackgroundEffectColor from "@/helpers/BackgroundEffectColor";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
@@ -15,13 +17,14 @@ import { Supabase } from "@/helpers/SupabaseHelper";
 import { getDeviceIdentifier } from "@/utils/deviceIdentifier";
 import { sessions, Users } from "@prisma/client";
 import { FastAverageColor } from 'fast-average-color';
-import { FaList, FaMusic, FaSearch } from "react-icons/fa";
+import { FaList, FaMusic, FaQuestionCircle, FaSearch } from "react-icons/fa";
 import PromotionalHeader from "../misc/PromotionalHeader";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
+// Using native title tooltip instead of reactstrap Tooltip to avoid requiring a target prop.
 
-const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession, setShowFriendInTopBar } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function, setShowFriendInTopBar?: (show: boolean) => void }) => {
+const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession, setShowFriendInTopBar, setQueueUsage: setParentQueueUsage } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function, setShowFriendInTopBar?: (show: boolean) => void, setQueueUsage?: (queueUsage: any) => void }) => {
 
     enum RequestPageView {
         Search,
@@ -33,6 +36,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     const { user } = useContext(UserContext);
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { setLoading, setSuccess, setError } = useQueueStatusStore();
 
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
@@ -167,7 +171,14 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         let interval = setInterval(getQueueUsage, 5000);
         return () => clearInterval(interval);
     }, [currentFriend])
-    
+
+    // Sync queueUsage to parent component
+    useEffect(() => {
+        if (setParentQueueUsage) {
+            setParentQueueUsage(queueUsage);
+        }
+    }, [queueUsage, setParentQueueUsage]);
+
     async function loadFriendSpotifyAuth() {
         if (currentFriend && currentFriend.RefreshToken) {
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
@@ -233,8 +244,16 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         });
 
         if (result.isConfirmed) {
-            // Show loading dialog while we add the song to the queue
-            alert.showLoading();
+            // Show non-blocking loading indicator in nav bar
+            setLoading(song.name);
+
+            // Optimistically decrement queue usage if there's a restriction
+            if (queueUsage && queueUsage.hasRestriction && queueUsage.currentQueueCount < queueUsage.maxQueueCount) {
+                setQueueUsage({
+                    ...queueUsage,
+                    currentQueueCount: queueUsage.currentQueueCount + 1
+                });
+            }
 
             // Obtain device id
             const device_id = getDeviceIdentifier();
@@ -258,6 +277,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             const data = await response.json();
 
             if (response.status == 201) {
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
                 await alert.fire({
                     title: 'Time Restricted',
                     text: `You cannot add songs to ${currentFriend.Username}'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
@@ -268,6 +290,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
             // User attempts to queue to a free friend
             if (data && data.name && data.name === "Player command failed: Premium required") {
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
                 await alert.fire({
                     title: 'Error',
                     text: `You cannot add songs to ${currentFriend.Username}'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
@@ -278,6 +303,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
             // User attempts to queue when friend does not have an active Spotify session
             if (data && data.name && data.name === 'Not Found') {
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
                 await alert.fire({
                     title: 'Error',
                     text: `${song.name} may not have added to queue. ${currentFriend.Username} may have temporarily lost their internet connection. Try again in a few minutes.`,
@@ -288,10 +316,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
             // User can successfully queue
             if (data && data.name && data.name === 'OK') {
-                await alert.fire({
-                    title: song.name + ' added to queue!',
-                    icon: 'success'
-                });
+                setSuccess(song.name);
+                // Refresh queue usage to get accurate count from server
+                await getQueueUsage();
             }
         }
     }
@@ -416,16 +443,26 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     {
                         queueUsage && queueUsage.hasRestriction && (
-                            <div className="text-center mb-4 text-white">
+                            <div className="text-center mb-4 text-white flex justify-center items-center gap-1">
                                 {queueUsage.timeUntilNextQueue ? (
                                     <h3 className="text-yellow-400">
                                         <strong>{queueUsage.timeUntilNextQueue}</strong> remaining until your next queue
                                     </h3>
                                 ) : (
                                     <h3>
-                                        <strong>{queueUsage.maxQueueCount - queueUsage.currentQueueCount}</strong> of <strong>{queueUsage.maxQueueCount}</strong> queues remaining in {currentFriend.Username}'s quota
+                                        <strong>{queueUsage.maxQueueCount - queueUsage.currentQueueCount}</strong> of <strong>{queueUsage.maxQueueCount}</strong> queues remaining
                                     </h3>
                                 )}
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <div className="inline-block ml-1 cursor-pointer">
+                                            <FaQuestionCircle className="text-stone-400" size={16} />
+                                        </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent>
+                                        <p>{currentFriend.Username} has enabled a queue limit of {queueUsage.maxQueueCount} songs every {queueUsage.queueRestrictionDuration} minutes.</p>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         )
                     }
