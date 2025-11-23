@@ -260,7 +260,23 @@ export default class Database {
         else {
             winston.info(`[Database] Failed to get user ${UserID}, likely does not exist`);
             return null;
-        } 
+        }
+        return data;
+    }
+
+    async getUserByUsername(Username: string) {
+        winston.info(`[Database] Getting user by username ${Username}`);
+        const data = await prisma.users.findFirst({
+            where: {
+                Username: Username
+            }
+        });
+        await prisma.$disconnect();
+        if (data) winston.info(`[Database] Successfully got user by username ${Username}`);
+        else {
+            winston.info(`[Database] Failed to get user by username ${Username}, likely does not exist`);
+            return null;
+        }
         return data;
     }
 

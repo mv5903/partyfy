@@ -373,7 +373,7 @@ const SelectFriend = () => {
                                                 }
                                                 // Use transition for smoother navigation
                                                 startTransition(() => {
-                                                    router.push(`/request/${friend.UserID}`);
+                                                    router.push(`/request/@${friend.Username}`);
                                                 });
                                             } }
                                             disabled={!friendIsActive || isPending}

@@ -81,7 +81,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             });
         }
         setExpirationDate(new Date(data.expiration_date));
-        setQRCodeURL("https://partyfy.mattvandenberg.com?session=" + data.session_id);
+        setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
         setFriendsListScreen(FriendListScreen.QR);
         alert.fire({
             title: 'Session Created',
@@ -124,7 +124,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                 setQRCodeURL('');
             } else {
                 setExpirationDate(new Date(data.expiration_date));
-                setQRCodeURL("https://partyfy.mattvandenberg.com?session=" + data.session_id);
+                setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
             }
             setLoading(false);
         })
@@ -199,18 +199,6 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
 
     return (
         <div className='text-white'>
-            <style>
-                {`
-                    .swal2-input {
-                        display: block;
-                        margin: 0 auto;
-                        width: 70%; /* Adjust the width as needed */
-                        text-align: center;
-                        margin-top: 16px;
-                    }
-                `}
-            </style>
-            <h1 className='my-3 text-xl font-semibold'>QR Code</h1>
             {
                 loading
                 ?

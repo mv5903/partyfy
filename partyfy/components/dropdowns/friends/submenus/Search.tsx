@@ -67,7 +67,6 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
 
     return (
         <div className="text-white">
-            <h1 className='mt-3 mb-6 text-xl font-semibold'>Find Someone</h1>
             <div className='flex justify-center w-3/4 mx-auto'>
                 <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
             </div>

@@ -73,7 +73,6 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
     
     return (
         <div className="text-white">
-            <h1 className='mt-3 mb-6 text-xl font-semibold'>Friends</h1>
             {
                 isLoading && friends.length === 0
                 ?

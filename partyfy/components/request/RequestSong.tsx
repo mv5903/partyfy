@@ -63,7 +63,12 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         };
         const newTab = tabMap[view];
         const currentPath = window.location.pathname;
-        router.push(`${currentPath}?tab=${newTab}`, { scroll: false });
+
+        // Preserve the session query parameter if it exists
+        const sessionId = searchParams.get('session');
+        const queryString = sessionId ? `tab=${newTab}&session=${sessionId}` : `tab=${newTab}`;
+
+        router.push(`${currentPath}?${queryString}`, { scroll: false });
     };
 
     const RGBtoHSL = (r, g, b) => {
@@ -131,17 +136,17 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         unattendedQueuesAllowed();
         isTemporarySessionNotExpired();
 
-        if (!temporarySession) isStillFriends();
+        isStillFriends();
 
         const subscription = Supabase
             .channel('UserRequest')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
+                isStillFriends();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
+                isStillFriends();
             })
             .subscribe();
 
@@ -245,6 +250,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
         if (result.isConfirmed) {
             // Show non-blocking loading indicator in nav bar
+            if (temporarySession) alert.showLoading();
             setLoading(song.name);
 
             // Optimistically decrement queue usage if there's a restriction
@@ -275,6 +281,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             });
 
             const data = await response.json();
+            if (temporarySession) alert.close();
 
             if (response.status == 201) {
                 setError();
@@ -317,6 +324,13 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             // User can successfully queue
             if (data && data.name && data.name === 'OK') {
                 setSuccess(song.name);
+                if (temporarySession) {
+                    await alert.fire({
+                        title: 'Success',
+                        text: `${song.name} has been added to ${currentFriend.Username}'s queue successfully.`,
+                        icon: 'success'
+                    });
+                }
                 // Refresh queue usage to get accurate count from server
                 await getQueueUsage();
             }
@@ -344,6 +358,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     }
 
     async function isStillFriends() {
+        console.log("[DEBUG] Checking if still friends", { temporarySession, currentFriend });
         if (temporarySession) return;
         if (!currentFriend) return;
         const response = await fetch(`/api/database/friends?action=isFriend&UserID=${user.getUserID()}&FriendUserID=${currentFriend.UserID}`);
@@ -423,13 +438,10 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             {
                 !friendSpotifyAuth ? <Loading /> :
                 <>
-                    <div className="flex items-center justify-between place-content-center p-2 mb-4">
-                        <h3 className="text-xl me-2 pt-2 mb-2 text-white">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
+                    <div className="flex items-center justify-center place-content-center p-2 mb-2">
+                        <h3 className={`text-xl pt-2 mb-2 text-white ${temporarySession ? '' : 'me-2'}`}>To <span><strong>{currentFriend.Username}</strong></span></h3>
                         {
-                            temporarySession
-                            ?
-                            <Button variant="destructive" className="p-3" onClick={() => exitSession()}><TiArrowBack className="mr-2" size={25}/> Leave Session</Button>
-                            :
+                            !temporarySession &&
                             <Button onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></Button>
                         }
                     </div>
@@ -439,7 +451,11 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     {
                         temporarySession &&
-                        <h3 className="text-center mb-4 text-white">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                        (expirationDate.getFullYear() == 2200 ? (
+                            <h3 className="text-center mb-4 text-white"><i>Session never expires.</i></h3>
+                        ) : (
+                            <h3 className="text-center mb-4 text-white">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                        ))
                     }
                     {
                         queueUsage && queueUsage.hasRestriction && (
@@ -459,8 +475,8 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                                             <FaQuestionCircle className="text-stone-400" size={16} />
                                         </div>
                                     </PopoverTrigger>
-                                    <PopoverContent>
-                                        <p>{currentFriend.Username} has enabled a queue limit of {queueUsage.maxQueueCount} songs every {queueUsage.queueRestrictionDuration} minutes.</p>
+                                    <PopoverContent className="bg-stone-800 text-white text-sm border-0 text-center me-2">
+                                        <p>{currentFriend.Username} has enabled a queue limit for their session.</p>
                                     </PopoverContent>
                                 </Popover>
                             </div>

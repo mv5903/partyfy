@@ -23,6 +23,7 @@ const FriendsMenu = () => {
     const { user } = useContext(UserContext);
     const fontSize = 18;
     const [open, setOpen] = useState(false);
+    const [currentScreen, setCurrentScreen] = useState<FriendListScreen>(FriendListScreen.Friends);
     const touchStartY = useRef(0);
 
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -36,6 +37,23 @@ const FriendsMenu = () => {
         // If swiped down more than 50px, close the sheet
         if (swipeDistance > 50) {
             setOpen(false);
+        }
+    };
+
+    const getTitleForScreen = (screen: FriendListScreen) => {
+        switch (screen) {
+            case FriendListScreen.QR:
+                return 'QR Code';
+            case FriendListScreen.Friends:
+                return 'Friends';
+            case FriendListScreen.Requests:
+                return 'Incoming Requests';
+            case FriendListScreen.Sent:
+                return 'Outgoing Requests';
+            case FriendListScreen.Search:
+                return 'Find Someone';
+            default:
+                return 'Friends';
         }
     };
 
@@ -55,10 +73,14 @@ const FriendsMenu = () => {
                 />
 
                 <SheetHeader className="mt-4">
-                    <SheetTitle className="text-white text-xl">Friends</SheetTitle>
+                    <SheetTitle className="text-white text-xl">Friends - <i>{getTitleForScreen(currentScreen)}</i></SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 h-full pt-4">
-                    <Tabs defaultValue={FriendListScreen.Friends.toString()} className="w-full flex flex-col h-full">
+                    <Tabs
+                        defaultValue={FriendListScreen.Friends.toString()}
+                        onValueChange={(value) => setCurrentScreen(parseInt(value) as FriendListScreen)}
+                        className="w-full flex flex-col h-full"
+                    >
                         <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
                             <TabsTrigger
                                 value={FriendListScreen.QR.toString()}

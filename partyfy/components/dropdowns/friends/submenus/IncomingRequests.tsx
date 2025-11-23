@@ -98,7 +98,6 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
 
     return (
         <div className="text-white">
-            <h1 className='mt-3 mb-6 text-xl font-semibold'>Incoming Requests</h1>
             <div className='overflow-y-scroll max-h-[65vh]'>
             {
                 loading && usersReturned.length === 0

@@ -26,15 +26,6 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
     // Show end time of progress bar as total rather than remaining
     const [showEndTimeAsTotal, setShowEndTimeAsTotal] = useLocalStorage('showEndTimeAsTotal', false);
 
-
-    async function showQueueDisclaimer() {
-        await alert.fire({
-            title: 'Queue Information',
-            text: "Please be aware that Partyfy uses Spotify's \"Get The User's Queue\" API, which currently does not differentiate between your manually curated queue and Spotify's 'Next From' recommendations. This limitation prevents us from distinguishing the tracks you've personally queued from those recommended by Spotify. However, songs queued from Partyfy will always appear first, despite this limitation. We appreciate your understanding as we continue to provide the best possible Partyfy experience within these constraints.",
-            icon: 'info'
-        });
-    }
-
     async function showFullQueue() {
         let accessToken = await friendSpotifyAuth.getAccessToken();
         if (!accessToken) return;
