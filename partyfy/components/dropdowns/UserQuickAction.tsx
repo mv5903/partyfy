@@ -195,11 +195,11 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                         id="logout-btn"
                         asChild
                         variant="secondary"
-                        className="flex justify-start w-full bg-stone-700 text-white"
+                        className="flex justify-start w-full bg-stone-700 text-white mb-6"
                     >
-                        <a href="/api/auth/logout">
-                            <FaRightFromBracket className='mr-2 mb-16' />
-                            Log Out {user?.db?.Username}
+                        <a href="/api/auth/logout" className="flex align-center">
+                            <FaRightFromBracket className='mr-2' />
+                            <p className="text-sm">Log Out {user?.db?.Username}</p>
                         </a>
                     </Button>
                   </div>

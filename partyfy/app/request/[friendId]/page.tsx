@@ -23,6 +23,7 @@ export default function RequestPage() {
   const [currentFriend, setCurrentFriend] = useState<Users | null>(null);
   const [friendLoading, setFriendLoading] = useState(true);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState<boolean | null>(null);
+  const [showFriendInTopBar, setShowFriendInTopBar] = useState<boolean>(false);
 
   // Handle authentication using Zustand store
   useEffect(() => {
@@ -75,19 +76,21 @@ export default function RequestPage() {
   }
 
   return (
-    <main className="text-left z-[2] flex flex-col h-screen mx-2">
+    <main className="text-left z-[2] flex flex-col h-screen mx-2 bg-black">
       <NavigationBar
         partyfyUser={partyfyUser}
         setSpotifyAuthenticated={setSpotifyAuthenticated}
         getUser={refetchUser}
+        currentFriend={showFriendInTopBar ? currentFriend : null}
       />
       <UserContext.Provider value={{ user: partyfyUser }}>
-        <div className="text-white text-center flex-1 overflow-auto">
+        <div className="text-white text-center flex-1 overflow-auto bg-black">
           <RequestSong
             currentFriend={currentFriend}
             setCurrentFriend={handleBackToDashboard}
             temporarySession={null}
             exitSession={null}
+            setShowFriendInTopBar={setShowFriendInTopBar}
           />
         </div>
       </UserContext.Provider>

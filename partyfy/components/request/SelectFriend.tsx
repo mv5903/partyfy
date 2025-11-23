@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { FaCog, FaSave } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
 import { useAlert } from "@/hooks/useAlert";
+import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 import Loading from "../misc/Loading";
 import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
@@ -29,6 +30,7 @@ const SelectFriend = () => {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
 
     // Use Zustand store for friends data
     const { friends: friendsList, spotifyStatuses, isLoading: loading, isRefreshing: refreshingFriendsLoading, fetchFriends, updateSpotifyStatuses } = useFriendsStore();
@@ -131,80 +133,67 @@ const SelectFriend = () => {
     const [intervalValue, setIntervalValue] = useState(1);
     const [intervalUnit, setIntervalUnit] = useState<RollingPeriod>(RollingPeriod.HOUR);
     const [queueLimitEnabled, setQueueLimitEnabled] = useState(false);
-    
-    if (commercialOptionsVisible) {
-        const saveCommercialOptions = async () => {
-            // Save the commercial options
-            if (queueLimitEnabled && maxQueueCount < 1 || intervalValue < 1) {
+
+    const saveCommercialOptions = async (silent = false) => {
+        // Save the commercial options
+        if (queueLimitEnabled && (maxQueueCount < 1 || intervalValue < 1)) {
+            if (!silent) {
                 await alert.fire({
                     title: 'Error!',
                     text: 'Please enter a value greater than 0 for both fields.',
                     icon: 'error'
                 });
-                return;
             }
-
-            const result = await alert.fire({
-                title: 'Are you sure?',
-                text: 'This will save your selected options.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save it!',
-                cancelButtonText: 'No, cancel!'
-            });
-
-            if (result.isConfirmed) {
-                alert.showLoading();
-
-                const response = await fetch('/api/database/users', {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        UserID: user.getUserID(),
-                        setOptions:
-                            queueLimitEnabled === true
-                            ?
-                            JSON.stringify({
-                                queueLimitTimeRestriction: {
-                                    maxQueueCount,
-                                    intervalValue,
-                                    intervalUnit
-                                }
-                            })
-                            :
-                            JSON.stringify({})
-                    })
-                });
-
-                alert.close();
-
-                if (response.ok) {
-                    await alert.fire({
-                        title: 'Saved!',
-                        text: 'Your commercial options have been saved.',
-                        icon: 'success'
-                    });
-                    setHadQueueLimit(queueLimitEnabled);
-                    if (queueLimitEnabled) {
-                        setOriginalOptions({
-                            queueLimitTimeRestriction: {
-                                maxQueueCount,
-                                intervalValue,
-                                intervalUnit
-                            }
-                        })
-                    }
-                } else {
-                    await alert.fire({
-                        title: 'Error!',
-                        text: 'There was an error saving your commercial options.',
-                        icon: 'error'
-                    });
-                }
-            }
+            return false;
         }
+
+        const response = await fetch('/api/database/users', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                UserID: user.getUserID(),
+                setOptions:
+                    queueLimitEnabled === true
+                    ?
+                    JSON.stringify({
+                        queueLimitTimeRestriction: {
+                            maxQueueCount,
+                            intervalValue,
+                            intervalUnit
+                        }
+                    })
+                    :
+                    JSON.stringify({})
+            })
+        });
+
+        if (response.ok) {
+            setHadQueueLimit(queueLimitEnabled);
+            if (queueLimitEnabled) {
+                setOriginalOptions({
+                    queueLimitTimeRestriction: {
+                        maxQueueCount,
+                        intervalValue,
+                        intervalUnit
+                    }
+                })
+            }
+            return true;
+        } else {
+            if (!silent) {
+                await alert.fire({
+                    title: 'Error!',
+                    text: 'There was an error saving your commercial options.',
+                    icon: 'error'
+                });
+            }
+            return false;
+        }
+    };
+
+    if (commercialOptionsVisible) {
 
 
         return (
@@ -250,42 +239,25 @@ const SelectFriend = () => {
                         <Button onClick={async () => {
                             let options = { maxQueueCount, intervalValue, intervalUnit };
 
-                            async function confirmBackPress() {
-                                const result = await alert.fire({
-                                    title: 'Are you sure?',
-                                    text: 'You have unsaved changes. Are you sure you want to go back?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, go back!',
-                                    cancelButtonText: 'No, cancel!'
-                                });
-                                if (result.isConfirmed) {
-                                    setCommercialOptionsVisible(false);
-                                }
+                            // Check if there are any changes
+                            const hasChanges =
+                                hadQueueLimit !== queueLimitEnabled ||
+                                (queueLimitEnabled && originalOptions?.queueLimitTimeRestriction && (
+                                    originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount ||
+                                    originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue ||
+                                    originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit
+                                ));
+
+                            // If there are changes, save silently with loading indicator
+                            if (hasChanges) {
+                                startLoading();
+                                await saveCommercialOptions(true);
+                                stopLoading();
                             }
 
-                            if (hadQueueLimit == queueLimitEnabled)  {
-                                setCommercialOptionsVisible(false);
-                                return;
-                            }
-
-                            if ( hadQueueLimit != queueLimitEnabled ) {
-                                await confirmBackPress();
-                                return;
-                            }
-
-                            else if (originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount
-                                || originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue
-                                || originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit)
-                                {
-                                    await confirmBackPress();
-                                    return;
-                                }
-
-                            else setCommercialOptionsVisible(false);
-
+                            // Close the panel
+                            setCommercialOptionsVisible(false);
                         }}><TiArrowBack size={25}/></Button>
-                        <Button variant="success" onClick={() => saveCommercialOptions()}><FaSave className="mr-2" /> Save</Button>
                     </div>
                 </div>
             </div>
@@ -293,8 +265,8 @@ const SelectFriend = () => {
     }
 
     return (
-        <div className="grow h-full flex flex-col">
-            <div className="text-center">
+        <div className="grow h-full flex flex-col overflow-hidden">
+            <div className="text-center flex-shrink-0">
                 {
                     isUnattendedQueuesEnabled === null || uqLoading
                     ?
@@ -320,12 +292,12 @@ const SelectFriend = () => {
                     </div>
                 }
             </div>
-            <div className="flex items-center m-4">
+            <div className="flex items-center m-4 flex-shrink-0">
                 <Separator className="flex-1" />
                 <span className="px-4 text-muted-foreground">OR</span>
                 <Separator className="flex-1" />
             </div>
-            <div className="grow text-center mx-2 flex flex-col gap-3">
+            <div className="flex-1 text-center mx-2 flex flex-col gap-3 overflow-hidden">
                 {
                     loading && friendsList.length === 0 &&
                     <Loading />
@@ -353,15 +325,15 @@ const SelectFriend = () => {
                 {
                     !loading && friendsList.length > 0 &&
                     <>
-                        <h3 className="text-2xl font-semibold text-white">Add to:</h3>
-                        <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
+                        <h3 className="flex-shrink-0 text-2xl font-semibold text-white">Add to:</h3>
+                        <h6 className="flex-shrink-0 text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
                             {
                                 refreshingFriendsLoading === true
                                 &&
                                 <LoadingDots />
                             }
                         </h6>
-                        <div className="h-[68vh] overflow-y-scroll flex flex-col gap-3">
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 min-h-0">
                             {
                                 [...friendsList].sort((a, b) => {
                                     const aIsActive = spotifyStatuses?.some(status => status.UserID === a.UserID);

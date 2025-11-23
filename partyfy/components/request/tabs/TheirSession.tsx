@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -25,29 +25,6 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
 
     // Show end time of progress bar as total rather than remaining
     const [showEndTimeAsTotal, setShowEndTimeAsTotal] = useLocalStorage('showEndTimeAsTotal', false);
-
-
-    // Resize the queue div when the now playing div resizes because of the length of song name and artists
-    const [queueHeight, setQueueHeight] = useState("");
-    const queueRef = useRef(null);
-    const nowPlayingRef = useRef(null);
-
-    useEffect(() => {
-        const handleResize = () => {
-            if (queueRef.current) {
-                const padding = 10;
-                const height = window.innerHeight - queueRef.current.getBoundingClientRect().top - padding;
-                // Calculate the height of the queue div, based on the top-left corner to the bottom of the window
-                setQueueHeight(height.toFixed(0));
-            }
-        }
-
-        handleResize();
-        // Window resize doesn't need to be checked every second - use window event listener instead
-        window.addEventListener('resize', handleResize);
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, [queueRef, nowPlayingRef]);
 
 
     async function showQueueDisclaimer() {
@@ -106,14 +83,14 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         ) 
     }
     return (
-        <div>
-            <div className="w-full">
+        <div className="h-full flex flex-col overflow-hidden">
+            <div className="w-full flex-shrink-0">
                 <div className="flex flex-col items-center">
                     { 
-                        nowPlaying 
-                        ?                            
+                        nowPlaying
+                        ?
                         <>
-                            <div ref={nowPlayingRef} className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
+                            <div className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
                                 <div className="flex gap-2 w-full">
                                     <div className="flex flex-col justify-center items-center">
                                         {
@@ -296,8 +273,9 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         </>
                     }
                 </div>
-                <h4 className="my-2 text-2xl">Next</h4>
-                <div className="overflow-auto" style={{ maxHeight: `${queueHeight}px` }} ref={queueRef} >
+            </div>
+            <h4 className="my-2 text-2xl flex-shrink-0">Next</h4>
+                <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
                         {
                             queue != null && Array.isArray(queue) &&
                             queue.map((item: any, index: number) => {
@@ -334,7 +312,6 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                             })
                         }
                 </div>
-            </div>
             {
                 queue != null && nowPlaying != null
                 ?

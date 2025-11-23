@@ -28,7 +28,7 @@ function ListContentCard(props: ListContentCardProps) {
 
     return (
         <Card
-            className="bg-stone-800 border-stone-800 mx-auto w-[92vw] cursor-pointer transition-colors group"
+            className="bg-stone-800 border-stone-800 mx-auto w-[92vw] cursor-pointer transition-colors group mt-3"
             onClick={btnOnClick}
         >
             <div className="flex items-center justify-between p-4 gap-4 w-full">

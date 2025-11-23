@@ -1,6 +1,7 @@
 'use client';
 
 import PromotionalHeader from '@/components/misc/PromotionalHeader';
+import { NavigationProgress } from '@/components/layout/NavigationProgress';
 import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 
@@ -64,16 +65,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (isClient && !isMobileDevice) {
     return (
-      <div className='flex flex-col justify-center items-center mt-10 text-white'>
-        <div className='flex justify-center'>
-          <img className='object-center' src='/logo.png' width="200px" alt="Partyfy Logo" />
+      <>
+        <NavigationProgress />
+        <div className='flex flex-col justify-center items-center mt-10 text-white'>
+          <div className='flex justify-center'>
+            <img className='object-center' src='/logo.png' width="200px" alt="Partyfy Logo" />
+          </div>
+          <h3 className="text-2xl m-4">Sorry, Partyfy is not available on desktop.</h3>
+          <h2 className="text-2xl m-4 text-center"><i>Please use your mobile device to access the site.</i></h2>
+          <PromotionalHeader />
         </div>
-        <h3 className="text-2xl m-4">Sorry, Partyfy is not available on desktop.</h3>
-        <h2 className="text-2xl m-4 text-center"><i>Please use your mobile device to access the site.</i></h2>
-        <PromotionalHeader />
-      </div>
+      </>
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <NavigationProgress />
+      {children}
+    </>
+  );
 }

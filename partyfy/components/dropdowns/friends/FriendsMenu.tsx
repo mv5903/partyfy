@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { FaPaperPlane, FaQrcode, FaSearch, FaUserFriends, FaUserPlus } from 'react-icons/fa';
 import UserContext from '@/providers/UserContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import { FaPeopleGroup } from 'react-icons/fa6';
@@ -19,63 +20,73 @@ import Search from './submenus/Search';
 import SentRequests from './submenus/SentRequests';
 
 const FriendsMenu = () => {
-    const [friendListScreen, setFriendListScreen] = useState(FriendListScreen.Friends);
     const { user } = useContext(UserContext);
-
-    const currentFriendListScreen = () => {
-        switch (friendListScreen) {
-            case FriendListScreen.QR:
-                return <QR user={user} setFriendsListScreen={setFriendListScreen} />
-            case FriendListScreen.Friends:
-                return <List user={user} setFriendListScreen={setFriendListScreen} />
-            case FriendListScreen.Requests:
-                return <IncomingRequests user={user} />
-            case FriendListScreen.Sent:
-                return <SentRequests user={user} />
-            case FriendListScreen.Search:
-                return <Search user={user} />
-        }
-    }
-
     const fontSize = 18;
-    const icons = [<FaQrcode size={fontSize}/>, <FaPeopleGroup size={fontSize} />, <FaUserPlus size={fontSize} />, <FaPaperPlane size={fontSize} />, <FaSearch size={fontSize} />];
 
     return (
-        <Sheet onOpenChange={(open) => {
-            if (!open) {
-                setFriendListScreen(FriendListScreen.Friends);
-            }
-        }}>
+        <Sheet>
             <SheetTrigger asChild>
                 <Button className="flex align-center mr-2 cursor-pointer mt-2 rounded-lg shadow-md">
-                    <FaUserFriends size={fontSize + 12} />
+                    <FaUserFriends size={30} />
                 </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[85vh] bg-stone-900 border-stone-900">
-                <SheetHeader>
+                {/* Pull bar for swipe down */}
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-stone-600 rounded-full cursor-grab active:cursor-grabbing" />
+
+                <SheetHeader className="mt-4">
                     <SheetTitle className="text-white text-xl">Friends</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 h-full pt-4">
-                    <div className="flex bg-stone-900 w-full gap-1">
-                        {
-                            Object.values(FriendListScreen)
-                                .filter((value): value is FriendListScreen => typeof value === 'number')
-                                .map((screen, index) => {
-                                    return (
-                                        <button
-                                            key={index}
-                                            className={`flex-1 flex items-center justify-center p-2 rounded-md text-white transition-colors ${friendListScreen === screen ? "bg-stone-700" : "bg-stone-800 hover:bg-stone-700"}`}
-                                            onClick={() => setFriendListScreen(screen)}
-                                        >
-                                        {icons[index]}
-                                        </button>
-                                    );
-                            })
-                        }
-                    </div>
-                    <div className="flex-1 overflow-auto">
-                        {currentFriendListScreen()}
-                    </div>
+                    <Tabs defaultValue={FriendListScreen.Friends.toString()} className="w-full flex flex-col h-full">
+                        <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
+                            <TabsTrigger
+                                value={FriendListScreen.QR.toString()}
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                            >
+                                <FaQrcode size={fontSize} />
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value={FriendListScreen.Friends.toString()}
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                            >
+                                <FaPeopleGroup size={fontSize} />
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value={FriendListScreen.Requests.toString()}
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                            >
+                                <FaUserPlus size={fontSize} />
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value={FriendListScreen.Sent.toString()}
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                            >
+                                <FaPaperPlane size={fontSize} />
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value={FriendListScreen.Search.toString()}
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                            >
+                                <FaSearch size={fontSize} />
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value={FriendListScreen.QR.toString()} className="flex-1 overflow-auto mt-4">
+                            <QR user={user} setFriendsListScreen={() => {}} />
+                        </TabsContent>
+                        <TabsContent value={FriendListScreen.Friends.toString()} className="flex-1 overflow-auto mt-4">
+                            <List user={user} setFriendListScreen={() => {}} />
+                        </TabsContent>
+                        <TabsContent value={FriendListScreen.Requests.toString()} className="flex-1 overflow-auto mt-4">
+                            <IncomingRequests user={user} />
+                        </TabsContent>
+                        <TabsContent value={FriendListScreen.Sent.toString()} className="flex-1 overflow-auto mt-4">
+                            <SentRequests user={user} />
+                        </TabsContent>
+                        <TabsContent value={FriendListScreen.Search.toString()} className="flex-1 overflow-auto mt-4">
+                            <Search user={user} />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </SheetContent>
         </Sheet>

@@ -5,6 +5,8 @@ import UserQuickAction from '@/components/dropdowns/UserQuickAction';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import UserContext from '@/providers/UserContext';
+import { Users } from '@prisma/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavigationBarProps {
   partyfyUser: PartyfyUser | null;
@@ -12,6 +14,7 @@ interface NavigationBarProps {
   setIsAHost?: (value: boolean) => void;
   setSpotifyAuthenticated?: (value: boolean) => void;
   getUser?: () => void;
+  currentFriend?: Users | null;
 }
 
 export default function NavigationBar({
@@ -20,13 +23,30 @@ export default function NavigationBar({
   setIsAHost = () => {},
   setSpotifyAuthenticated = () => {},
   getUser = () => {},
+  currentFriend = null,
 }: NavigationBarProps) {
+  console.log('[DEBUG] NavigationBar render - currentFriend:', currentFriend?.Username);
+
   return (
     <nav className='flex justify-between'>
       <div className='flex justfiy-start place-items-center'>
-        <h2 className={`text-2xl m-3`}>{`${partyfyUser?.db?.Username ?? ''}`}</h2>
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={currentFriend ? 'with-friend' : 'without-friend'}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className={`text-xl m-3 whitespace-nowrap`}
+          >
+            {currentFriend
+              ? `to ${currentFriend.Username}`
+              : `${partyfyUser?.db?.Username ?? ''}`
+            }
+          </motion.h2>
+        </AnimatePresence>
         {
-          partyfyUser && partyfyUser.db && partyfyUser.getProductType() == PartyfyProductType.COMMERCIAL &&
+          !currentFriend && partyfyUser && partyfyUser.db && partyfyUser.getProductType() == PartyfyProductType.COMMERCIAL &&
           <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
         }
       </div>

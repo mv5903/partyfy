@@ -1,0 +1,32 @@
+/* Custom NProgress styles for Partyfy */
+
+/* Loading bar */
+#nprogress .bar {
+  background: #16a34a !important; /* green-600 */
+  height: 3px !important;
+  box-shadow: 0 0 10px #16a34a, 0 0 5px #16a34a;
+}
+
+/* Peg (the glowing part at the end) */
+#nprogress .peg {
+  box-shadow: 0 0 10px #16a34a, 0 0 5px #16a34a !important;
+}
+
+/* Loading spinner (hidden by config, but styling just in case) */
+#nprogress .spinner {
+  display: none !important;
+}
+
+/* Ensure it's always on top */
+#nprogress {
+  pointer-events: none;
+  z-index: 99999 !important;
+}
+
+#nprogress .bar {
+  position: fixed;
+  z-index: 99999 !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+}

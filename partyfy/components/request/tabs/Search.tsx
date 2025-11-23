@@ -39,14 +39,14 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
     }
 
     return (
-        <>
-            <div className="w-full flex flex-col items-center">
+        <div className="h-full flex flex-col overflow-hidden">
+            <div className="w-full flex flex-col items-center flex-shrink-0">
                 <h4 className="text-2xl my-4 text-white">Add Song</h4>
                 <Input className="w-3/4 mt-2 bg-stone-800 border-stone-700 text-white" placeholder="Search for a song..." onChange={(e : any) => searchSpotify(e.target.value)}/>
             </div>
             {
                 searchResults.length > 0 &&
-                <div className="mt-4 w-full flex flex-col items-center max-h-[62vh] overflow-auto">
+                <div className="mt-4 w-full flex flex-col items-center flex-1 overflow-y-auto overflow-x-hidden min-h-0">
                     {
                         searchResults.map((result: any, key: number) => {
 
@@ -59,15 +59,16 @@ const Search = ({ you, spotifyAuth, addToQueue, isTemporarySession } : { you: an
                                 btnOnClick: () => addToQueue(result),
                                 btnIcon: <FaPlusCircle />,
                                 btnColorClass: 'btn-success',
+                                
                             }
 
                             return <ListContentCard key={key} {...listContentCardProps} />;
-                            
+
                         })
                     }
                 </div>
             }
-        </>
+        </div>
     );
 }
 

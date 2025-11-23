@@ -175,12 +175,12 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     if (loading && playlists.length === 0) return <Loading />;
 
     return (
-        <>
-            { !activePlaylist && <h3 className="text-2xl text-center my-4">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
-            <div className="flex flex-col justify-center items-center w-full">
+        <div className="h-full flex flex-col overflow-hidden">
+            { !activePlaylist && <h3 className="text-2xl text-center my-4 flex-shrink-0">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
+            <div className="flex-1 flex flex-col justify-center items-center w-full overflow-hidden">
                 {
                     !activePlaylist && playlists.length > 0 &&
-                    <div className="w-full max-h-[75vh] overflow-auto px-1" id="playlists">
+                    <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0" id="playlists">
                         <InfiniteScroll
                             dataLength={playlists.length}
                             next={() => getMorePlaylists()}
@@ -218,15 +218,15 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 }
                 {
                     activePlaylist &&
-                    <div className="w-full flex flex-col items-center">
-                        <div className="flex justify-center items-center mt-4">
+                    <div className="w-full h-full flex flex-col items-center overflow-hidden">
+                        <div className="flex justify-center items-center mt-4 flex-shrink-0">
                             <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
                             <Button onClick={() => setActivePlaylist(null)}><TiArrowBack size={30}/></Button>
                         </div>
-                        <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
+                        <h6 className="text-sm text-gray-400 my-2 cursor-pointer flex-shrink-0"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
                             activePlaylist.items.length > 0 &&
-                            <div className="w-full max-h-[67vh] overflow-auto flex justify-center" id="playlistItems">
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex justify-center min-h-0" id="playlistItems">
                                  <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.tags, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
@@ -274,7 +274,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 }
             </div>
             <alert.AlertComponent />
-        </>
+        </div>
     );
 }
 

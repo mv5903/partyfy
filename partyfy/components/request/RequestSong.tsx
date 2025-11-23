@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TiArrowBack } from "react-icons/ti";
 
@@ -21,7 +21,7 @@ import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
 
-const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
+const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession, setShowFriendInTopBar } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function, setShowFriendInTopBar?: (show: boolean) => void }) => {
 
     enum RequestPageView {
         Search,
@@ -38,6 +38,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
     const [nowPlaying, setNowPlaying] = useState<any>(null);
     const [queueUsage, setQueueUsage] = useState<any>(null);
+
+    // Callback ref for the tabs element to detect when it's hidden
+    const [tabsElement, setTabsElement] = useState<HTMLDivElement | null>(null);
 
     // Get tab from URL params, default to Search
     const tabParam = searchParams.get('tab');
@@ -78,6 +81,46 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
             (100 * (2 * l - s)) / 2,
         ];
     };
+
+    // IntersectionObserver to detect when tabs are hidden
+    useEffect(() => {
+        console.log('[DEBUG] IntersectionObserver effect running', {
+            hasElement: !!tabsElement,
+            hasCallback: !!setShowFriendInTopBar,
+            currentFriend: currentFriend?.Username
+        });
+
+        if (!tabsElement || !setShowFriendInTopBar) {
+            console.log('[DEBUG] Missing requirements, not setting up observer');
+            return;
+        }
+
+        console.log('[DEBUG] Setting up observer on element:', tabsElement);
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                console.log('[DEBUG] Intersection changed:', {
+                    isIntersecting: entry.isIntersecting,
+                    willShowFriend: !entry.isIntersecting,
+                    boundingRect: entry.boundingClientRect.top
+                });
+                // When tabs are NOT intersecting (hidden), show friend in top bar
+                setShowFriendInTopBar(!entry.isIntersecting);
+            },
+            {
+                threshold: 0,
+                rootMargin: '-80px 0px 0px 0px' // Trigger when tabs are 80px from top
+            }
+        );
+
+        observer.observe(tabsElement);
+        console.log('[DEBUG] Observer started observing');
+
+        return () => {
+            console.log('[DEBUG] Cleaning up observer');
+            observer.disconnect();
+        };
+    }, [tabsElement, setShowFriendInTopBar, currentFriend]);
 
     useEffect(() => {
         loadFriendSpotifyAuth();
@@ -388,7 +431,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     <div className="flex flex-col items-center">
                         <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className={`w-full`}>
-                            <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
+                            <TabsList ref={setTabsElement} className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
                                 <TabsTrigger value={RequestPageView.Search.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
                                     <FaSearch size={10} />Search
                                 </TabsTrigger>

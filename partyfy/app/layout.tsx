@@ -52,7 +52,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className="m-0 p-0 bg-black">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -63,7 +63,7 @@ export default async function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
       </head>
-      <body>
+      <body className="m-0 p-0 bg-black">
         <UserProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ClientLayout>

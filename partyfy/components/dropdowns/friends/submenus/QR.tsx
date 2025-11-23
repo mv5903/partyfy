@@ -1,6 +1,7 @@
 import Loading from '@/components/misc/Loading';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
+import { PartyfyProductType } from '@/helpers/PartyfyProductType';
 import { useEffect, useRef, useState } from 'react';
 import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
@@ -17,42 +18,49 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
     const qrRef = useRef(null);
 
     async function getNewSession() {
+        let date: Date;
 
-        function toLocalISOString(date) {
-            const offset = date.getTimezoneOffset() * 60000; // Convert offset to milliseconds
-            const localISOTime = new Date(date - offset).toISOString();
-            return localISOTime.slice(0, 16);
-        }
-        
-        const now = new Date();
-        const oneWeekLater = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)); // One week from now
+        // Check if user is commercial
+        const isCommercial = user.getProductType() === PartyfyProductType.COMMERCIAL;
 
-        const currentDateTime = toLocalISOString(now);
-        const maxDateTime = toLocalISOString(oneWeekLater);
-
-        const expirationDate = await alert.fire({
-            title: 'Expiration Date',
-            text: 'Choose an expiration date for this session. After this date, the session will be deleted. The expiration date cannot be changed. The maximum length is one week.',
-            input: 'datetime-local',
-            inputAttributes: {
-                min: currentDateTime, // Prevent past dates
-                max: maxDateTime,     // One week limit
-            },
-            showCancelButton: true,
-            confirmButtonText: 'Create',
-            cancelButtonText: 'Cancel'
-        })
-
-        if (expirationDate.isDismissed) return;
-        let date = new Date(expirationDate.value);
-        if (date < new Date()) {
-            await alert.fire({
-                title: 'Invalid Date',
-                text: 'The expiration date must be in the future.',
-                icon: 'error'
+        if (isCommercial) {
+            // Commercial users get sessions that don't expire
+            // Use year 2200 - far enough to be effectively permanent, but safe for all systems
+            date = new Date();
+            date.setFullYear(2200, 11, 31); // December 31, 2200
+            date.setHours(23, 59, 59, 999);
+        } else {
+            // Non-commercial users choose number of days (1-7)
+            const daysResult = await alert.fire({
+                title: 'Session Duration',
+                text: 'How many days should this session last?',
+                input: 'text',
+                inputAttributes: {
+                    type: 'number',
+                    min: '1',
+                    max: '7',
+                    step: '1'
+                } as any,
+                inputValue: '7',
+                showCancelButton: true,
+                confirmButtonText: 'Create',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    const num = parseInt(value);
+                    if (!value || isNaN(num) || num < 1 || num > 7) {
+                        return 'Please enter a number between 1 and 7';
+                    }
+                }
             });
-            return;
+
+            if (daysResult.isDismissed) return;
+
+            const days = parseInt(daysResult.value);
+            const now = new Date();
+            date = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
         }
+
+        alert.showLoading();
 
         const response = await fetch('/api/database/sessions', {
             method: 'POST',
@@ -75,6 +83,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
         setExpirationDate(new Date(data.expiration_date));
         setQRCodeURL("https://partyfy.mattvandenberg.com?session=" + data.session_id);
         setFriendsListScreen(FriendListScreen.QR);
+        alert.fire({
+            title: 'Session Created',
+            text: 'Temporary session created successfully.',
+            icon: 'success'
+        })
     }
 
     async function deleteSession(withConfirmation = true) {
@@ -87,6 +100,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
             if (choice.isDismissed) return;
         }
+        alert.showLoading();
         const response = await fetch('/api/database/sessions', {
             method: 'DELETE',
             headers: {
@@ -97,6 +111,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
         })
         const data = await response.json();
+        alert.close();
         setQRCodeURL('');
         setFriendsListScreen(FriendListScreen.QR);
     }
@@ -207,7 +222,13 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                         ?
                         <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
                             <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
-                            <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
+                            {
+                                expirationDate.getFullYear() === 2200
+                                ?
+                                <h4 className='text-stone-400'><i>This session does not expire.</i></h4>
+                                :
+                                <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
+                            }
                             <div className='w-auto p-2 border-white border-4 rounded-md'>
                                 <QRCode bgColor='transparent' fgColor='white' ref={qrRef} value={qrCodeURL} size={192} />
                             </div>
