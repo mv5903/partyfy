@@ -15,6 +15,10 @@ html {
   background-attachment: fixed;
 }
 
+* {
+  font-family: $body-font;
+}
+
 body {
   @apply bg-transparent h-full;
   -webkit-user-select: none; /* Safari */

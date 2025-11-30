@@ -1,7 +1,6 @@
 'use client';
 
 import AnchorLink from '@/components/misc/AnchorLink';
-import Loading from '@/components/misc/Loading';
 import NavigationBar from '@/components/layout/NavigationBar';
 import SelectFriend from '@/components/request/SelectFriend';
 import BackgroundEffectColor from '@/helpers/BackgroundEffectColor';
@@ -111,10 +110,7 @@ function DashboardContent() {
     await refetchUserStore();
   };
 
-  // Only show loading if auth is still loading OR there's no user at all
-  if (isLoading || !user) {
-    return <Loading />;
-  }
+  const pageIsLoading = isLoading || !user || spotifyAuthenticated === null || (spotifyAuthenticated === true && !partyfyUser);
 
   return (
     <main className="text-left z-[2] flex flex-col h-screen">
@@ -124,19 +120,18 @@ function DashboardContent() {
         setIsAHost={setIsAHost}
         setSpotifyAuthenticated={setSpotifyAuthenticated}
         getUser={refetchUser}
+        isLoading={pageIsLoading}
       />
       {
-        spotifyAuthenticated === true
-          ?
-          <>
-            {
-              user != null && partyfyUser &&
-              <UserContext.Provider value={{ user: partyfyUser }}>
-                <SelectFriend />
-              </UserContext.Provider>
-            }
-          </>
-          :
+        pageIsLoading ? (
+          <UserContext.Provider value={{ user: partyfyUser }}>
+            <SelectFriend isLoading={true} />
+          </UserContext.Provider>
+        ) : spotifyAuthenticated === true && partyfyUser ? (
+          <UserContext.Provider value={{ user: partyfyUser }}>
+            <SelectFriend />
+          </UserContext.Provider>
+        ) : (
           <>
             {
               spotifyAuthenticated === false &&
@@ -145,7 +140,7 @@ function DashboardContent() {
                 <h2 className="text-2xl m-4 text-center"><i>To get started, you'll need to link your Spotify account.</i></h2>
                 <h6 className=''>You'll only have to do this once.</h6>
                 <h4 className="text-1xl m-4 text-center">Please note that due to Spotify's API policy, friends will not be able to add to your queue if you link a free account. You can still queue to your friends, though, if they have premium.</h4>
-                <Button 
+                <Button
                   onClick={handleSpotifyAuthClick}
                   className="bg-green-600 hover:bg-green-700 text-white btn-margin m-4 decoration-none"
                   tabIndex={0}
@@ -156,13 +151,8 @@ function DashboardContent() {
                 </Button>
               </div>
             }
-            {
-              spotifyAuthenticated === null &&
-              <>
-                <Loading />
-              </>
-            }
           </>
+        )
       }
       <alert.AlertComponent />
     </main>
@@ -171,7 +161,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense>
       <DashboardContent />
     </Suspense>
   );

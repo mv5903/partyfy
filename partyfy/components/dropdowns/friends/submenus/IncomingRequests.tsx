@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { FaCheckCircle, FaRegCheckCircle, FaRegTrashAlt } from 'react-icons/fa';
 
-import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useFriendRequestsStore } from '@/stores/useFriendRequestsStore';
 
 const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     // Use Zustand store for incoming requests data
     const { incomingRequests: usersReturned, isLoadingIncoming: loading, fetchIncomingRequests } = useFriendRequestsStore();
 
@@ -30,6 +31,15 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
         }
     }, []);
 
+    // Handle loading states with navigation loader
+    useEffect(() => {
+        if (loading && usersReturned.length === 0) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [loading, usersReturned, startLoading, stopLoading]);
+
     async function deleteIncomingRequest(FriendUserID: string, FriendUsername: string) {
         let result = await alert.fire({
             title: 'Are you sure?',
@@ -39,9 +49,9 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
             confirmButtonText: 'Yes',
             cancelButtonText: 'No'
         });
-        alert.showLoading();
 
         if (result.isConfirmed) {
+            startLoading();
             let response = await fetch('/api/database/friends', {
                 method: 'DELETE',
                 headers: {
@@ -54,6 +64,7 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
                 })
             });
             let data = await response.json();
+            stopLoading();
             if (response.status !== 200) {
                 alert.fire({
                     title: 'Error',
@@ -62,12 +73,14 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
                 });
                 return;
             }
+            await alert.fire({
+                title: 'Friend request deleted',
+                icon: 'success'
+            });
+        } else {
+            stopLoading();
         }
         fetchIncomingRequests(user.getUserID());
-        alert.fire({
-            title: 'Friend request deleted',
-            icon: 'success'
-        })
     }
 
     async function acceptIncomingRequest(FriendUserID: string, FriendUsername: string) {
@@ -100,17 +113,13 @@ const IncomingRequests = ({ user } : { user : PartyfyUser } ) => {
         <div className="text-white">
             <div className='overflow-y-scroll max-h-[65vh]'>
             {
-                loading && usersReturned.length === 0
+                usersReturned.length === 0 || !usersReturned
                 ?
-                <Loading />
+                <div>
+                    <h5 className="text-xl text-center text-white">You have no incoming friend requests.</h5>
+                </div>
                 :
-                    usersReturned.length === 0 || !usersReturned
-                    ?
-                    <div>
-                        <h5 className="text-xl text-center text-white">You have no incoming friend requests.</h5>
-                    </div>
-                    :
-                    usersReturned.map((user, index) => {
+                usersReturned.map((user, index) => {
                         return (
                             <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                                 <div className="flex place-items-center justify-between">

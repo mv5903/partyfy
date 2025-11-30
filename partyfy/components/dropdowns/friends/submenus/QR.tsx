@@ -6,12 +6,13 @@ import { useEffect, useRef, useState } from 'react';
 import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsListScreen: Function } ) => {
     const alert = useAlert();
-    const [loading, setLoading] = useState(true);
+    const { startLoading, stopLoading } = useNavigationLoader();
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
 
@@ -60,7 +61,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             date = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
         }
 
-        alert.showLoading();
+        startLoading();
 
         const response = await fetch('/api/database/sessions', {
             method: 'POST',
@@ -73,21 +74,23 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
         })
         const data = await response.json();
+        stopLoading();
         if (data.name === 'Error creating session') {
             await alert.fire({
                 title: 'Error',
                 text: 'There was an error creating a session. Please try again later.',
                 icon: 'error'
             });
+        } else {
+            setExpirationDate(new Date(data.expiration_date));
+            setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
+            setFriendsListScreen(FriendListScreen.QR);
+            await alert.fire({
+                title: 'Session Created',
+                text: 'Temporary session created successfully.',
+                icon: 'success'
+            });
         }
-        setExpirationDate(new Date(data.expiration_date));
-        setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
-        setFriendsListScreen(FriendListScreen.QR);
-        alert.fire({
-            title: 'Session Created',
-            text: 'Temporary session created successfully.',
-            icon: 'success'
-        })
     }
 
     async function deleteSession(withConfirmation = true) {
@@ -100,7 +103,7 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
             if (choice.isDismissed) return;
         }
-        alert.showLoading();
+        startLoading();
         const response = await fetch('/api/database/sessions', {
             method: 'DELETE',
             headers: {
@@ -111,12 +114,13 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
         })
         const data = await response.json();
-        alert.close();
+        stopLoading();
         setQRCodeURL('');
         setFriendsListScreen(FriendListScreen.QR);
     }
 
     useEffect(() => {
+        startLoading();
         fetch('/api/database/sessions?UserID=' + user.getUserID())
         .then(res => res.json())
         .then(data => {
@@ -126,12 +130,12 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                 setExpirationDate(new Date(data.expiration_date));
                 setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
             }
-            setLoading(false);
+            stopLoading();
         })
         .catch(err => {
-            setLoading(false);
+            stopLoading();
         });
-    }, []);
+    }, [startLoading, stopLoading]);
 
     useEffect(() => {
         async function checkSessionExpiration() {
@@ -199,16 +203,9 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
 
     return (
         <div className='text-white'>
-            {
-                loading
-                ?
-                <Loading />
-                :
-                <>
-                    {
-                        qrCodeURL
-                        ?
-                        <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
+            {qrCodeURL
+            ?
+            <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
                             <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
                             {
                                 expirationDate.getFullYear() === 2200
@@ -226,19 +223,11 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                                 <Button variant="destructive" onClick={() => deleteSession(true)}><FaTrash /></Button>
                             </div>
                         </div>
-                        :
-                        <div>
-                            <div className='w-full flex flex-col place-items-center gap-6'>
-                                <h4 className='text-md text-center mt-3 text-white'>You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
-                                <Button variant='secondary' onClick={getNewSession}><FaPlus className="mr-2" /> Create Session</Button>
-                            </div>
-                            {
-                                loading && <Loading />
-                            }
-                        </div>
-                    }
-                </>
-
+            :
+            <div className='w-full flex flex-col place-items-center gap-6'>
+                <h4 className='text-md text-center mt-3 text-white'>You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
+                <Button variant='secondary' onClick={getNewSession}><FaPlus className="mr-2" /> Create Session</Button>
+            </div>
             }
             <alert.AlertComponent />
         </div>

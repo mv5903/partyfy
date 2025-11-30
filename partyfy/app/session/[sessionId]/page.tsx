@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { sessions, Users } from '@prisma/client';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import UserContext from '@/providers/UserContext';
 
 export default function SessionPage() {
@@ -13,24 +14,18 @@ export default function SessionPage() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
+  const { startLoading, stopLoading } = useNavigationLoader();
 
   const [activeTemporarySession, setActiveTemporarySession] = useState<sessions | null>(null);
   const [temporarySessionFriend, setTemporarySessionFriend] = useState<Users | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
       console.log('[Session Page] Checking session:', sessionId);
 
-      // Show alert loading
-      alert.fire({
-        title: 'Joining Session',
-        text: 'Please wait while we check the session...',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false
-      });
+      // Start loading
+      startLoading();
 
       try {
         console.log('[Session Page] Fetching session from API...');
@@ -40,62 +35,52 @@ export default function SessionPage() {
 
         // Check if the session exists
         if (!data) {
-          alert.close();
+          stopLoading();
           setError('Session Not Found. Ask your friend to create a new one.');
-          setLoading(false);
           return;
         }
 
         // Check if the session is active
         const expirationDate = new Date(data.expiration_date);
         if (expirationDate < new Date()) {
-          alert.close();
+          stopLoading();
           setError(`Session expired at ${expirationDate.toLocaleDateString()} at ${expirationDate.toLocaleTimeString()}. Ask your friend to create a new one.`);
-          setLoading(false);
           return;
         }
 
         // Get the friend's user info
         response = await fetch('/api/database/users?UserID=' + data.user_id);
         if (response.status === 500) {
-          alert.close();
+          stopLoading();
           setError('Error loading session. Please try again.');
-          setLoading(false);
           return;
         }
         let friendData = await response.json();
         if (!friendData) {
-          alert.close();
+          stopLoading();
           setError('Could not load user information. Please try again.');
-          setLoading(false);
           return;
         }
 
-        // Cancel alert
-        alert.close();
+        // Stop loading
+        stopLoading();
         setTemporarySessionFriend(friendData);
         setActiveTemporarySession(data);
-        setLoading(false);
       } catch (error) {
         console.error('Error checking session:', error);
-        alert.close();
+        stopLoading();
         setError('There was an error joining the session. Please try again.');
-        setLoading(false);
       }
     };
 
     if (sessionId) {
       checkSession();
     }
-  }, [sessionId, router, alert]);
+  }, [sessionId, router, alert, startLoading, stopLoading]);
 
   const exitSession = () => {
     router.push('/');
   };
-
-  if (loading) {
-    return <Loading />;
-  }
 
   if (error) {
     return (

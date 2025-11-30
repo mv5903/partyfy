@@ -2,24 +2,23 @@ import { useEffect, useState } from "react";
 import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
-import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
 import { useAlert } from "@/hooks/useAlert";
+import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
 import { TbArrowsShuffle, TbRepeat, TbRepeatOff, TbRepeatOnce } from "react-icons/tb";
-import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     const [queue, setQueue] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
 
@@ -64,6 +63,15 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
 
         return () => clearInterval(interval);
     }, []);
+
+    // Handle loading states with navigation loader
+    useEffect(() => {
+        if (queue === null || nowPlaying === null) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [queue, nowPlaying, startLoading, stopLoading]);
 
     if (nowPlaying === false) {
         return (
@@ -250,17 +258,9 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         </>
                         :
                         <>
-                            {
-                                nowPlaying === false
-                                ?
+                            {nowPlaying === false && (
                                 <h3 className="text-center mt-4">Nothing is playing.</h3>
-                                :
-                                <div className="bg-stone-900 p-2 my-2 w-full h-[15vh] flex justify-center place-items-center rounded-md">
-                                    <Card className="bg-stone-800 border-stone-700">
-                                        <Spinner variant="wave" className="text-stone-400" />
-                                    </Card>
-                                </div>
-                            }
+                            )}
                         </>
                     }
                 </div>
@@ -320,9 +320,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                 }
                 </>
                 :
-                <div className="mt-4">
-                    <Loading  />
-                </div>
+                null
             }
             <alert.AlertComponent />
         </div>

@@ -17,6 +17,7 @@ import { UserProfile } from "@auth0/nextjs-auth0/client";
 import ListContentCard from "@/components/misc/ListContentCard";
 import PlaylistCard from "@/components/misc/PlaylistCard";
 import { usePlaylistsStore } from "@/stores/usePlaylistsStore";
+import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 
 interface IActivePlaylist {
     name?: string;
@@ -36,9 +37,18 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     const [playlists, setPlaylists] = useState([]);
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
     const [nextURL, setNextURL] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { startLoading, stopLoading } = useNavigationLoader();
 
     const { user } = useContext(UserContext);
+
+    // Handle Zustand store loading state with navigation loader
+    useEffect(() => {
+        if (playlistsLoading && playlists.length === 0) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [playlistsLoading, playlists, startLoading, stopLoading]);
 
     async function getPlaylists() {
         let accessToken = await spotifyAuth.getAccessToken();
@@ -84,7 +94,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 });
             }
         }
-        setLoading(false);
+        stopLoading();
         if (isFirstLoad) window.scrollTo(0, 0);
     }
 
@@ -94,7 +104,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
         const response = await fetch('/api/spotify/recentlyplayed?user=' + user.getUserID() + '&access_token=' + accessToken);
         if (response.status === 204) {
             setActivePlaylist(null);
-            setLoading(false);
+            stopLoading();
             await alert.fire({
                 title: "You haven't queued any songs yet!",
                 icon: 'info'
@@ -110,7 +120,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 tracks: data.tracks.length,
                 tags: ['recent', 'up to 50 available']
             });
-            setLoading(false);
+            stopLoading();
         } 
     }
 
@@ -167,12 +177,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             });
 
             setPlaylists(playlistsCopy);
-            setLoading(false);
         }
     }, [cachedPlaylists]);
-
-    // Only show loading if there's no cached data yet
-    if (loading && playlists.length === 0) return <Loading />;
 
     return (
         <div className="h-full flex flex-col overflow-hidden">
@@ -204,7 +210,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                     isNeedLikedSongsPermission
                                                         ? acquireLikedSongsPermission
                                                         : () => {
-                                                            setLoading(true);
+                                                            startLoading();
                                                             getPlaylistSongs(true, playlist.id, tags, playlist.name);
                                                         }
                                                 }

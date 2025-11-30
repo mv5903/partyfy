@@ -9,6 +9,7 @@ import { Users } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQueueStatusStore } from '@/stores/useQueueStatusStore';
 import { FaCheck, FaSpinner } from 'react-icons/fa';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface NavigationBarProps {
   partyfyUser: PartyfyUser | null;
@@ -18,6 +19,7 @@ interface NavigationBarProps {
   getUser?: () => void;
   currentFriend?: Users | null;
   queueUsage?: any;
+  isLoading?: boolean;
 }
 
 export default function NavigationBar({
@@ -28,9 +30,31 @@ export default function NavigationBar({
   getUser = () => {},
   currentFriend = null,
   queueUsage = null,
+  isLoading = false,
 }: NavigationBarProps) {
   console.log('[DEBUG] NavigationBar render - currentFriend:', currentFriend?.Username);
   const { status, songName } = useQueueStatusStore();
+
+  if (isLoading) {
+    return (
+      <nav className='flex justify-between'>
+        <div className='flex justify-start place-items-center'>
+          <Skeleton className="h-7 w-40 m-3" />
+        </div>
+        <UserContext.Provider value={{ user: partyfyUser }}>
+          <div className="flex align-start">
+            <FriendsMenu />
+            <UserQuickAction
+              isAHost={isAHost}
+              setIsAHost={setIsAHost}
+              setSpotifyAuthenticated={setSpotifyAuthenticated}
+              getUser={getUser}
+            />
+          </div>
+        </UserContext.Provider>
+      </nav>
+    );
+  }
 
   return (
     <nav className='flex justify-between'>

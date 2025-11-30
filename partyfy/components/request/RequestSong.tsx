@@ -5,7 +5,7 @@ import { TiArrowBack } from "react-icons/ti";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
 import { useAlert } from "@/hooks/useAlert";
-import Loading from "../misc/Loading";
+import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -33,6 +33,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     }
 
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     const { user } = useContext(UserContext);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -176,6 +177,15 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         let interval = setInterval(getQueueUsage, 5000);
         return () => clearInterval(interval);
     }, [currentFriend])
+
+    // Handle loading state with navigation loader
+    useEffect(() => {
+        if (!friendSpotifyAuth) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [friendSpotifyAuth, startLoading, stopLoading]);
 
     // Sync queueUsage to parent component
     useEffect(() => {
@@ -435,8 +445,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     return (
         <div className="text-white">
-            {
-                !friendSpotifyAuth ? <Loading /> :
+            {friendSpotifyAuth && (
                 <>
                     <div className="flex items-center justify-center place-content-center p-2 mb-2">
                         <h3 className={`text-xl pt-2 mb-2 text-white ${temporarySession ? '' : 'me-2'}`}>To <span><strong>{currentFriend.Username}</strong></span></h3>
@@ -513,7 +522,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                         </Tabs>
                     </div>
                 </>
-            }
+            )}
             <alert.AlertComponent />
         </div>
     )

@@ -5,15 +5,12 @@ import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
-import { Users } from "@prisma/client";
 import { useContext, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FaCog, FaSave } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
 import { useAlert } from "@/hooks/useAlert";
 import { useNavigationLoader } from "@/hooks/useNavigationLoader";
-import Loading from "../misc/Loading";
-import LoadingDots from "../misc/LoadingDots";
 import ScrollingText from "../misc/ScrollingText";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,21 +18,17 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { FaArrowRotateRight } from "react-icons/fa6";
 import { useFriendsStore } from "@/stores/useFriendsStore";
 import { useUnattendedQueuesStore } from "@/stores/useUnattendedQueuesStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const SelectFriend = () => {
+const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
     const { user } = useContext(UserContext);
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const alert = useAlert();
     const { startLoading, stopLoading } = useNavigationLoader();
-
-    // Use Zustand store for friends data
     const { friends: friendsList, spotifyStatuses, isLoading: loading, isRefreshing: refreshingFriendsLoading, fetchFriends, updateSpotifyStatuses } = useFriendsStore();
-
-    // Use Zustand store for unattended queues status
     const { isEnabled: isUnattendedQueuesEnabled, isLoading: uqLoading, fetchStatus: fetchUQStatus, updateStatus: updateUQStatus } = useUnattendedQueuesStore();
     const [commercialOptionsVisible, setCommercialOptionsVisible] = useState(false);
     const [originalOptions, setOriginalOptions] = useState(null);
@@ -69,14 +62,26 @@ const SelectFriend = () => {
     }
 
     useEffect(() => {
+        if (isLoading || !user) return;
         BackgroundEffectColor.removeBackgroundEffectColor();
         getFriendPlayingStatus();
         // Reduced from 10s to 15s for better performance
         const interval = setInterval(getFriendPlayingStatus, 5000);
         return () => clearInterval(interval);
-    }, [friendsList]);
+    }, [friendsList, isLoading, user]);
+
+    // Handle loading states with navigation loader
+    useEffect(() => {
+        if (isLoading) return;
+        if (loading || refreshingFriendsLoading || uqLoading) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [loading, refreshingFriendsLoading, uqLoading, startLoading, stopLoading, isLoading]);
 
     useEffect(() => {
+        if (isLoading || !user) return;
         fetch('api/database/users?UserID=' + user.getUserID())
             .then(response => response.json())
             .then(data => {
@@ -99,11 +104,11 @@ const SelectFriend = () => {
 
                 }
             });
-    }, [commercialOptionsVisible]);     
+    }, [commercialOptionsVisible, isLoading, user]);     
     
 
     useEffect(() => {
-        // Fetch friends using Zustand store (will use cache if available)
+        if (isLoading || !user) return;
         fetchFriends(user.getUserID());
         fetchUQStatus(user.getUserID());
 
@@ -121,10 +126,9 @@ const SelectFriend = () => {
         return () => {
             Supabase.channel('RequestPage').unsubscribe();
         }
-    }, []);
+    }, [isLoading, user]);
 
     async function unattendedQueues() {
-        // Use the store's updateStatus method which handles loading state and caching
         await updateUQStatus(user.getUserID(), !isUnattendedQueuesEnabled);
     }
 
@@ -191,6 +195,44 @@ const SelectFriend = () => {
             return false;
         }
     };
+
+    // Show skeleton during initial page load OR while data is loading
+    const showSkeleton = isLoading || (loading && friendsList.length === 0) || isUnattendedQueuesEnabled === null;
+
+    if (showSkeleton) {
+        return (
+            <div className="grow h-full flex flex-col overflow-hidden">
+                {/* Top section - Remote Queues button */}
+                <div className="text-center flex-shrink-0">
+                    <div className="h-[10vh] flex flex-col items-center justify-center gap-2">
+                        <Skeleton className="h-10 w-64 rounded-md bg-stone-800" />
+                        <Skeleton className="h-4 w-80 max-w-[90vw] bg-stone-800" />
+                    </div>
+                </div>
+
+                {/* Separator */}
+                <div className="flex items-center m-4 flex-shrink-0">
+                    <Separator className="flex-1" />
+                    <span className="px-4 text-muted-foreground">OR</span>
+                    <Separator className="flex-1" />
+                </div>
+
+                {/* Friends section */}
+                <div className="flex-1 text-center mx-2 flex flex-col gap-3 overflow-hidden">
+                    <h3 className="flex-shrink-0 text-2xl font-semibold text-white">Add to:</h3>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 min-h-0">
+                        {[...Array(8)].map((_, i) => (
+                            <Skeleton key={i} className="w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300 text-white bg-stone-800 opacity-50">
+                                <div className="flex justify-between items-center">
+                                    <Skeleton className="h-5 w-24" />
+                                </div>
+                            </Skeleton>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (commercialOptionsVisible) {
 
@@ -266,30 +308,26 @@ const SelectFriend = () => {
     return (
         <div className="grow h-full flex flex-col overflow-hidden">
             <div className="text-center flex-shrink-0">
-                {
-                    isUnattendedQueuesEnabled === null || uqLoading
-                    ?
-                    <div className="h-[10vh]">
-                        <LoadingDots className="mt-4" />
-                    </div>
-                    :
-                    <div className="h-[10vh]">
-                        <div className="flex justify-center place-items-center">
-                            <Button
-                                variant={isUnattendedQueuesEnabled ? "success" : "warning"}
-                                className="m-2"
-                                onClick={() => unattendedQueues()}
-                            >
-                                {isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}
-                            </Button>
-                            {
-                                user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
-                                <Button className="p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></Button>
-                            }
-                        </div>
-                        <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
-                    </div>
-                }
+                <div className="h-[10vh]">
+                    {isUnattendedQueuesEnabled !== null && !uqLoading && (
+                        <>
+                            <div className="flex justify-center place-items-center">
+                                <Button
+                                    variant={isUnattendedQueuesEnabled ? "success" : "warning"}
+                                    className="m-2"
+                                    onClick={() => unattendedQueues()}
+                                >
+                                    {isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}
+                                </Button>
+                                {
+                                    user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
+                                    <Button className="p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></Button>
+                                }
+                            </div>
+                            <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
+                        </>
+                    )}
+                </div>
             </div>
             <div className="flex items-center m-4 flex-shrink-0">
                 <Separator className="flex-1" />
@@ -298,26 +336,8 @@ const SelectFriend = () => {
             </div>
             <div className="flex-1 text-center mx-2 flex flex-col gap-3 overflow-hidden">
                 {
-                    loading && friendsList.length === 0 &&
-                    <Loading />
-                }
-                {isPending && (
-                    <div className="fixed inset-0 bg-black bg-opacity-70 z-[9999] flex items-center justify-center">
-                        <Loading />
-                    </div>
-                )}
-                {
                     !loading && friendsList.length === 0 &&
                     <div>
-                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
-                            {
-                                refreshingFriendsLoading === true
-                                &&
-                                <div className="">
-                                    <LoadingDots />
-                                </div>
-                            }
-                        </h6>
                         <h3 className="mx-3">No friends found. Add some through the friends menu.</h3>
                     </div>
                 }
@@ -325,13 +345,6 @@ const SelectFriend = () => {
                     !loading && friendsList.length > 0 &&
                     <>
                         <h3 className="flex-shrink-0 text-2xl font-semibold text-white">Add to:</h3>
-                        <h6 className="flex-shrink-0 text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends(user.getUserID())}>
-                            {
-                                refreshingFriendsLoading === true
-                                &&
-                                <LoadingDots />
-                            }
-                        </h6>
                         <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 min-h-0">
                             {
                                 [...friendsList].sort((a, b) => {

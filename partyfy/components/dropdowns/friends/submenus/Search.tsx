@@ -1,21 +1,21 @@
-import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { useState } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 const Search = ({ user } : { user : PartyfyUser } ) => {
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     const [usersReturned, setUsersReturned] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     async function searchUsers(query : string) {
-        setLoading(true);
+        startLoading();
         if (query === '') {
-            setLoading(false);
+            stopLoading();
             setUsersReturned([]);
             return;
         }
@@ -27,7 +27,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
             data = data.filter((users : any) => users.UserID != user.getUserID());
             setUsersReturned(data);
         }
-        setLoading(false);
+        stopLoading();
     }
 
     async function sendFriendRequest(FriendUserID: string, FriendUsername: string) {
@@ -40,10 +40,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
         });
 
         if (choice.isConfirmed) {
-            alert.fire({
-                title: 'Sending friend request...',
-                showConfirmButton: false
-            });
+            startLoading();
             const response = await fetch('/api/database/friends', {
                 method: 'PATCH',
                 headers: {
@@ -55,6 +52,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                     action: 'SendFriendRequest'
                 })
             });
+            stopLoading();
             if (response.ok) {
                 await alert.fire({
                     title: 'Success',
@@ -71,7 +69,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                 <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
             </div>
             <div>
-                {!loading && usersReturned.map((user, index) => {
+                {usersReturned.map((user, index) => {
                     return (
                         <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                             <div className="flex place-items-center justify-between">
@@ -81,9 +79,6 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                         </Card>
                     );
                 })}
-                {
-                    loading && <Loading />
-                }
             </div>
             <alert.AlertComponent />
         </div>

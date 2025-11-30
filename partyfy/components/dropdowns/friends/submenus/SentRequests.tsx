@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { FaRegTrashAlt } from 'react-icons/fa';
 
-import Loading from '@/components/misc/Loading';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useFriendRequestsStore } from '@/stores/useFriendRequestsStore';
 
 const SentRequests = ({ user } : { user : PartyfyUser } ) => {
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     // Use Zustand store for sent requests data
     const { sentRequests: usersReturned, isLoadingSent: loading, fetchSentRequests } = useFriendRequestsStore();
 
@@ -29,6 +30,15 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
             Supabase.channel('SentRequests').unsubscribe();
         }
     }, []);
+
+    // Handle loading states with navigation loader
+    useEffect(() => {
+        if (loading && usersReturned.length === 0) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [loading, usersReturned, startLoading, stopLoading]);
 
     async function cancelFriendRequest(FriendUserID: string, FriendUsername: string) {
         let result = await alert.fire({
@@ -60,17 +70,13 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
         <div className="text-white">
             <div className='overflow-y-scroll max-h-[65vh]'>
                 {
-                    loading && usersReturned.length === 0
+                    usersReturned.length === 0 || !usersReturned
                     ?
-                    <Loading />
+                    <div>
+                        <h5 className="text-xl text-center text-white">You have not sent any friend requests.</h5>
+                    </div>
                     :
-                        usersReturned.length === 0 || !usersReturned
-                        ?
-                        <div>
-                            <h5 className="text-xl text-center text-white">You have not sent any friend requests.</h5>
-                        </div>
-                        :
-                        usersReturned.map((user, index) => {
+                    usersReturned.map((user, index) => {
                             return (
                                 <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
                                     <div className="flex place-items-center justify-between">
@@ -79,7 +85,7 @@ const SentRequests = ({ user } : { user : PartyfyUser } ) => {
                                     </div>
                                 </Card>
                             );
-                        })
+                    })
                 }
             </div>
             <alert.AlertComponent />

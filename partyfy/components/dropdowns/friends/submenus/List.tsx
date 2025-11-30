@@ -1,16 +1,17 @@
-import Loading from '@/components/misc/Loading';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
 import { useEffect, useState } from 'react';
 import { FaPlus, FaRegTrashAlt, FaTrash, FaTrashAlt } from 'react-icons/fa';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useFriendsStore } from '@/stores/useFriendsStore';
 
 const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendListScreen: Function } ) => {
     const alert = useAlert();
+    const { startLoading, stopLoading } = useNavigationLoader();
     // Use Zustand store for friends data
     const { friends, isLoading, fetchFriends } = useFriendsStore();
 
@@ -30,6 +31,15 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
         }
     }, []);
 
+    // Handle loading states with navigation loader
+    useEffect(() => {
+        if (isLoading && friends.length === 0) {
+            startLoading();
+        } else {
+            stopLoading();
+        }
+    }, [isLoading, friends, startLoading, stopLoading]);
+
     async function removeFriend(FriendUserID: string, FriendUsername: string) {
         const result = await alert.fire({
             title: 'Are you sure?',
@@ -39,9 +49,9 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
             confirmButtonText: 'Remove',
             cancelButtonText: 'Cancel'
         });
-        alert.showLoading();
 
         if (result.isConfirmed) {
+            startLoading();
             const response = await fetch('/api/database/friends', {
                 method: 'DELETE',
                 headers: {
@@ -67,18 +77,14 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                     icon: 'error'
                 });
             }
+            stopLoading();
         }
         fetchFriends(user.getUserID());
     }
-    
+
     return (
         <div className="text-white">
-            {
-                isLoading && friends.length === 0
-                ?
-                <Loading />
-                :
-                <div className='overflow-y-scroll max-h-[65vh]'>
+            <div className='overflow-y-scroll max-h-[65vh]'>
                     {
                         friends.length === 0 || !friends
                         ?
@@ -99,9 +105,8 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                                 </Card>
                             );
                         })
-                    }
-                </div>
-            }
+                }
+            </div>
             <alert.AlertComponent />
         </div>
     );

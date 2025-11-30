@@ -1,6 +1,5 @@
 'use client';
 
-import Loading from '@/components/misc/Loading';
 import NavigationBar from '@/components/layout/NavigationBar';
 import RequestSong from '@/components/request/RequestSong';
 import UserContext from '@/providers/UserContext';
@@ -11,9 +10,11 @@ import { useEffect, useState } from 'react';
 import { Users, sessions } from '@prisma/client';
 import { useUserStore } from '@/stores/useUserStore';
 import { useAlert } from '@/hooks/useAlert';
+import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 
 export default function RequestPage() {
   const alert = useAlert();
+  const { startLoading, stopLoading } = useNavigationLoader();
   const { user, isLoading } = useUser();
   const params = useParams();
   const router = useRouter();
@@ -184,6 +185,16 @@ export default function RequestPage() {
     await refetchUserStore();
   };
 
+  // Handle loading states with navigation loader
+  useEffect(() => {
+    const isPageLoading = isLoading || friendLoading || !currentFriend || (user && (userStoreLoading || !partyfyUser));
+    if (isPageLoading && !authError) {
+      startLoading();
+    } else {
+      stopLoading();
+    }
+  }, [isLoading, friendLoading, currentFriend, user, userStoreLoading, partyfyUser, authError, startLoading, stopLoading]);
+
   // Debug logging
   console.log('[RequestPage] State:', {
     isLoading,
@@ -218,13 +229,13 @@ export default function RequestPage() {
   // Show loading while checking authentication or fetching data
   if (isLoading || friendLoading || !currentFriend) {
     console.log('[RequestPage] Showing loading - reason:', { isLoading, friendLoading, noCurrentFriend: !currentFriend });
-    return <Loading />;
+    return null;
   }
 
   // For logged-in users, wait for user store
   if (user && (userStoreLoading || !partyfyUser)) {
     console.log('[RequestPage] Showing loading - waiting for user store:', { userStoreLoading, noPartyfyUser: !partyfyUser });
-    return <Loading />;
+    return null;
   }
 
   return (
