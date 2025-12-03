@@ -9,10 +9,14 @@ import '@/styles/nprogress-custom.css';
 /**
  * NavigationProgress component
  * Shows a loading bar at the top of the screen during navigation
+ * Pages with skeleton loaders should be added to EXCLUDED_ROUTES
  */
 export function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Routes that use skeleton loaders instead of the top loading bar
+  const EXCLUDED_ROUTES = ['/dashboard'];
 
   useEffect(() => {
     // Configure NProgress
@@ -25,6 +29,11 @@ export function NavigationProgress() {
   }, []);
 
   useEffect(() => {
+    // Skip loading bar for excluded routes
+    if (EXCLUDED_ROUTES.includes(pathname)) {
+      return;
+    }
+
     // Start the progress bar when navigation starts
     NProgress.start();
 

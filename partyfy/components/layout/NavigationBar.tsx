@@ -58,7 +58,7 @@ export default function NavigationBar({
 
   return (
     <nav className='flex justify-between'>
-      <div className='flex justfiy-start place-items-center'>
+      <div className='flex justfiy-start place-items-center h-12'>
         <AnimatePresence mode="wait">
           <motion.h2
             key={currentFriend ? 'with-friend' : 'without-friend'}

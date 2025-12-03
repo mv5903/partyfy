@@ -3,7 +3,6 @@
 import NavigationBar from '@/components/layout/NavigationBar';
 import RequestSong from '@/components/request/RequestSong';
 import UserContext from '@/providers/UserContext';
-import PartyfyUser from '@/helpers/PartyfyUser';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';

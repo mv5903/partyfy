@@ -7,7 +7,6 @@ import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
 import { useAlert } from "@/hooks/useAlert";
-import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { MdAlbum, MdComputer, MdList, MdPerson, MdPodcasts, MdSmartphone, MdSpeaker } from "react-icons/md";
@@ -18,7 +17,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: SpotifyAuth, friend: Users }) => {
 
     const alert = useAlert();
-    const { startLoading, stopLoading } = useNavigationLoader();
     const [queue, setQueue] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
 
@@ -64,14 +62,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         return () => clearInterval(interval);
     }, []);
 
-    // Handle loading states with navigation loader
-    useEffect(() => {
-        if (queue === null || nowPlaying === null) {
-            startLoading();
-        } else {
-            stopLoading();
-        }
-    }, [queue, nowPlaying, startLoading, stopLoading]);
+    const isLoading = queue === null || nowPlaying === null;
 
     if (nowPlaying === false) {
         return (
@@ -85,7 +76,28 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
         <div className="h-full flex flex-col overflow-hidden">
             <div className="w-full flex-shrink-0">
                 <div className="flex flex-col items-center">
-                    { 
+                    {
+                        isLoading
+                        ?
+                        <>
+                            {/* Skeleton for Now Playing */}
+                            <div className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
+                                <div className="flex gap-2 w-full">
+                                    <div className="flex flex-col justify-center items-center gap-2">
+                                        <div className="w-24 h-24 bg-stone-800 animate-shimmer rounded" />
+                                        <div className="w-20 h-6 bg-stone-800 animate-shimmer rounded" />
+                                    </div>
+                                    <div className="flex flex-col w-full px-2 gap-2">
+                                        <div className="h-5 bg-stone-800 animate-shimmer rounded w-3/4" />
+                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-1/2" />
+                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-2/3" />
+                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-full" />
+                                        <div className="h-2 bg-stone-800 animate-shimmer rounded w-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                        :
                         nowPlaying
                         ?
                         <>
@@ -266,8 +278,26 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                 </div>
             </div>
             <h4 className="my-2 text-2xl flex-shrink-0">Next</h4>
-                <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 mb-3">
                         {
+                            isLoading
+                            ?
+                            // Skeleton for queue
+                            [...Array(5)].map((_, i) => (
+                                <div key={i}>
+                                    <div className="flex justify-between w-full px-0 gap-1">
+                                        <div className="h-6 w-6 bg-stone-800 animate-shimmer rounded" />
+                                        <div className="w-12 h-12 bg-stone-800 animate-shimmer rounded me-2" />
+                                        <div className="w-2/3 flex flex-col gap-2">
+                                            <div className="h-5 bg-stone-800 animate-shimmer rounded w-3/4" />
+                                            <div className="h-4 bg-stone-800 animate-shimmer rounded w-1/2" />
+                                        </div>
+                                        <div className="w-6 h-6 bg-stone-800 animate-shimmer rounded" />
+                                    </div>
+                                    {i < 4 && <Separator className="my-2 bg-stone-600" />}
+                                </div>
+                            ))
+                            :
                             queue != null && Array.isArray(queue) &&
                             queue.map((item: any, index: number) => {
                                 return (

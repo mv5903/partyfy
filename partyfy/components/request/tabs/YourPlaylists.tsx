@@ -17,7 +17,7 @@ import { UserProfile } from "@auth0/nextjs-auth0/client";
 import ListContentCard from "@/components/misc/ListContentCard";
 import PlaylistCard from "@/components/misc/PlaylistCard";
 import { usePlaylistsStore } from "@/stores/usePlaylistsStore";
-import { useNavigationLoader } from "@/hooks/useNavigationLoader";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
 
 interface IActivePlaylist {
     name?: string;
@@ -37,18 +37,9 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     const [playlists, setPlaylists] = useState([]);
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
     const [nextURL, setNextURL] = useState(null);
-    const { startLoading, stopLoading } = useNavigationLoader();
+    const [loadingSongs, setLoadingSongs] = useState(false);
 
     const { user } = useContext(UserContext);
-
-    // Handle Zustand store loading state with navigation loader
-    useEffect(() => {
-        if (playlistsLoading && playlists.length === 0) {
-            startLoading();
-        } else {
-            stopLoading();
-        }
-    }, [playlistsLoading, playlists, startLoading, stopLoading]);
 
     async function getPlaylists() {
         let accessToken = await spotifyAuth.getAccessToken();
@@ -78,6 +69,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             return;
         }
         if (playlist_id) {
+            if (isFirstLoad) setLoadingSongs(true);
             let accessToken = await spotifyAuth.getAccessToken();
             if (!accessToken) return;
             const response = await fetch('/api/spotify/playlist?action=get&access_token=' + accessToken + '&playlist_id=' + playlist_id + '&offset=' + offset);
@@ -93,18 +85,19 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     tags
                 });
             }
+            setLoadingSongs(false);
         }
-        stopLoading();
         if (isFirstLoad) window.scrollTo(0, 0);
     }
 
     async function getRecentSongs() {
+        setLoadingSongs(true);
         let accessToken = await spotifyAuth.getAccessToken();
         if (!accessToken) return;
         const response = await fetch('/api/spotify/recentlyplayed?user=' + user.getUserID() + '&access_token=' + accessToken);
         if (response.status === 204) {
             setActivePlaylist(null);
-            stopLoading();
+            setLoadingSongs(false);
             await alert.fire({
                 title: "You haven't queued any songs yet!",
                 icon: 'info'
@@ -120,8 +113,8 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 tracks: data.tracks.length,
                 tags: ['recent', 'up to 50 available']
             });
-            stopLoading();
-        } 
+            setLoadingSongs(false);
+        }
     }
 
     async function acquireLikedSongsPermission() {
@@ -180,12 +173,24 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
         }
     }, [cachedPlaylists]);
 
+    const showPlaylistsSkeleton = playlistsLoading && playlists.length === 0;
+
     return (
         <div className="h-full flex flex-col overflow-hidden">
             { !activePlaylist && <h3 className="text-2xl text-center my-4 flex-shrink-0">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
             <div className="flex-1 flex flex-col justify-center items-center w-full overflow-hidden">
                 {
-                    !activePlaylist && playlists.length > 0 &&
+                    !activePlaylist && showPlaylistsSkeleton &&
+                    <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0">
+                        <div className="grid grid-cols-2 gap-3">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-stone-800 animate-shimmer rounded-lg h-48" />
+                            ))}
+                        </div>
+                    </div>
+                }
+                {
+                    !activePlaylist && playlists.length > 0 && !showPlaylistsSkeleton &&
                     <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0" id="playlists">
                         <InfiniteScroll
                             dataLength={playlists.length}
@@ -209,10 +214,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                 onClick={
                                                     isNeedLikedSongsPermission
                                                         ? acquireLikedSongsPermission
-                                                        : () => {
-                                                            startLoading();
-                                                            getPlaylistSongs(true, playlist.id, tags, playlist.name);
-                                                        }
+                                                        : () => getPlaylistSongs(true, playlist.id, tags, playlist.name)
                                                 }
                                             />
                                         );
@@ -231,7 +233,15 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                         </div>
                         <h6 className="text-sm text-gray-400 my-2 cursor-pointer flex-shrink-0"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
-                            activePlaylist.items.length > 0 &&
+                            loadingSongs &&
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 px-3 min-h-0">
+                                {[...Array(8)].map((_, i) => (
+                                    <div key={i} className="bg-stone-800 animate-shimmer rounded-lg h-16" />
+                                ))}
+                            </div>
+                        }
+                        {
+                            !loadingSongs && activePlaylist.items.length > 0 &&
                             <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex justify-center min-h-0" id="playlistItems">
                                  <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
@@ -273,7 +283,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                             </div>
                         }
                         {
-                            (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
+                            !loadingSongs && (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
                             <h3 className="text-center m-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
                         }
                     </div>

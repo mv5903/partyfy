@@ -485,7 +485,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                                         </div>
                                     </PopoverTrigger>
                                     <PopoverContent className="bg-stone-800 text-white text-sm border-0 text-center me-2">
-                                        <p>{currentFriend.Username} has enabled a queue limit for their session.</p>
+                                        <p>{currentFriend.Username} has a rolling queue limit of <strong>{queueUsage.maxQueueCount} item every {queueUsage.intervalValue + " " + queueUsage.intervalUnit + (queueUsage.intervalValue > 1 ? "s" : "")}</strong> for their session.</p>
                                     </PopoverContent>
                                 </Popover>
                             </div>

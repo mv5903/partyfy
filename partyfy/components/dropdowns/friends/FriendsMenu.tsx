@@ -45,7 +45,7 @@ const FriendsMenu = () => {
             case FriendListScreen.QR:
                 return 'QR Code';
             case FriendListScreen.Friends:
-                return 'Friends';
+                return '';
             case FriendListScreen.Requests:
                 return 'Incoming Requests';
             case FriendListScreen.Sent:
@@ -73,7 +73,7 @@ const FriendsMenu = () => {
                 />
 
                 <SheetHeader className="mt-4">
-                    <SheetTitle className="text-white text-xl">Friends - <i>{getTitleForScreen(currentScreen)}</i></SheetTitle>
+                    <SheetTitle className="text-white text-xl">Friends {currentScreen != FriendListScreen.Friends && "-"} <i>{getTitleForScreen(currentScreen)}</i></SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 h-full pt-4">
                     <Tabs
