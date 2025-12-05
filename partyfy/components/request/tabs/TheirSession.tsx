@@ -3,6 +3,7 @@ import { BsExplicitFill } from "react-icons/bs";
 import { useLocalStorage } from "usehooks-ts";
 
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import ScrollingText from "@/components/misc/ScrollingText";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { fancyTimeFormat } from "@/helpers/Utils";
 import { Users } from "@prisma/client";
@@ -103,7 +104,7 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                         <>
                             <div className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
                                 <div className="flex gap-2 w-full">
-                                    <div className="flex flex-col justify-center items-center">
+                                    <div className="flex flex-col justify-center items-center flex-shrink-0">
                                         {
                                             nowPlaying.currently_playing_type == 'track'
                                             ?
@@ -125,16 +126,17 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                             <SpotifyLinkBack link={nowPlaying.item.external_urls.spotify} />
                                         }
                                     </div>
-                                    <div className="flex flex-col w-full">
-                                        <div className="flex flex-col items-start justify-between w-full px-2">
-                                        <div className="flex justify-start gap-2">
+                                    <div className="flex flex-col w-full min-w-0">
+                                        <div className="flex flex-col items-start justify-between px-2 min-w-0">
+                                        <div className="flex justify-start items-center gap-2 w-full min-w-0">
                                             {nowPlaying.item ? (
-                                                <h6 className="text-left text-lg">
-                                                    <strong>
-                                                        {nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}
-                                                    </strong>
-                                                    {nowPlaying.item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
-                                                </h6>
+                                                <>
+                                                    <ScrollingText
+                                                        text={nowPlaying.item.name + (nowPlaying.item.is_local ? ' (Local File)' : '')}
+                                                        className="text-left text-lg font-bold flex-1 min-w-0"
+                                                    />
+                                                    {nowPlaying.item.explicit === true && <BsExplicitFill className="flex-shrink-0" />}
+                                                </>
                                             ) : (
                                                 <h6 className="text-left">
                                                     <strong>
@@ -143,27 +145,31 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 </h6>
                                             )}
                                         </div>
-                                        <div className="flex justify-start gap-2">
+                                        <div className="flex justify-start gap-2 w-full min-w-0">
                                             {
                                                 nowPlaying.item
                                                 ?
-                                                <h6 className="text-left"><i>{nowPlaying.currently_playing_type === 'episode' ? nowPlaying.item.show.publisher : getArtistList(nowPlaying.item.artists)}</i></h6>
+                                                <ScrollingText
+                                                    text={nowPlaying.currently_playing_type === 'episode' ? nowPlaying.item.show.publisher : getArtistList(nowPlaying.item.artists)}
+                                                    className="text-left italic w-full"
+                                                />
                                                 :
                                                 <h6 className="text-left"><i>Unknown artist</i></h6>
                                             }
                                         </div>
-                                        <div className="flex justify-start place-items-center gap-2">
-                                            {
-                                                nowPlaying.currently_playing_type === 'episode'
-                                                ?
-                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.show.name : ''}</h6>
-                                                :
-                                                <h6 className="text-left">{nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : ''}</h6>
-                                            }
+                                        <div className="flex justify-start place-items-center gap-2 w-full min-w-0">
+                                            <ScrollingText
+                                                text={
+                                                    nowPlaying.currently_playing_type === 'episode'
+                                                    ? (nowPlaying.item ? nowPlaying.item.show.name : '')
+                                                    : (nowPlaying.item ? nowPlaying.item.album.name + (nowPlaying.item.disc_number > 1 ? ` (Disc #${nowPlaying.item.disc_number})` : '') : '')
+                                                }
+                                                className="text-left w-full"
+                                            />
                                         </div>
                                         <div className="flex justify-between w-full my-1">
-                                            <h6>{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
-                                            <div className="flex justify-around items-center text-white gap-4">
+                                            <h6 className="w-10">{fancyTimeFormat(nowPlaying.progress_ms)}</h6>
+                                            <div className="flex justify-around items-center text-white gap-3">
                                                 { nowPlaying?.repeat_state == "off" &&
                                                     <Popover>
                                                         <PopoverTrigger><TbRepeatOff /></PopoverTrigger>
@@ -248,9 +254,9 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 {
                                                     showEndTimeAsTotal
                                                     ?
-                                                    <h6 onClick={() => setShowEndTimeAsTotal(false)}>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
+                                                    <h6 className="w-10" onClick={() => setShowEndTimeAsTotal(false)}>{fancyTimeFormat(nowPlaying.item.duration_ms)}</h6>
                                                     :
-                                                    <h6 onClick={() => setShowEndTimeAsTotal(true)}>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
+                                                    <h6 className="w-10" onClick={() => setShowEndTimeAsTotal(true)}>-{fancyTimeFormat(nowPlaying.item.duration_ms - nowPlaying.progress_ms)}</h6>
                                                 }
                                                 </>
                                                 :
@@ -302,25 +308,25 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                             queue.map((item: any, index: number) => {
                                 return (
                                     <div key={index}>
-                                        <div className="flex justify-between w-full px-0 gap-1">
+                                        <div className="flex justify-between items-center w-full px-0 gap-2">
                                             <h2 className="mr-2">{index + 1}</h2>
                                             <img 
                                                 className="me-2" 
                                                 src={item.type == 'track' ? item.album.images[2].url : item.images[0].url} 
                                                 style={{ width: '50px', height: '50px' }} 
                                             />
-                                            <div className="w-2/3">
-                                                <div className="flex justify-start">
-                                                    <h6 className="text-left text-md">
-                                                        <strong>
-                                                            {item.name}
-                                                        </strong>
-                                                        {item.explicit === true ? <BsExplicitFill className="inline-block ml-2 mb-1" /> : ''}
-                                                    </h6>
+                                            <div className="w-2/3 min-w-0">
+                                                <div className="flex justify-start items-center gap-2 w-full min-w-0">
+                                                    <ScrollingText
+                                                        text={item.name}
+                                                        className="text-left text-md font-bold flex-1 min-w-0"
+                                                    />
+                                                    {item.explicit === true && <BsExplicitFill className="flex-shrink-0" />}
                                                 </div>
-                                                <h6 className="text-left">
-                                                    <i>{item.type == 'track' ? getArtistList(item.artists) : item.show.name}</i>
-                                                </h6>
+                                                <ScrollingText
+                                                    text={item.type == 'track' ? getArtistList(item.artists) : item.show.name}
+                                                    className="text-left italic w-full"
+                                                />
                                             </div>
                                             <SpotifyLinkBack link={item.external_urls.spotify} />
                                         </div>

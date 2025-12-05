@@ -327,24 +327,29 @@ const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
                                     return (
                                         <button
                                             key={index}
-                                            onClick={async () => {
-                                                if (!friendIsActive) return;
-                                                if (!isQueueEnabled) {
-                                                    await alert.fire({
-                                                        title: 'Error!',
-                                                        text: `${friend.Username} does not have unattended queues enabled. Ask them to enable it if you want to queue songs.`,
-                                                        icon: 'error'
+                                            onClick={() => {
+                                                // Navigate immediately with view transition for smooth UX
+                                                if (document.startViewTransition) {
+                                                    document.startViewTransition(() => {
+                                                        startTransition(() => {
+                                                            router.push(`/request/@${friend.Username}`);
+                                                        });
                                                     });
-                                                    return;
+                                                } else {
+                                                    startTransition(() => {
+                                                        router.push(`/request/@${friend.Username}`);
+                                                    });
                                                 }
-                                                // Use transition for smoother navigation
-                                                startTransition(() => {
-                                                    router.push(`/request/@${friend.Username}`);
-                                                });
-                                            } }
-                                            disabled={!friendIsActive || isPending}
-                                            className={`w-full text-left h-10 px-3 py-2 rounded-lg transition ease-in-out duration-300 text-white
-                                                        ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600' : 'bg-stone-800'}
+                                            }}
+                                            onMouseEnter={() => {
+                                                // Prefetch on hover for instant navigation
+                                                if (friendIsActive && isQueueEnabled) {
+                                                    router.prefetch(`/request/@${friend.Username}`);
+                                                }
+                                            }}
+                                            disabled={!friendIsActive || !isQueueEnabled || isPending}
+                                            className={`w-full text-left h-10 px-3 py-2 rounded-lg transition-all ease-in-out duration-150 text-white active:scale-[0.98]
+                                                        ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600 active:bg-stone-500' : 'bg-stone-800'}
                                                         ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
                                         >
                                             <div className="flex justify-between items-center">

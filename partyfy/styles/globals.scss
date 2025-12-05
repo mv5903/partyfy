@@ -224,10 +224,10 @@ div:not(nav *) {
 
   @keyframes shimmer {
     0% {
-      background-position: -1000px 0;
+      background-position: -500px 0;
     }
     100% {
-      background-position: 1000px 0;
+      background-position: 500px 0;
     }
   }
 
@@ -239,6 +239,6 @@ div:not(nav *) {
       rgba(255, 255, 255, 0) 100%
     );
     background-size: 1000px 100%;
-    animation: shimmer 2s infinite;
+    animation: shimmer 1s infinite;
   }
 }

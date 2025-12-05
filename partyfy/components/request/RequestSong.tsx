@@ -21,6 +21,7 @@ import PromotionalHeader from "../misc/PromotionalHeader";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
+import { ScrollingSyncProvider } from "@/contexts/ScrollingSyncContext";
 // Using native title tooltip instead of reactstrap Tooltip to avoid requiring a target prop.
 
 const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession, setShowFriendInTopBar, setQueueUsage: setParentQueueUsage } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function, setShowFriendInTopBar?: (show: boolean) => void, setQueueUsage?: (queueUsage: any) => void }) => {
@@ -510,7 +511,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                                 </TabsContent>
                             }
                             <TabsContent value={RequestPageView.TheirSession.toString()} className="w-full">
-                                <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />
+                                <ScrollingSyncProvider>
+                                    <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />
+                                </ScrollingSyncProvider>
                             </TabsContent>
                         </Tabs>
                     </div>

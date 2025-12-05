@@ -1,15 +1,30 @@
 import { randomBytes } from 'crypto';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { useScrollingSync } from '@/contexts/ScrollingSyncContext';
 
 // memo is used to prevent re-rendering of the component if the props are the same (song title doesn't change.), otherwise, the animation will keep restarting.
-const ScrollingText = memo(({ text } : {text: string }) => {
+const ScrollingText = memo(({ text, className } : {text: string, className?: string }) => {
   const textRef = useRef(null);
   const containerRef = useRef(null);
   const [scrollDistance, setScrollDistance] = useState(0);
   const [uniqueId] = useState(() => randomBytes(16).toString('hex'));
+  const { cycleId, maxDuration, registerDuration, unregisterDuration } = useScrollingSync();
   const fixedDelay = 2; // delay before and after scrolling
-  const scrollSpeed = 30; // scrolling speed in pixels per second
-  const minDuration = 5; // minimum total duration in seconds
+  const scrollSpeed = 30; // pixels per second
+  const maxAllowedDuration = 20; // maximum duration to prevent text from scrolling too slowly
+
+  const myRequiredDuration = useMemo(() => {
+    if (scrollDistance === 0) return 7; // minimum duration when no scrolling needed
+    const scrollTime = scrollDistance / scrollSpeed;
+    const calculatedDuration = scrollTime + 2 * fixedDelay;
+    // Cap at maxAllowedDuration - very long text will scroll faster
+    return Math.min(calculatedDuration, maxAllowedDuration);
+  }, [scrollDistance]);
+
+  useEffect(() => {
+    registerDuration(uniqueId, myRequiredDuration);
+    return () => unregisterDuration(uniqueId);
+  }, [myRequiredDuration, uniqueId, registerDuration, unregisterDuration]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -28,25 +43,22 @@ const ScrollingText = memo(({ text } : {text: string }) => {
   }, [text]);
 
   let shouldScroll = scrollDistance > 0;
-  const scrollDuration = scrollDistance / scrollSpeed;
-  const calculatedDuration = scrollDuration + 2 * fixedDelay; // total duration including fixed delays
-  const totalDuration = Math.max(calculatedDuration, minDuration); // enforce the minimum duration
-  const delayPercentage = (fixedDelay / totalDuration) * 100;
+  const delayPercentage = (fixedDelay / maxDuration) * 100;
 
   return (
-    <div ref={containerRef} style={{ overflow: 'hidden', width: '100%', position: 'relative'}}>
+    <div ref={containerRef} className={`overflow-hidden relative ${className}`}>
       {shouldScroll && (
         <style>{`
-        @keyframes dynamicMarquee${uniqueId} {
+        @keyframes dynamicMarquee${uniqueId}-${cycleId} {
           0%, ${delayPercentage}% { transform: translateX(0); }
           ${100 - delayPercentage}%, 100% { transform: translateX(-${scrollDistance}px); }
         }
-        .animate-marquee${uniqueId} {
-          animation: dynamicMarquee${uniqueId} ${totalDuration}s linear infinite;
+        .animate-marquee${uniqueId}-${cycleId} {
+          animation: dynamicMarquee${uniqueId}-${cycleId} ${maxDuration}s linear infinite;
         }
         `}</style>
       )}
-      <div ref={textRef} className={`whitespace-nowrap ${shouldScroll ? `animate-marquee${uniqueId}` : ''}`}>
+      <div ref={textRef} className={`whitespace-nowrap ${shouldScroll ? `animate-marquee${uniqueId}-${cycleId}` : ''}`}>
         {text}
       </div>
     </div>
