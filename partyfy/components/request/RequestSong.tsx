@@ -5,7 +5,6 @@ import { TiArrowBack } from "react-icons/ti";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
 import { useAlert } from "@/hooks/useAlert";
-import { useNavigationLoader } from "@/hooks/useNavigationLoader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -33,7 +32,6 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     }
 
     const alert = useAlert();
-    const { startLoading, stopLoading } = useNavigationLoader();
     const { user } = useContext(UserContext);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -180,12 +178,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     // Handle loading state with navigation loader
     useEffect(() => {
-        if (!friendSpotifyAuth) {
-            startLoading();
-        } else {
-            stopLoading();
-        }
-    }, [friendSpotifyAuth, startLoading, stopLoading]);
+    }, [friendSpotifyAuth]);
 
     // Sync queueUsage to parent component
     useEffect(() => {

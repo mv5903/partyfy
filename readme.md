@@ -20,11 +20,11 @@ When linking a Spotify free account, functionality is limited (I have no control
 - Friends of a free account user cannot add songs to the queue.
 - Friends of a free account user cannot see the queue.
 
-### Limitations
-Unfortunately, some of the most requested features are currently impossible due to the current version of Spotify's API. They currently do not provide endpoints for the following actions:
+### Other Limitations
+The Spotify API doesn't support:
 1. Deleting an item from the queue
 2. Rearranging items in the queue
-3. Keeping the queue just the queue, not a combination of the queue (which is always at the top, luckily) and items that will play next based on the playlist content is being streamed from.
+3. Separation of queue vs up next
 
 ### Stack
 - Frontend: React with Typescript

@@ -103,3 +103,4 @@ iOSInjectionProject/
 *.pbxproj
 
 *.tsbuildinfo
+sw.js.map
