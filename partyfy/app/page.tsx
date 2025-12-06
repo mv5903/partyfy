@@ -1,11 +1,10 @@
 'use client';
 
-import AnchorLink from '@/components/misc/AnchorLink';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Music2, Users, Share2, Smartphone, Sparkles, Zap } from 'lucide-react';
+import { Users, Share2, Zap } from 'lucide-react';
 import { FaToggleOff } from 'react-icons/fa';
 
 export default function LandingPage() {
@@ -46,28 +45,20 @@ export default function LandingPage() {
         <div className='flex flex-col sm:flex-row gap-4'>
           <Button
             className='bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all'
-            size='lg'>
-            <AnchorLink
-              href="/api/auth/signup"
-              className="text-white"
-              tabIndex={0}
-              testId="navbar-signup-desktop"
-              icon={null}>
+            size='lg'
+            asChild>
+            <a href="/api/auth/signup" data-testid="navbar-signup-desktop">
               Sign Up Free
-            </AnchorLink>
+            </a>
           </Button>
           <Button
             className='bg-transparent border-2 border-gray-600 hover:border-gray-400 text-white px-8 py-6 text-lg font-semibold'
             size='lg'
-            variant='outline'>
-            <AnchorLink
-              href="/api/auth/login"
-              className="text-white"
-              tabIndex={0}
-              testId="navbar-login-desktop"
-              icon={null}>
+            variant='outline'
+            asChild>
+            <a href="/api/auth/login" data-testid="navbar-login-desktop">
               Log In
-            </AnchorLink>
+            </a>
           </Button>
         </div>
       </section>
@@ -215,28 +206,20 @@ export default function LandingPage() {
           <div className='flex flex-col sm:flex-row gap-4 justify-center'>
             <Button
               className='bg-green-600 hover:bg-green-700 text-white px-10 py-7 text-xl font-semibold shadow-2xl hover:shadow-green-600/50 transition-all'
-              size='lg'>
-              <AnchorLink
-                href="/api/auth/signup"
-                className="text-white"
-                tabIndex={0}
-                testId="navbar-signup-cta"
-                icon={null}>
+              size='lg'
+              asChild>
+              <a href="/api/auth/signup" data-testid="navbar-signup-cta">
                 Sign Up Free
-              </AnchorLink>
+              </a>
             </Button>
             <Button
               className='bg-transparent border-2 border-gray-600 hover:border-gray-400 text-white px-10 py-7 text-xl font-semibold'
               size='lg'
-              variant='outline'>
-              <AnchorLink
-                href="/api/auth/login"
-                className="text-white"
-                tabIndex={0}
-                testId="navbar-login-cta"
-                icon={null}>
+              variant='outline'
+              asChild>
+              <a href="/api/auth/login" data-testid="navbar-login-cta">
                 Log In
-              </AnchorLink>
+              </a>
             </Button>
           </div>
         </div>

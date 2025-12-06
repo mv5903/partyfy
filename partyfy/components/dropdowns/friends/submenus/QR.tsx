@@ -1,4 +1,3 @@
-import Loading from '@/components/misc/Loading';
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
@@ -6,15 +5,14 @@ import { useEffect, useRef, useState } from 'react';
 import { FaCopy, FaPlus, FaSave, FaTrash } from 'react-icons/fa';
 import QRCode from "react-qr-code";
 import { useAlert } from '@/hooks/useAlert';
-import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsListScreen: Function } ) => {
     const alert = useAlert();
-    const { startLoading, stopLoading } = useNavigationLoader();
     const [qrCodeURL, setQRCodeURL] = useState('');
     const [expirationDate, setExpirationDate] = useState<Date>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const qrRef = useRef(null);
 
@@ -61,8 +59,6 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             date = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
         }
 
-        startLoading();
-
         const response = await fetch('/api/database/sessions', {
             method: 'POST',
             headers: {
@@ -74,7 +70,6 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
         })
         const data = await response.json();
-        stopLoading();
         if (data.name === 'Error creating session') {
             await alert.fire({
                 title: 'Error',
@@ -103,7 +98,6 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
             if (choice.isDismissed) return;
         }
-        startLoading();
         const response = await fetch('/api/database/sessions', {
             method: 'DELETE',
             headers: {
@@ -114,13 +108,12 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
             })
         })
         const data = await response.json();
-        stopLoading();
         setQRCodeURL('');
         setFriendsListScreen(FriendListScreen.QR);
     }
 
     useEffect(() => {
-        startLoading();
+        setIsLoading(true);
         fetch('/api/database/sessions?UserID=' + user.getUserID())
         .then(res => res.json())
         .then(data => {
@@ -130,12 +123,14 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
                 setExpirationDate(new Date(data.expiration_date));
                 setQRCodeURL(`${window.location.origin}/request/@${user.db.Username}?session=${data.session_id}`);
             }
-            stopLoading();
         })
         .catch(err => {
-            stopLoading();
+            // Error handling
+        })
+        .finally(() => {
+            setIsLoading(false);
         });
-    }, [startLoading, stopLoading]);
+    }, []);
 
     useEffect(() => {
         async function checkSessionExpiration() {
@@ -203,32 +198,42 @@ const QR = ({ user, setFriendsListScreen } : { user : PartyfyUser, setFriendsLis
 
     return (
         <div className='text-white'>
-            {qrCodeURL
-            ?
-            <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
-                            <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
-                            {
-                                expirationDate.getFullYear() === 2200
-                                ?
-                                <h4 className='text-stone-400'><i>This session does not expire.</i></h4>
-                                :
-                                <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
-                            }
-                            <div className='w-auto p-2 border-white border-4 rounded-md'>
-                                <QRCode bgColor='transparent' fgColor='white' ref={qrRef} value={qrCodeURL} size={192} />
-                            </div>
-                            <div className='flex gap-2'>
-                                <Button variant='secondary' onClick={() => saveQR()}><FaSave /></Button>
-                                <Button variant='secondary' onClick={() => copyLinkToClipboard()}><FaCopy /></Button>
-                                <Button variant="destructive" onClick={() => deleteSession(true)}><FaTrash /></Button>
-                            </div>
-                        </div>
-            :
-            <div className='w-full flex flex-col place-items-center gap-6'>
-                <h4 className='text-md text-center mt-3 text-white'>You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
-                <Button variant='secondary' onClick={getNewSession}><FaPlus className="mr-2" /> Create Session</Button>
-            </div>
-            }
+            {isLoading ? (
+                <div className='w-full flex flex-col place-items-center gap-6'>
+                    <Skeleton className='h-6 w-3/4 mt-3 bg-stone-700' />
+                    <Skeleton className='h-5 w-1/2 bg-stone-700' />
+                    <Skeleton className='h-52 w-52 bg-stone-700' />
+                    <div className='flex gap-2'>
+                        <Skeleton className='h-10 w-10 bg-stone-700' />
+                        <Skeleton className='h-10 w-10 bg-stone-700' />
+                        <Skeleton className='h-10 w-10 bg-stone-700' />
+                    </div>
+                </div>
+            ) : qrCodeURL ? (
+                <div className='w-full h-full text-center flex flex-col place-items-center justify-start gap-4'>
+                    <h4 className='mt-3 text-white'>Ask your friends to scan this code to join your temporary session.</h4>
+                    {
+                        expirationDate.getFullYear() === 2200
+                        ?
+                        <h4 className='text-stone-400'><i>This session does not expire.</i></h4>
+                        :
+                        <h4 className='text-stone-400'><i>Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</i></h4>
+                    }
+                    <div className='w-auto p-2 border-white border-4 rounded-md'>
+                        <QRCode bgColor='transparent' fgColor='white' ref={qrRef} value={qrCodeURL} size={192} />
+                    </div>
+                    <div className='flex gap-2'>
+                        <Button variant='secondary' onClick={() => saveQR()}><FaSave /></Button>
+                        <Button variant='secondary' onClick={() => copyLinkToClipboard()}><FaCopy /></Button>
+                        <Button variant="destructive" onClick={() => deleteSession(true)}><FaTrash /></Button>
+                    </div>
+                </div>
+            ) : (
+                <div className='w-full flex flex-col place-items-center gap-6'>
+                    <h4 className='text-md text-center mt-3 text-white'>You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account.</h4>
+                    <Button variant='secondary' onClick={getNewSession}><FaPlus className="mr-2" /> Create Session</Button>
+                </div>
+            )}
             <alert.AlertComponent />
         </div>
     )

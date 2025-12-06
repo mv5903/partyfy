@@ -1,17 +1,16 @@
 import { FriendListScreen } from '@/helpers/FriendListScreen';
 import PartyfyUser from '@/helpers/PartyfyUser';
 import { Supabase } from '@/helpers/SupabaseHelper';
-import { useEffect, useState } from 'react';
-import { FaPlus, FaRegTrashAlt, FaTrash, FaTrashAlt } from 'react-icons/fa';
+import { useEffect } from 'react';
+import { FaPlus, FaRegTrashAlt } from 'react-icons/fa';
 import { useAlert } from '@/hooks/useAlert';
-import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useFriendsStore } from '@/stores/useFriendsStore';
 
 const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendListScreen: Function } ) => {
     const alert = useAlert();
-    const { startLoading, stopLoading } = useNavigationLoader();
     // Use Zustand store for friends data
     const { friends, isLoading, fetchFriends } = useFriendsStore();
 
@@ -31,15 +30,6 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
         }
     }, []);
 
-    // Handle loading states with navigation loader
-    useEffect(() => {
-        if (isLoading && friends.length === 0) {
-            startLoading();
-        } else {
-            stopLoading();
-        }
-    }, [isLoading, friends, startLoading, stopLoading]);
-
     async function removeFriend(FriendUserID: string, FriendUsername: string) {
         const result = await alert.fire({
             title: 'Are you sure?',
@@ -51,7 +41,6 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
         });
 
         if (result.isConfirmed) {
-            startLoading();
             const response = await fetch('/api/database/friends', {
                 method: 'DELETE',
                 headers: {
@@ -77,7 +66,6 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                     icon: 'error'
                 });
             }
-            stopLoading();
         }
         fetchFriends(user.getUserID());
     }
@@ -85,27 +73,36 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
     return (
         <div className="text-white">
             <div className='overflow-y-scroll max-h-[65vh]'>
-                    {
-                        friends.length === 0 || !friends
-                        ?
-                        <div>
-                            <h5 className="text-xl text-center text-white">You have no friends yet.</h5>
-                            <div className='flex justify-center'>
-                                <Button className='mt-4 bg-white text-black' onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaPlus className="mr-2" /> Add Friends</Button>
-                            </div>
+                {isLoading && friends.length === 0 ? (
+                    <>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <Card key={i} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                                <div className="flex place-items-center justify-between">
+                                    <Skeleton className="h-5 w-32 bg-stone-700" />
+                                    <Skeleton className="h-8 w-8 bg-stone-700" />
+                                </div>
+                            </Card>
+                        ))}
+                    </>
+                ) : friends.length === 0 || !friends ? (
+                    <div>
+                        <h5 className="text-xl text-center text-white">You have no friends yet.</h5>
+                        <div className='flex justify-center'>
+                            <Button className='mt-4 bg-white text-black' onClick={() => setFriendListScreen(FriendListScreen.Search)}><FaPlus className="mr-2" /> Add Friends</Button>
                         </div>
-                        :
-                        friends.map((user, index) => {
-                            return (
-                                <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
-                                    <div className="flex place-items-center justify-between">
-                                        <h3 className="text-lg text-white">{user.Username}</h3>
-                                        <Button size="sm" variant="ghost" onClick={() => removeFriend(user.UserID, user.Username)}><FaRegTrashAlt className='text-red-500' /></Button>
-                                    </div>
-                                </Card>
-                            );
-                        })
-                }
+                    </div>
+                ) : (
+                    friends.map((user, index) => {
+                        return (
+                            <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                                <div className="flex place-items-center justify-between">
+                                    <h3 className="text-lg text-white">{user.Username}</h3>
+                                    <Button size="sm" variant="ghost" onClick={() => removeFriend(user.UserID, user.Username)}><FaRegTrashAlt className='text-red-500' /></Button>
+                                </div>
+                            </Card>
+                        );
+                    })
+                )}
             </div>
             <alert.AlertComponent />
         </div>

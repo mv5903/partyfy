@@ -2,23 +2,23 @@ import PartyfyUser from '@/helpers/PartyfyUser';
 import { useState } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
 import { useAlert } from '@/hooks/useAlert';
-import { useNavigationLoader } from '@/hooks/useNavigationLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Search = ({ user } : { user : PartyfyUser } ) => {
     const alert = useAlert();
-    const { startLoading, stopLoading } = useNavigationLoader();
     const [usersReturned, setUsersReturned] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     async function searchUsers(query : string) {
-        startLoading();
         if (query === '') {
-            stopLoading();
             setUsersReturned([]);
+            setIsSearching(false);
             return;
         }
+        setIsSearching(true);
         const response = await fetch('/api/database/friends?Query=' + query + '&action=search&UserID=' + user.getUserID());
         let data = await response.json();
 
@@ -26,8 +26,10 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
         if (data.length > 0) {
             data = data.filter((users : any) => users.UserID != user.getUserID());
             setUsersReturned(data);
+        } else {
+            setUsersReturned([]);
         }
-        stopLoading();
+        setIsSearching(false);
     }
 
     async function sendFriendRequest(FriendUserID: string, FriendUsername: string) {
@@ -40,7 +42,6 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
         });
 
         if (choice.isConfirmed) {
-            startLoading();
             const response = await fetch('/api/database/friends', {
                 method: 'PATCH',
                 headers: {
@@ -52,7 +53,6 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                     action: 'SendFriendRequest'
                 })
             });
-            stopLoading();
             if (response.ok) {
                 await alert.fire({
                     title: 'Success',
@@ -69,16 +69,29 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                 <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
             </div>
             <div>
-                {usersReturned.map((user, index) => {
-                    return (
-                        <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
-                            <div className="flex place-items-center justify-between">
-                                <h5 className="text-lg text-white">{user.Username}</h5>
-                                <Button size="sm" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane /></Button>
-                            </div>
-                        </Card>
-                    );
-                })}
+                {isSearching ? (
+                    <>
+                        {[1, 2, 3].map((i) => (
+                            <Card key={i} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                                <div className="flex place-items-center justify-between">
+                                    <Skeleton className="h-5 w-28 bg-stone-700" />
+                                    <Skeleton className="h-8 w-8 bg-stone-700" />
+                                </div>
+                            </Card>
+                        ))}
+                    </>
+                ) : (
+                    usersReturned.map((user, index) => {
+                        return (
+                            <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                                <div className="flex place-items-center justify-between">
+                                    <h5 className="text-lg text-white">{user.Username}</h5>
+                                    <Button size="sm" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane /></Button>
+                                </div>
+                            </Card>
+                        );
+                    })
+                )}
             </div>
             <alert.AlertComponent />
         </div>

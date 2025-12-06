@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import { FaPaperPlane, FaQrcode, FaSearch, FaUserFriends, FaUserPlus } from 'react-icons/fa';
 import UserContext from '@/providers/UserContext';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,8 @@ import List from './submenus/List';
 import QR from './submenus/QR';
 import Search from './submenus/Search';
 import SentRequests from './submenus/SentRequests';
+import { useFriendRequestsStore } from '@/stores/useFriendRequestsStore';
+import { Supabase } from '@/helpers/SupabaseHelper';
 
 const FriendsMenu = () => {
     const { user } = useContext(UserContext);
@@ -25,6 +27,29 @@ const FriendsMenu = () => {
     const [open, setOpen] = useState(false);
     const [currentScreen, setCurrentScreen] = useState<FriendListScreen>(FriendListScreen.Friends);
     const touchStartY = useRef(0);
+    const { incomingRequests, fetchIncomingRequests } = useFriendRequestsStore();
+    const incomingCount = incomingRequests?.length || 0;
+
+    // Listen for friend request changes in real-time
+    useEffect(() => {
+        if (!user) return;
+
+        // Fetch initial data
+        fetchIncomingRequests(user.getUserID());
+
+        // Subscribe to changes
+        const channel = Supabase
+            .channel('FriendsMenuBadge')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
+                // Refetch incoming requests when any change happens to Friends table
+                fetchIncomingRequests(user.getUserID(), false);
+            })
+            .subscribe();
+
+        return () => {
+            Supabase.channel('FriendsMenuBadge').unsubscribe();
+        };
+    }, [user, fetchIncomingRequests]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStartY.current = e.touches[0].clientY;
@@ -60,8 +85,13 @@ const FriendsMenu = () => {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button className="flex align-center mr-2 cursor-pointer mt-2 rounded-lg shadow-md">
+                <Button className="flex align-center mr-2 cursor-pointer mt-2 rounded-lg shadow-md relative">
                     <FaUserFriends size={30} />
+                    {incomingCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {incomingCount > 9 ? '9+' : incomingCount}
+                        </span>
+                    )}
                 </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[85vh] bg-stone-900 border-stone-900">
@@ -96,9 +126,14 @@ const FriendsMenu = () => {
                             </TabsTrigger>
                             <TabsTrigger
                                 value={FriendListScreen.Requests.toString()}
-                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"
+                                className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300 relative"
                             >
                                 <FaUserPlus size={fontSize} />
+                                {incomingCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                        {incomingCount > 9 ? '9+' : incomingCount}
+                                    </span>
+                                )}
                             </TabsTrigger>
                             <TabsTrigger
                                 value={FriendListScreen.Sent.toString()}

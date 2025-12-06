@@ -52,12 +52,15 @@ export const useFriendRequestsStore = create<FriendRequestsState>((set, get) => 
       return;
     }
 
-    console.log('[FriendRequestsStore] Fetching fresh incoming requests');
+    console.log('[FriendRequestsStore] Fetching fresh incoming requests for userId:', userId);
     set({ isLoadingIncoming: incomingRequests.length === 0 });
 
     try {
       const response = await fetch(`/api/database/friends?UserID=${userId}&action=requests`);
       const data = await response.json();
+
+      console.log('[FriendRequestsStore] Incoming requests API response:', data);
+      console.log('[FriendRequestsStore] Number of incoming requests:', data?.length || 0);
 
       set({
         incomingRequests: data || [],
