@@ -111,7 +111,7 @@ const FriendsMenu = () => {
                         onValueChange={(value) => setCurrentScreen(parseInt(value) as FriendListScreen)}
                         className="w-full flex flex-col h-full"
                     >
-                        <TabsList className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
+                        <TabsList className="grid w-full bg-stone-900 text-white" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
                             <TabsTrigger
                                 value={FriendListScreen.QR.toString()}
                                 className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300"

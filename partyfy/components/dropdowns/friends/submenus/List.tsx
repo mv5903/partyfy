@@ -76,7 +76,7 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                 {isLoading && friends.length === 0 ? (
                     <>
                         {[1, 2, 3, 4, 5].map((i) => (
-                            <Card key={i} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                            <Card key={i} className="p-2 mt-3 bg-stone-900 border-stone-700">
                                 <div className="flex place-items-center justify-between">
                                     <Skeleton className="h-5 w-32 bg-stone-700" />
                                     <Skeleton className="h-8 w-8 bg-stone-700" />
@@ -94,7 +94,7 @@ const List = ({ user, setFriendListScreen } : { user : PartyfyUser, setFriendLis
                 ) : (
                     friends.map((user, index) => {
                         return (
-                            <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                            <Card key={index} className="p-2 mt-3 bg-stone-900 border-stone-700">
                                 <div className="flex place-items-center justify-between">
                                     <h3 className="text-lg text-white">{user.Username}</h3>
                                     <Button size="sm" variant="ghost" onClick={() => removeFriend(user.UserID, user.Username)}><FaRegTrashAlt className='text-red-500' /></Button>

@@ -2,6 +2,7 @@ import { BsGlobe, BsPeopleFill } from "react-icons/bs";
 import { FaExclamationCircle, FaHeart, FaHistory, FaSpotify } from "react-icons/fa";
 import SpotifyLinkBack from "./SpotifyLinkBack";
 import { Card } from "@/components/ui/card";
+import ScrollingText from "./ScrollingText";
 
 interface PlaylistCardProps {
     playlist: any;
@@ -15,12 +16,12 @@ function PlaylistCard({ playlist, onClick }: PlaylistCardProps) {
 
     return (
         <Card
-            className="bg-stone-800 w-full shadow-md rounded-lg border-stone-800 cursor-pointer hover:bg-stone-700 transition-all duration-200 overflow-hidden group"
+            className="bg-stone-900 w-full shadow-md rounded-lg border-stone-800 cursor-pointer hover:bg-stone-700 transition-all duration-200 overflow-hidden group"
             onClick={onClick}
         >
             <div className="p-4 flex flex-col gap-3">
                 {/* Image Section */}
-                <div className="relative w-full aspect-square bg-stone-900overflow-hidden shadow-lg">
+                <div className="relative w-full aspect-square bg-stone-900 overflow-hidden shadow-lg">
                     {playlist.images && playlist.images.length > 0 ? (
                         <img
                             src={playlist.images[0].url}
@@ -49,9 +50,12 @@ function PlaylistCard({ playlist, onClick }: PlaylistCardProps) {
                 {/* Text Section */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-start justify-center gap-2">
-                        <h3 className="text-white font-semibold text-base line-clamp-2 text-center flex-grow">
-                            {playlist.name}
-                        </h3>
+                        <div className="flex-grow min-w-0">
+                            <ScrollingText
+                                text={playlist.name}
+                                className="text-white font-semibold text-base text-center"
+                            />
+                        </div>
                         <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
                             {playlist.collaborative && (
                                 <BsPeopleFill className="text-gray-400" size={14} />
@@ -66,13 +70,16 @@ function PlaylistCard({ playlist, onClick }: PlaylistCardProps) {
                     </div>
 
                     <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <p className="text-gray-400 text-sm line-clamp-1 text-center">
-                            {isLikedSongs ? 'Your Liked Songs' : playlist.owner?.display_name || 'Spotify'}
-                        </p>
+                        <div className="min-w-0 max-w-full">
+                            <ScrollingText
+                                text={isLikedSongs ? 'Your Liked Songs' : playlist.owner?.display_name || 'Spotify'}
+                                className="text-gray-400 text-sm text-center"
+                            />
+                        </div>
                     </div>
 
                     {playlist.tracks?.total !== undefined && (
-                        <p className="text-gray-500 text-xs">
+                        <p className="text-gray-500 text-xs text-center">
                             {playlist.tracks.total} {playlist.tracks.total === 1 ? 'song' : 'songs'}
                         </p>
                     )}

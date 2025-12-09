@@ -66,13 +66,13 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
     return (
         <div className="text-white">
             <div className='flex justify-center w-3/4 mx-auto'>
-                <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-800 border-stone-700 text-white"/>
+                <Input onChange={e => searchUsers(e.target.value)} id="usernameSearch" placeholder="Your friend's username..." type="text" className="bg-stone-900 border-stone-700 text-white"/>
             </div>
             <div>
                 {isSearching ? (
                     <>
                         {[1, 2, 3].map((i) => (
-                            <Card key={i} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                            <Card key={i} className="p-2 mt-3 bg-stone-900 border-stone-700">
                                 <div className="flex place-items-center justify-between">
                                     <Skeleton className="h-5 w-28 bg-stone-700" />
                                     <Skeleton className="h-8 w-8 bg-stone-700" />
@@ -83,7 +83,7 @@ const Search = ({ user } : { user : PartyfyUser } ) => {
                 ) : (
                     usersReturned.map((user, index) => {
                         return (
-                            <Card key={index} className="p-2 mt-3 bg-stone-800 border-stone-700">
+                            <Card key={index} className="p-2 mt-3 bg-stone-900 border-stone-700">
                                 <div className="flex place-items-center justify-between">
                                     <h5 className="text-lg text-white">{user.Username}</h5>
                                     <Button size="sm" onClick={() => sendFriendRequest(user.UserID, user.Username)}><FaPaperPlane /></Button>

@@ -136,7 +136,7 @@ export const useAlert = () => {
           handleCancel();
         }
       }}>
-        <AlertDialogContent className="bg-stone-800 border-stone-700 text-white">
+        <AlertDialogContent className="bg-stone-900 border-stone-700 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center justify-center gap-3 text-xl">
               {config.icon && (

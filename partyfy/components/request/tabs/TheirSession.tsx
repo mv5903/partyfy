@@ -85,15 +85,15 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                             <div className="bg-stone-900 p-2 my-2 flex justify-center w-full rounded-md">
                                 <div className="flex gap-2 w-full">
                                     <div className="flex flex-col justify-center items-center gap-2">
-                                        <div className="w-24 h-24 bg-stone-800 animate-shimmer rounded" />
-                                        <div className="w-20 h-6 bg-stone-800 animate-shimmer rounded" />
+                                        <div className="w-24 h-24 bg-stone-900 animate-shimmer rounded" />
+                                        <div className="w-20 h-6 bg-stone-900 animate-shimmer rounded" />
                                     </div>
                                     <div className="flex flex-col w-full px-2 gap-2">
-                                        <div className="h-5 bg-stone-800 animate-shimmer rounded w-3/4" />
-                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-1/2" />
-                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-2/3" />
-                                        <div className="h-4 bg-stone-800 animate-shimmer rounded w-full" />
-                                        <div className="h-2 bg-stone-800 animate-shimmer rounded w-full" />
+                                        <div className="h-5 bg-stone-900 animate-shimmer rounded w-3/4" />
+                                        <div className="h-4 bg-stone-900 animate-shimmer rounded w-1/2" />
+                                        <div className="h-4 bg-stone-900 animate-shimmer rounded w-2/3" />
+                                        <div className="h-4 bg-stone-900 animate-shimmer rounded w-full" />
+                                        <div className="h-2 bg-stone-900 animate-shimmer rounded w-full" />
                                     </div>
                                 </div>
                             </div>
@@ -173,76 +173,76 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                                                 { nowPlaying?.repeat_state == "off" &&
                                                     <Popover>
                                                         <PopoverTrigger><TbRepeatOff /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat is off</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Repeat is off</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.repeat_state == "context" &&
                                                     <Popover>
                                                         <PopoverTrigger><TbRepeat /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat context</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Repeat context</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.repeat_state == "track" &&
                                                     <Popover>
                                                         <PopoverTrigger><TbRepeatOnce /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Repeat track</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Repeat track</PopoverContent>
                                                     </Popover>
                                                 }
 
                                                 { nowPlaying?.shuffle_state == true &&
                                                     <Popover>
                                                         <PopoverTrigger><TbArrowsShuffle /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Shuffle is on</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Shuffle is on</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.shuffle_state == false &&
                                                     <Popover>
                                                         <PopoverTrigger><TbArrowsShuffle className="text-gray-400" /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Shuffle is off</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Shuffle is off</PopoverContent>
                                                     </Popover>
                                                 }
 
                                                 { nowPlaying?.device?.type == "Smartphone" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdSmartphone /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on smartphone</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing on smartphone</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.device?.type == "Speaker" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdSpeaker /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on speaker</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing on speaker</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.device?.type == "Computer" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdComputer /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing on computer</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing on computer</PopoverContent>
                                                     </Popover>
                                                 }
 
                                                 { nowPlaying?.context?.type == "artist" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdPerson /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from artist</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing from artist</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.context?.type == "playlist" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdList /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from playlist</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing from playlist</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.context?.type == "album" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdAlbum /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from album</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing from album</PopoverContent>
                                                     </Popover>
                                                 }
                                                 { nowPlaying?.context?.type == "show" &&
                                                     <Popover>
                                                         <PopoverTrigger><MdPodcasts /></PopoverTrigger>
-                                                        <PopoverContent className="bg-stone-800 border-0 text-white w-auto whitespace-nowrap">Playing from podcast</PopoverContent>
+                                                        <PopoverContent className="bg-stone-900 border-0 text-white w-auto whitespace-nowrap">Playing from podcast</PopoverContent>
                                                     </Popover>
                                                 }
                                             </div>
@@ -292,13 +292,13 @@ const TheirSession = ({ friendSpotifyAuth, friend } : { friendSpotifyAuth: Spoti
                             [...Array(5)].map((_, i) => (
                                 <div key={i}>
                                     <div className="flex justify-between w-full px-0 gap-1">
-                                        <div className="h-6 w-6 bg-stone-800 animate-shimmer rounded" />
-                                        <div className="w-12 h-12 bg-stone-800 animate-shimmer rounded me-2" />
+                                        <div className="h-6 w-6 bg-stone-900 animate-shimmer rounded" />
+                                        <div className="w-12 h-12 bg-stone-900 animate-shimmer rounded me-2" />
                                         <div className="w-2/3 flex flex-col gap-2">
-                                            <div className="h-5 bg-stone-800 animate-shimmer rounded w-3/4" />
-                                            <div className="h-4 bg-stone-800 animate-shimmer rounded w-1/2" />
+                                            <div className="h-5 bg-stone-900 animate-shimmer rounded w-3/4" />
+                                            <div className="h-4 bg-stone-900 animate-shimmer rounded w-1/2" />
                                         </div>
-                                        <div className="w-6 h-6 bg-stone-800 animate-shimmer rounded" />
+                                        <div className="w-6 h-6 bg-stone-900 animate-shimmer rounded" />
                                     </div>
                                     {i < 4 && <Separator className="my-2 bg-stone-600" />}
                                 </div>

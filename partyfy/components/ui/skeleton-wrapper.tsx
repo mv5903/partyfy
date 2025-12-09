@@ -35,7 +35,7 @@ export function SkeletonWrapper({ isLoading, children, className, skeletonClassN
     <div
       className={cn(
         skeletonClassName || childClassName,
-        'bg-stone-800 animate-shimmer',
+        'bg-stone-900 animate-shimmer',
         className
       )}
       style={children.props.style}

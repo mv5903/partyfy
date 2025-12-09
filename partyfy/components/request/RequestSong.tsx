@@ -46,12 +46,14 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     // Callback ref for the tabs element to detect when it's hidden
     const [tabsElement, setTabsElement] = useState<HTMLDivElement | null>(null);
 
-    // Get tab from URL params, default to Search
+    // Get tab from URL params, default to YourPlaylists for friends, Search for temporary sessions
     const tabParam = searchParams.get('tab');
     const getRequestPageView = () => {
         if (tabParam === 'session') return RequestPageView.TheirSession;
+        if (tabParam === 'search') return RequestPageView.Search;
         if (tabParam === 'playlists' && !temporarySession) return RequestPageView.YourPlaylists;
-        return RequestPageView.Search;
+        // Default: YourPlaylists for friends, Search for temporary sessions
+        return temporarySession ? RequestPageView.Search : RequestPageView.YourPlaylists;
     };
     const requestPageView = getRequestPageView();
 
@@ -439,6 +441,18 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     return (
         <div className="text-white">
+            {!friendSpotifyAuth && (
+                <div className="flex flex-col items-center justify-center h-full">
+                    <h3 className="text-xl pt-2 mb-4 text-white">To <span><strong>{currentFriend?.Username}</strong></span></h3>
+                    <div className="w-full px-2">
+                        <div className="grid grid-cols-2 gap-3">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-48" />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             {friendSpotifyAuth && (
                 <>
                     <div className="flex items-center justify-center place-content-center p-2 mb-2">
@@ -478,7 +492,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                                             <FaQuestionCircle className="text-stone-400" size={16} />
                                         </div>
                                     </PopoverTrigger>
-                                    <PopoverContent className="bg-stone-800 text-white text-sm border-0 text-center me-2">
+                                    <PopoverContent className="bg-stone-900 text-white text-sm border-0 text-center me-2">
                                         <p>{currentFriend.Username} has a rolling queue limit of <strong>{queueUsage.maxQueueCount} item every {queueUsage.intervalValue + " " + queueUsage.intervalUnit + (queueUsage.intervalValue > 1 ? "s" : "")}</strong> for their session.</p>
                                     </PopoverContent>
                                 </Popover>
@@ -487,7 +501,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     <div className="flex flex-col items-center">
                         <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className={`w-full`}>
-                            <TabsList ref={setTabsElement} className="grid w-full bg-stone-800 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
+                            <TabsList ref={setTabsElement} className="grid w-full bg-stone-900 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
                                 <TabsTrigger value={RequestPageView.Search.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
                                     <FaSearch size={10} />Search
                                 </TabsTrigger>
@@ -507,7 +521,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                             {
                                 !temporarySession &&
                                 <TabsContent value={RequestPageView.YourPlaylists.toString()} className="w-full">
-                                    <YourPlaylists you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />
+                                    <YourPlaylists key={currentFriend?.UserID} you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />
                                 </TabsContent>
                             }
                             <TabsContent value={RequestPageView.TheirSession.toString()} className="w-full">

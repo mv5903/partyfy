@@ -193,7 +193,7 @@ const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
             <div className="my-4">
                 <div className="text-center">
                     <h3 className="text-2xl font-semibold text-white mb-3">Commercial Options</h3>
-                    <Card className="p-3 w-[90%] mx-auto bg-stone-800 border-stone-700">
+                    <Card className="p-3 w-[90%] mx-auto bg-stone-900 border-stone-700">
                         <CardContent className="pt-6">
                             <div className="flex justify-center gap-8 items-center">
                                 <Label htmlFor="queue-limit-toggle" className="text-xl font-semibold text-white mb-0">Queue Limit</Label>
@@ -328,18 +328,10 @@ const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
                                         <button
                                             key={index}
                                             onClick={() => {
-                                                // Navigate immediately with view transition for smooth UX
-                                                if (document.startViewTransition) {
-                                                    document.startViewTransition(() => {
-                                                        startTransition(() => {
-                                                            router.push(`/request/@${friend.Username}`);
-                                                        });
-                                                    });
-                                                } else {
-                                                    startTransition(() => {
-                                                        router.push(`/request/@${friend.Username}`);
-                                                    });
-                                                }
+                                                // Navigate with startTransition for smooth UX
+                                                startTransition(() => {
+                                                    router.push(`/request/@${friend.Username}`);
+                                                });
                                             }}
                                             onMouseEnter={() => {
                                                 // Prefetch on hover for instant navigation
@@ -349,7 +341,7 @@ const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
                                             }}
                                             disabled={!friendIsActive || !isQueueEnabled || isPending}
                                             className={`w-full text-left h-10 px-3 py-2 rounded-lg transition-all ease-in-out duration-150 text-white active:scale-[0.98]
-                                                        ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600 active:bg-stone-500' : 'bg-stone-800'}
+                                                        ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600 active:bg-stone-500' : 'bg-stone-900'}
                                                         ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
                                         >
                                             <div className="flex justify-between items-center">

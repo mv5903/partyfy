@@ -10,6 +10,7 @@ import { CONSTANTS } from "@/assets/Constants";
 import { OAuthRedirect } from "@/helpers/OAuthRedirect";
 import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import ScrollingText from "@/components/misc/ScrollingText";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import UserContext from '@/providers/UserContext';
@@ -38,6 +39,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
     const [nextURL, setNextURL] = useState(null);
     const [loadingSongs, setLoadingSongs] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const { user } = useContext(UserContext);
 
@@ -170,10 +172,22 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             });
 
             setPlaylists(playlistsCopy);
+
+            // Show skeleton for minimum 400ms to provide loading feedback
+            setTimeout(() => {
+                setIsInitialLoad(false);
+            }, 400);
         }
     }, [cachedPlaylists]);
 
-    const showPlaylistsSkeleton = playlistsLoading && playlists.length === 0;
+    // Stop showing skeleton once loading completes (even if no playlists)
+    useEffect(() => {
+        if (!playlistsLoading && isInitialLoad) {
+            setIsInitialLoad(false);
+        }
+    }, [playlistsLoading, isInitialLoad]);
+
+    const showPlaylistsSkeleton = isInitialLoad || (playlistsLoading && playlists.length === 0);
 
     return (
         <div className="h-full flex flex-col overflow-hidden">
@@ -184,7 +198,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0">
                         <div className="grid grid-cols-2 gap-3">
                             {[...Array(6)].map((_, i) => (
-                                <div key={i} className="bg-stone-800 animate-shimmer rounded-lg h-48" />
+                                <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-48" />
                             ))}
                         </div>
                     </div>
@@ -227,30 +241,37 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 {
                     activePlaylist &&
                     <div className="w-full h-full flex flex-col items-center overflow-hidden">
-                        <div className="flex justify-center items-center mt-4 flex-shrink-0">
-                            <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
-                            <Button onClick={() => setActivePlaylist(null)}><TiArrowBack size={30}/></Button>
+                        <div className="flex justify-center items-center mt-4 flex-shrink-0 gap-4 min-w-0 w-full px-4">
+                            <div className="flex-grow min-w-0">
+                                <ScrollingText
+                                    text={activePlaylist.name}
+                                    className="text-center text-2xl font-bold"
+                                />
+                            </div>
+                            <Button onClick={() => setActivePlaylist(null)} className="flex-shrink-0"><TiArrowBack size={30}/></Button>
                         </div>
                         <h6 className="text-sm text-gray-400 my-2 cursor-pointer flex-shrink-0"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
                             loadingSongs &&
-                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 px-3 min-h-0">
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 px-2 min-h-0">
                                 {[...Array(8)].map((_, i) => (
-                                    <div key={i} className="bg-stone-800 animate-shimmer rounded-lg h-16" />
+                                    <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-16" />
                                 ))}
                             </div>
                         }
                         {
                             !loadingSongs && activePlaylist.items.length > 0 &&
-                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex justify-center min-h-0" id="playlistItems">
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-2" id="playlistItems">
                                  <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.tags, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
                                     hasMore={activePlaylist.next != null}
-                                    loader={<Loading />} 
+                                    loader={<Loading />}
                                     endMessage={<h6 className="text-center mt-2">You've reached the end.</h6>}
                                     scrollableTarget="playlistItems"
+                                    className="w-full"
                                 >
+                                    <div className="flex flex-col gap-2 w-full">
                                     {
                                         activePlaylist.items.map((item: any, key: number) => {
                                             let result = activePlaylist.id == 'recentSongs' ? item : item.track;
@@ -269,16 +290,10 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                 btnColorClass: 'btn-success w-full',
                                             }
 
-                                            let content =   
-                                            <>
-                                                <ListContentCard key={key} {...listContentCardProps} />
-                                                { key != activePlaylist.items.length - 1 && <div className="mb-3"></div> }
-                                            </>;
-
-
-                                            return content;
+                                            return <ListContentCard key={key} {...listContentCardProps} />;
                                         })
                                     }
+                                    </div>
                                 </InfiniteScroll>
                             </div>
                         }

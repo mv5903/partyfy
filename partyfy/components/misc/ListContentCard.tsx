@@ -1,6 +1,7 @@
 import { BsExplicitFill } from "react-icons/bs";
 import SpotifyLinkBack from "./SpotifyLinkBack";
 import { Card } from "@/components/ui/card";
+import ScrollingText from "./ScrollingText";
 
 interface ListContentCardProps {
     imgSrc: string | JSX.Element;
@@ -28,35 +29,37 @@ function ListContentCard(props: ListContentCardProps) {
 
     return (
         <Card
-            className="bg-stone-800 border-stone-800 mx-auto w-[92vw] cursor-pointer transition-colors group mt-3"
+            className="bg-stone-900 border-stone-700 cursor-pointer hover:bg-stone-700 hover:border-stone-600 transition-all duration-200"
             onClick={btnOnClick}
         >
-            <div className="flex items-center justify-between p-4 gap-4 w-full">
+            <div className="flex items-center justify-between p-3 gap-2 w-full">
                 {
                     typeof imgSrc === 'string'
                     ?
-                    <img src={imgSrc} className="w-16 h-16 object-cover" alt="Thumbnail" />
+                    <img src={imgSrc} className="w-12 h-12 object-cover rounded flex-shrink-0" alt="Thumbnail" />
                     :
-                    <div className="w-16 h-16 overflow-hidden">
+                    <div className="w-12 h-12 overflow-hidden rounded flex-shrink-0">
                         {imgSrc}
                     </div>
                 }
                 <div className="flex-grow min-w-0">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-start gap-2 w-full min-w-0">
                         {
                             typeof primaryContent === 'string'
                             ?
-                            <h4 className="text-white font-medium text-base line-clamp-1">{primaryContent}</h4>
+                            <ScrollingText text={primaryContent} className="text-white font-semibold text-base flex-1 min-w-0" />
                             :
-                            <div className="text-white font-medium text-base line-clamp-1">{primaryContent}</div>
+                            <div className="text-white font-semibold text-base line-clamp-1 flex-1 min-w-0">{primaryContent}</div>
                         }
                         {explicit && <BsExplicitFill className="text-gray-400 flex-shrink-0" size={16} />}
                     </div>
-                    <p className="text-sm text-gray-400 line-clamp-1 mt-1.5">{secondaryContent}</p>
+                    <div className="min-w-0">
+                        <ScrollingText text={secondaryContent} className="text-sm text-gray-400 italic" />
+                    </div>
                 </div>
                 { spotifyLinkBack &&
                     <div
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="flex-shrink-0"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <SpotifyLinkBack link={spotifyLinkBack} />
