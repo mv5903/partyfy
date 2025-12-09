@@ -1,6 +1,7 @@
 import Database from '@/database/db';
 import UserOptions from '@/prisma/UserOptions';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { winston } from '@/logs/winston';
 
 type Data = {
   name: string
@@ -39,7 +40,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
     // Get a user's profile
     if (req.method === 'GET') {
-        let data = await database.getUser(req.query.UserID as string) as any;
+        let data;
+        if (req.query.Username) {
+            // Fetch by username
+            data = await database.getUserByUsername(req.query.Username as string) as any;
+        } else {
+            // Fetch by UserID (backward compatibility)
+            data = await database.getUser(req.query.UserID as string) as any;
+        }
         res.status(200).json(data);
         return;
     }

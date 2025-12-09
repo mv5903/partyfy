@@ -1,6 +1,7 @@
 import UserContext from '@/providers/UserContext';
 import { useContext, useEffect, useState } from 'react';
 import ClearTable from './ClearTable';
+import { Button } from '@/components/ui/button';
 
 const Options = () => {
     const { user } = useContext(UserContext);
@@ -38,17 +39,23 @@ const Options = () => {
 
     return (
         <>
-            <button className="btn btn-primary" onClick={() => setShowOptions(true)}>Options</button>
+            <Button onClick={() => setShowOptions(true)}>Options</Button>
             {
                 showOptions &&
                 <div>
                     <div>
                         <h3>Options</h3>
                         <div className="d-flex">
-                            <ClearTable table={'Queue'} />  
+                            <ClearTable table={'Queue'} />
                             <ClearTable table={'Recently Played'} />
                         </div>
-                        <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues"}</button>
+                        <Button
+                            variant={isUnattendedQueuesEnabled ? "success" : "warning"}
+                            className="m-2"
+                            onClick={() => unattendedQueues()}
+                        >
+                            {isUnattendedQueuesEnabled ? "Unattended Queues Enabled. Disable..." : "Allow Unattended Queues"}
+                        </Button>
                     </div>
                 </div>
             }

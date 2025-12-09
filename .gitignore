@@ -101,3 +101,6 @@ iOSInjectionProject/
 *.xcsettings
 *.xcscheme
 *.pbxproj
+
+*.tsbuildinfo
+sw.js.map

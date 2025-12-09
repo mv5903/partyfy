@@ -5,83 +5,72 @@ import { getArtistList } from "@/helpers/SpotifyDataParser";
 import { Supabase } from "@/helpers/SupabaseHelper";
 import { RollingPeriod } from "@/prisma/UserOptions";
 import UserContext from '@/providers/UserContext';
-import { Users } from "@prisma/client";
-import { useContext, useEffect, useState } from "react";
-import { FaCog, FaSave } from "react-icons/fa";
+import { useContext, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { FaCog } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
-import Loading from "../misc/Loading";
-import LoadingDots from "../misc/LoadingDots";
+import { useAlert } from "@/hooks/useAlert";
 import ScrollingText from "../misc/ScrollingText";
-import RequestSong from "./RequestSong";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useFriendsStore } from "@/stores/useFriendsStore";
+import { useUnattendedQueuesStore } from "@/stores/useUnattendedQueuesStore";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
 
-const SelectFriend = () => {
+const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
     const { user } = useContext(UserContext);
-
-    const [isUnattendedQueuesEnabled, setIsUnattendedQueuesEnabled] = useState(null);
-    const [friendsList, setFriendsList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentFriend, setCurrentFriend] = useState<Users>(null);
-    const [uqLoading, setUQLoading] = useState(false);
-    const [spotifyStatuses, setSpotifyStatuses] = useState<any>([]);
-    const [refreshingFriendsLoading, setRefreshingFriendsLoading] = useState(false);
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const alert = useAlert();
+    const { friends: friendsList, spotifyStatuses, isLoading: loading, isRefreshing: refreshingFriendsLoading, fetchFriends, updateSpotifyStatuses } = useFriendsStore();
+    const { isEnabled: isUnattendedQueuesEnabled, isLoading: uqLoading, fetchStatus: fetchUQStatus, updateStatus: updateUQStatus } = useUnattendedQueuesStore();
     const [commercialOptionsVisible, setCommercialOptionsVisible] = useState(false);
     const [originalOptions, setOriginalOptions] = useState(null);
     const [hadQueueLimit, setHadQueueLimit] = useState(false);
 
-    async function fetchFriends() {
-        setRefreshingFriendsLoading(true);
-        if (currentFriend) return;
-        const response = await fetch('/api/database/friends?UserID=' + user.getUserID())
-        let data = await response.json();
-        // Show users who have functionality enabled first
-        data = data.sort((a: any, b: any) => b.UnattendedQueues - a.UnattendedQueues);
-        setRefreshingFriendsLoading(false);
-        setLoading(false);
-        setFriendsList(data);
-    }
-    async function fetchUQStatus() {
-        if (currentFriend) return;
-        const response = await fetch('/api/database/unattendedqueues?UserID=' + user.getUserID());
-        const data = await response.json();
-        if (data) {
-            setIsUnattendedQueuesEnabled(data.UnattendedQueues ?? false);
-        }
-    }
-
     async function getFriendPlayingStatus() {
+        if (friendsList.length === 0) return;
+
         try {
             // Fetch the status for each friend
             const statusPromises = friendsList.map(async friend => {
                 let spotifyAuth = new SpotifyAuth(friend.RefreshToken);
                 let accessToken = await spotifyAuth.getAccessToken();
                 if (!accessToken) return null;
-    
+
                 const response = await fetch(`/api/spotify/nowplaying?access_token=${accessToken}`);
                 if (response.status === 204) return null;
-    
+
                 const data = await response.json();
                 return data && data.is_playing ? { isActive: true, data, UserID: friend.UserID } : null;
             });
-    
+
             // Wait for all promises to resolve and filter out nulls
             const results = (await Promise.all(statusPromises)).filter(status => status !== null);
-    
-            // Update the state with the new statuses
-            setSpotifyStatuses(results);
+
+            // Update the Zustand store with the new statuses
+            updateSpotifyStatuses(results);
         } catch (error) {
             console.error('Error fetching playing statuses:', error);
         }
     }
 
     useEffect(() => {
+        if (isLoading || !user) return;
         BackgroundEffectColor.removeBackgroundEffectColor();
         getFriendPlayingStatus();
-        const interval = setInterval(getFriendPlayingStatus, 10000);
+        // Reduced from 10s to 15s for better performance
+        const interval = setInterval(getFriendPlayingStatus, 5000);
         return () => clearInterval(interval);
-    }, [currentFriend, friendsList]);
+    }, [friendsList, isLoading, user]);
+
 
     useEffect(() => {
+        if (isLoading || !user) return;
         fetch('api/database/users?UserID=' + user.getUserID())
             .then(response => response.json())
             .then(data => {
@@ -104,210 +93,162 @@ const SelectFriend = () => {
 
                 }
             });
-    }, [commercialOptionsVisible]);     
+    }, [commercialOptionsVisible, isLoading, user]);     
     
 
     useEffect(() => {
-        fetchFriends();
-        fetchUQStatus();
+        if (isLoading || !user) return;
+        fetchFriends(user.getUserID());
+        fetchUQStatus(user.getUserID());
 
         Supabase
             .channel('RequestPage')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
-                fetchFriends();
-                fetchUQStatus();
+                fetchFriends(user.getUserID(), false);
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
-                fetchFriends();
-                fetchUQStatus();
+                if (payload.new?.Username == user.db.Username) return; // Skip if the change is for the current user to avoid unnecessary fetch
+                fetchFriends(user.getUserID(), false);
             })
             .subscribe();
 
         return () => {
             Supabase.channel('RequestPage').unsubscribe();
         }
-    }, []);
+    }, [isLoading, user]);
 
     async function unattendedQueues() {
-        setUQLoading(true);
-        const response = await fetch('/api/database/unattendedqueues', {
-            method: "PATCH",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                UserID: user.getUserID(),
-                enable: !isUnattendedQueuesEnabled
-            })
-        });
-        setUQLoading(false);
-        if (response.ok) {
-            setIsUnattendedQueuesEnabled(!isUnattendedQueuesEnabled);
-        }
+        await updateUQStatus(user.getUserID(), !isUnattendedQueuesEnabled);
     }
 
     const [maxQueueCount, setMaxQueueCount] = useState(5);
     const [intervalValue, setIntervalValue] = useState(1);
     const [intervalUnit, setIntervalUnit] = useState<RollingPeriod>(RollingPeriod.HOUR);
     const [queueLimitEnabled, setQueueLimitEnabled] = useState(false);
-    
-    if (commercialOptionsVisible) {
-        const saveCommercialOptions = () => {
-            // Save the commercial options
-            if (queueLimitEnabled && maxQueueCount < 1 || intervalValue < 1) {
-                Swal.fire({
+
+    const saveCommercialOptions = async (silent = false) => {
+        // Save the commercial options
+        if (queueLimitEnabled && (maxQueueCount < 1 || intervalValue < 1)) {
+            if (!silent) {
+                await alert.fire({
                     title: 'Error!',
                     text: 'Please enter a value greater than 0 for both fields.',
                     icon: 'error'
                 });
-                return;
             }
-            
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will save your selected options.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save it!',
-                cancelButtonText: 'No, cancel!',
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Saving...',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    const response = await fetch('/api/database/users', {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            UserID: user.getUserID(),
-                            setOptions: 
-                                queueLimitEnabled === true
-                                ?
-                                JSON.stringify({
-                                    queueLimitTimeRestriction: {
-                                        maxQueueCount,
-                                        intervalValue,
-                                        intervalUnit
-                                    }
-                                })
-                                :
-                                JSON.stringify({})
-                        })
-                    });
-                    if (response.ok) {
-                        Swal.fire({
-                            title: 'Saved!',
-                            text: 'Your commercial options have been saved.',
-                            icon: 'success'
-                        });
-                        setHadQueueLimit(queueLimitEnabled);
-                        if (queueLimitEnabled) {
-                            setOriginalOptions({
-                                queueLimitTimeRestriction: {
-                                    maxQueueCount,
-                                    intervalValue,
-                                    intervalUnit
-                                }
-                            })
-                        }
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'There was an error saving your commercial options.',
-                            icon: 'error'
-                        });
-                    }
-                }
-            
-            })
+            return false;
         }
 
+        const response = await fetch('/api/database/users', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                UserID: user.getUserID(),
+                setOptions:
+                    queueLimitEnabled === true
+                    ?
+                    JSON.stringify({
+                        queueLimitTimeRestriction: {
+                            maxQueueCount,
+                            intervalValue,
+                            intervalUnit
+                        }
+                    })
+                    :
+                    JSON.stringify({})
+            })
+        });
 
+        if (response.ok) {
+            setHadQueueLimit(queueLimitEnabled);
+            if (queueLimitEnabled) {
+                setOriginalOptions({
+                    queueLimitTimeRestriction: {
+                        maxQueueCount,
+                        intervalValue,
+                        intervalUnit
+                    }
+                })
+            }
+            return true;
+        } else {
+            if (!silent) {
+                await alert.fire({
+                    title: 'Error!',
+                    text: 'There was an error saving your commercial options.',
+                    icon: 'error'
+                });
+            }
+            return false;
+        }
+    };
+
+    // Show skeleton during initial page load OR while data is loading
+    const showSkeleton = isLoading || (loading && friendsList.length === 0) || isUnattendedQueuesEnabled === null;
+
+    if (commercialOptionsVisible) {
         return (
             <div className="my-4">
                 <div className="text-center">
                     <h3 className="text-2xl font-semibold text-white mb-3">Commercial Options</h3>
-                    <div className="card p-3 w-[90%] mx-auto">
-                        <div className="flex justify-center gap-8">
-                            <h4 className="text-xl font-semibold text-white mb-3">Queue Limit</h4>
-                            <input type="checkbox" className="switch switch-lg" checked={queueLimitEnabled} onChange={() => setQueueLimitEnabled(!queueLimitEnabled)} />
-                        </div>
-
-                        <p className="text-gray-400">Set the maximum number of songs that can be added to your queue through Partyfy in a given time period (rolling), via your friends or the QR code method.</p>
-                        {/* <p className="text-gray-400">This functionality is not guranteed if someone queues using a private browser window without an account.</p> */}
-                        <div className={`${queueLimitEnabled === false && 'blur-sm'}`}>
-                            <div>
-                                <label className="block text-white mt-4 mb-2">Maximum Songs</label>
-                                <input minLength={1} required type="number" className="input" value={maxQueueCount} onChange={e => setMaxQueueCount((e as any).target.value)} />
+                    <Card className="p-3 w-[90%] mx-auto bg-stone-900 border-stone-700">
+                        <CardContent className="pt-6">
+                            <div className="flex justify-center gap-8 items-center">
+                                <Label htmlFor="queue-limit-toggle" className="text-xl font-semibold text-white mb-0">Queue Limit</Label>
+                                <Switch id="queue-limit-toggle" checked={queueLimitEnabled} onCheckedChange={setQueueLimitEnabled} className="scale-125" />
                             </div>
-                            <div>
-                                <label className="block text-white mt-4 mb-2">Per Time Period of</label>
-                                <div className="flex justify-around">
-                                    <input minLength={1} required type="number" className="input" value={intervalValue} onChange={e => setIntervalValue((e as any).target.value)} />
-                                    <select onChange={e => setIntervalUnit((e as any).target.value)} value={intervalUnit} className="input">
-                                        <option value="minute">Minute(s)</option>
-                                        <option value="hour">Hour(s)</option>
-                                        <option value="day">Day(s)</option>
-                                        <option value="week">Week(s)</option>
-                                        <option value="month">Month(s)</option>
-                                        <option value="year">Year(s)</option>
-                                    </select>
+
+                            <p className="text-gray-400 mt-4">Set the maximum number of songs that can be added to your queue through Partyfy in a given time period (rolling), via your friends or the QR code method.</p>
+                            {/* <p className="text-gray-400">This functionality is not guranteed if someone queues using a private browser window without an account.</p> */}
+                            <div className={`${queueLimitEnabled === false && 'blur-sm'}`}>
+                                <div className="mt-4">
+                                    <Label htmlFor="max-songs" className="block text-white mb-2">Maximum Songs</Label>
+                                    <Input id="max-songs" min={1} required type="number" value={maxQueueCount} onChange={e => setMaxQueueCount((e as any).target.value)} className="bg-stone-900 border-stone-700 text-white" />
+                                </div>
+                                <div className="mt-4">
+                                    <Label className="block text-white mb-2">Per Time Period of</Label>
+                                    <div className="flex gap-4">
+                                        <Input min={1} required type="number" value={intervalValue} onChange={e => setIntervalValue((e as any).target.value)} className="bg-stone-900 border-stone-700 text-white" />
+                                        <select
+                                            onChange={e => setIntervalUnit((e as any).target.value)}
+                                            value={intervalUnit}
+                                            className="flex h-9 w-full rounded-md border border-stone-700 bg-stone-900 text-white px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                                        >
+                                            <option value="minute">Minute(s)</option>
+                                            <option value="hour">Hour(s)</option>
+                                            <option value="day">Day(s)</option>
+                                            <option value="week">Week(s)</option>
+                                            <option value="month">Month(s)</option>
+                                            <option value="year">Year(s)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                     <div className="absolute bottom-[5%] flex justify-center gap-12 w-full">
-                        <button className="btn btn-primary" onClick={() => {
+                        <Button onClick={async () => {
                             let options = { maxQueueCount, intervalValue, intervalUnit };
 
-                            function confirmBackPress() {
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: 'You have unsaved changes. Are you sure you want to go back?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Yes, go back!',
-                                    cancelButtonText: 'No, cancel!'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        setCommercialOptionsVisible(false);
-                                    }
-                                });
+                            // Check if there are any changes
+                            const hasChanges =
+                                hadQueueLimit !== queueLimitEnabled ||
+                                (queueLimitEnabled && originalOptions?.queueLimitTimeRestriction && (
+                                    originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount ||
+                                    originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue ||
+                                    originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit
+                                ));
+
+                            // If there are changes, save silently
+                            if (hasChanges) {
+                                await saveCommercialOptions(true);
                             }
 
-                            if (hadQueueLimit == queueLimitEnabled)  {
-                                setCommercialOptionsVisible(false);
-                                return;
-                            }
-
-                            if ( hadQueueLimit != queueLimitEnabled ) {
-                                confirmBackPress();
-                                return; 
-                            } 
-                                
-                            else if (originalOptions.queueLimitTimeRestriction.maxQueueCount != options.maxQueueCount 
-                                || originalOptions.queueLimitTimeRestriction.intervalValue != options.intervalValue 
-                                || originalOptions.queueLimitTimeRestriction.intervalUnit != options.intervalUnit)
-                                {
-                                    confirmBackPress();
-                                    return;
-                                }
-                        
-                            else setCommercialOptionsVisible(false);
-                    
-                        }}><TiArrowBack size={25}/></button>
-                        <button className="btn btn-success" onClick={() => saveCommercialOptions()}><FaSave className="mr-2" /> Save</button>
+                            // Close the panel
+                            setCommercialOptionsVisible(false);
+                        }}><TiArrowBack size={25}/></Button>
                     </div>
                 </div>
             </div>
@@ -315,71 +256,51 @@ const SelectFriend = () => {
     }
 
     return (
-        <div className="grow h-full flex flex-col">
-            {
-                !currentFriend &&
-                <>
-                    <div className="text-center">
-                        {
-                            isUnattendedQueuesEnabled === null || uqLoading
-                            ?
-                            <div className="h-[10vh]">
-                                <LoadingDots className="mt-4" />
-                            </div>
-                            :
-                            <div className="h-[10vh]">
-                                <div className="flex justify-center place-items-center">
-                                    <button className={`btn m-2 ${isUnattendedQueuesEnabled ? "btn-success" : "btn-warning"}`} onClick={() => unattendedQueues()}>{isUnattendedQueuesEnabled ? "Remote Queues: Enabled" : "Remote Queues: Disabled"}</button>
-                                    {
-                                        user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled &&
-                                        <button className="btn btn-primary p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}><FaCog /></button>
-                                    }
-                                </div>
-                                <p className="text-gray-400 mt-2">{isUnattendedQueuesEnabled ? "Your friends can add to your queue." : "Your friends cannot add to your queue."}</p>
-                            </div>
-                        }
+        <div className="grow h-full flex flex-col overflow-hidden">
+            <h3 className="flex-shrink-0 text-2xl font-semibold text-white text-center w-full">To you:</h3>
+            <div className="text-center flex-shrink-0 h-16 pt-2">
+                <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="flex justify-center items-center">
+                        <SkeletonWrapper isLoading={showSkeleton} skeletonClassName="h-10 w-64 rounded-md m-2">
+                            <Button
+                                variant={isUnattendedQueuesEnabled ? "success" : "warning"}
+                                className="m-2 w-48"
+                                onClick={() => unattendedQueues()}
+                            >
+                                {isUnattendedQueuesEnabled ? "Queues Allowed" : "Queues Not Allowed"}
+                            </Button>
+                        </SkeletonWrapper>
+                        {!showSkeleton && user && user.db && user.getProductType() === PartyfyProductType.COMMERCIAL && isUnattendedQueuesEnabled && (
+                            <Button className="p-2 px-4" onClick={() => setCommercialOptionsVisible(true)}>
+                                <FaCog />
+                            </Button>
+                        )}
                     </div>
-                    <div className="divider divider-horizontal m-4">OR</div>
-                </>
-            }
-            <div className="grow text-center mx-2 flex flex-col gap-3">
+                </div>
+            </div>
+            <div className="flex items-center m-4 flex-shrink-0">
+                <Separator className="flex-1" />
+                <span className="px-4 text-muted-foreground">OR</span>
+                <Separator className="flex-1" />
+            </div>
+            <div className="flex-1 text-center mx-2 flex flex-col gap-3 overflow-hidden">
+                <h3 className="flex-shrink-0 text-2xl font-semibold text-white">To your friends:</h3>
+                <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 min-h-0">
                 {
-                    loading &&
-                    <Loading />
-                }
-                {
-                    !loading && friendsList.length === 0 &&
-                    <div>
-                        <h6 className="text-sm text-gray-400 mb-6 cursor-pointer" onClick={() => fetchFriends()}>
-                            {
-                                refreshingFriendsLoading === true
-                                ?
-                                <div className="">
-                                    <LoadingDots />
-                                </div>
-                                :
-                                <i>Tap here to refresh</i>
-                            }
-                        </h6>
-                        <h3>No friends found. Add some through the friends menu.</h3>
-                    </div>
-                }
-                {
-                    !currentFriend && !loading && friendsList.length > 0 &&
-                    <>
-                        <h3 className="text-2xl font-semibold text-white">Add to:</h3>
-                        <h6 className="text-sm text-gray-400 cursor-pointer" onClick={() => fetchFriends()}>
-                            {
-                                refreshingFriendsLoading === true
-                                ?
-                                <LoadingDots />
-                                :
-                                <i>Tap here to refresh</i>
-                            }
-                        </h6>
-                        <div className="h-[68vh] overflow-y-scroll flex flex-col gap-3">
-                            {
-                                [...friendsList].sort((a, b) => {
+                    showSkeleton ? (
+                        // Show skeleton friend items while loading
+                        [...Array(8)].map((_, i) => (
+                            <SkeletonWrapper key={i} isLoading={true}>
+                                <button className="w-full text-left h-10 px-3 py-2 rounded-lg" />
+                            </SkeletonWrapper>
+                        ))
+                    ) : friendsList.length === 0 ? (
+                        <div>
+                            <h3 className="mx-3 text-xl" data-testid="no-friends-label">No friends yet!</h3>
+                            <p className="text-gray-400 mt-2">Add some in the friends menu.</p>
+                        </div>
+                    ) : (
+                        [...friendsList].sort((a, b) => {
                                     const aIsActive = spotifyStatuses?.some(status => status.UserID === a.UserID);
                                     const bIsActive = spotifyStatuses?.some(status => status.UserID === b.UserID);
                                     const aIsQueueEnabled = a.UnattendedQueues === true;
@@ -407,20 +328,20 @@ const SelectFriend = () => {
                                         <button
                                             key={index}
                                             onClick={() => {
-                                                if (!friendIsActive) return;
-                                                if (!isQueueEnabled) {
-                                                    Swal.fire({
-                                                        title: 'Error!',
-                                                        text: `${friend.Username} does not have unattended queues enabled. Ask them to enable it if you want to queue songs.`,
-                                                        icon: 'error'
-                                                    });
-                                                    return;
+                                                // Navigate with startTransition for smooth UX
+                                                startTransition(() => {
+                                                    router.push(`/request/@${friend.Username}`);
+                                                });
+                                            }}
+                                            onMouseEnter={() => {
+                                                // Prefetch on hover for instant navigation
+                                                if (friendIsActive && isQueueEnabled) {
+                                                    router.prefetch(`/request/@${friend.Username}`);
                                                 }
-                                                setCurrentFriend(friend);
-                                            } }
-                                            disabled={!friendIsActive}
-                                            className={`w-full text-left px-3 py-2 rounded-lg transition ease-in-out duration-300
-                                                        ${isQueueEnabled && friendIsActive ? 'bg-blue-600 hover:bg-blue-600' : 'bg-gray-700'}
+                                            }}
+                                            disabled={!friendIsActive || !isQueueEnabled || isPending}
+                                            className={`w-full text-left h-10 px-3 py-2 rounded-lg transition-all ease-in-out duration-150 text-white active:scale-[0.98]
+                                                        ${isQueueEnabled && friendIsActive ? 'bg-stone-700 hover:bg-stone-600 active:bg-stone-500' : 'bg-stone-900'}
                                                         ${!isQueueEnabled || !friendIsActive ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
                                         >
                                             <div className="flex justify-between items-center">
@@ -449,16 +370,11 @@ const SelectFriend = () => {
                                         </button>
                                     );
                                 })
-                            }
-                        </div>
-                    </>
-
+                    )
                 }
-                {
-                    currentFriend != null &&
-                    <RequestSong currentFriend={currentFriend} setCurrentFriend={setCurrentFriend} temporarySession={null} exitSession={null} />
-                }
+                </div>
             </div>
+            <alert.AlertComponent />
         </div>
     );
 }

@@ -15,24 +15,18 @@ Notice how you'll never need to install an update since the iOS app is just a wr
 - **Queue Visibility**: See the queue in real-time, with the ability to see the next 20 upcoming songs.
 - **QR Code**: Generate a QR code that your friends can scan to join the queue, or copy the link. This will be useful for parties where you don't want to add everyone as a friend or need people to sign up.
 
-### Upcoming Features
-I'm a solo developer finishing college and I have a part-time job, so I can't work on these as fast as I want to. Here are some of the features I have planned for the future (I will update this list as I complete them):
-- **Back Button**: Use your device's back button to go back to the previous page. Currently, you have to use the back button in the app, and using your device's back button will cause unexpected behavior.
-- **Previously Queued Songs**: See the songs that have already been played in the queue.
-
 ### Known Free Account Limitations
 When linking a Spotify free account, functionality is limited (I have no control over this):
 - Friends of a free account user cannot add songs to the queue.
 - Friends of a free account user cannot see the queue.
 
-### Limitations
-Unfortunately, some of the most requested features are currently impossible due to the current version of Spotify's API. They currently do not provide endpoints for the following actions:
+### Other Limitations
+The Spotify API doesn't support:
 1. Deleting an item from the queue
 2. Rearranging items in the queue
-3. Keeping the queue just the queue, not a combination of the queue (which is always at the top, luckily) and items that will play next based on the playlist content is being streamed from.
+3. Separation of queue vs up next
 
 ### Stack
-For those who are curious, here is a general overview of the stack used to create this application:
 - Frontend: React with Typescript
 - Backend: Node.js with Express using the Next.js framework
 - Database: Vercel's PostgreSQL database with Prisma ORM for Typescript

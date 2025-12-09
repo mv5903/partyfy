@@ -1,0 +1,29 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [preview]
+  pull_request:
+    branches: [master]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./partyfy
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+      
+      - name: Run Playwright tests
+        run: doppler run -- npx playwright test
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}

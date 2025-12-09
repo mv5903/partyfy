@@ -4,9 +4,10 @@ import { isMobile } from 'react-device-detect';
 import UserContext from '@/providers/UserContext';
 import SelectFriend from './request/SelectFriend';
 
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from '@/hooks/useAlert';
 
 const Dashboard = () => {
+    const alert = useAlert();
     const { user } = useContext(UserContext);
 
     useEffect(() => {
@@ -32,7 +33,7 @@ const Dashboard = () => {
     useEffect(() => {
         if (!isMobile) {
             if (localStorage.getItem('betterOnMobileNotification') === null) {
-                Swal.fire({
+                alert.fire({
                     title: 'Better on Mobile',
                     text: 'Partyfy is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience.',
                     icon: 'info',
@@ -56,7 +57,12 @@ const Dashboard = () => {
             .catch(err => console.log(err));
     }, []);
 
-    return <SelectFriend />;
+    return (
+        <>
+            <SelectFriend />
+            <alert.AlertComponent />
+        </>
+    );
 }
 
 export default Dashboard;

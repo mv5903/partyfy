@@ -1,0 +1,284 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "ok": "OK",
+      "yes": "Yes",
+      "no": "No",
+      "create": "Create",
+      "delete": "Delete",
+      "remove": "Remove",
+      "addIt": "Add it!",
+      "goBack": "Yes, go back!",
+      "grantPermission": "Grant Permission"
+    },
+    "labels": {
+      "partyfy": "Partyfy",
+      "loading": "Loading",
+      "or": "OR"
+    },
+    "placeholders": {
+      "searchSong": "Search for a song...",
+      "friendUsername": "Your friend's username...",
+      "usernameExample": "johndoe24"
+    },
+    "status": {
+      "notEnabled": "not enabled",
+      "offline": "offline",
+      "unknown": "Unknown",
+      "unknownArtist": "Unknown artist",
+      "localFile": "(Local File)",
+      "podcastsNotSupported": "(Podcasts not supported)",
+      "explicit": "Explicit Version",
+      "paused": "Paused",
+      "fromSpotify": "From Spotify"
+    },
+    "time": {
+      "minute": "Minute(s)",
+      "hour": "Hour(s)",
+      "day": "Day(s)",
+      "week": "Week(s)",
+      "month": "Month(s)",
+      "year": "Year(s)"
+    }
+  },
+  "alerts": {
+    "clearTable": {
+      "confirmTitle": "Are you sure?",
+      "confirmText": "You won't be able to revert this!",
+      "confirmButton": "Yes, clear it!",
+      "successTitle": "Cleared!",
+      "successText": "The table has been cleared."
+    },
+    "queue": {
+      "confirmationTitle": "Queue Confirmation",
+      "confirmationText": "You're about to add {{songName}}{{explicit}} by {{artists}} to {{username}}'s queue.",
+      "addedTitle": "{{songName}} added to queue!",
+      "timeRestrictedTitle": "Time Restricted",
+      "timeRestrictedText": "You cannot add songs to {{username}}'s queue because you have attempted to queue more songs than their enforced limit. {{additionalInfo}}.",
+      "premiumRequiredTitle": "Error",
+      "premiumRequiredText": "You cannot add songs to {{username}}'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.",
+      "connectionErrorTitle": "Error",
+      "connectionErrorText": "{{songName}} may not have added to queue. {{username}} may have temporarily lost their internet connection. Try again in a few minutes."
+    },
+    "spotify": {
+      "noAccountTitle": "No Spotify account linked",
+      "noAccountText": "Your friend {{username}} needs to link their Spotify account to account before you can request songs.",
+      "authenticationRequired": "To get started, you'll need to link your Spotify account.",
+      "authenticationOnce": "You'll only have to do this once.",
+      "freeAccountNotice": "Please note that due to Spotify's API policy, friends will not be able to add to your queue if you link a free account. You can still queue to your friends, though, if they have premium."
+    },
+    "session": {
+      "joiningTitle": "Joining Session",
+      "joiningText": "Please wait while we check the session...",
+      "notFoundTitle": "Session Not Found",
+      "notFoundText": "The session you tried to join does not exist. Ask your friend to create a new one.",
+      "expiredTitle": "Session Expired",
+      "expiredText": "The session you tried to join expired at {{date}} at {{time}}. Ask your friend to create a new one.",
+      "sessionExpires": "Session expires on {{date}} at {{time}}",
+      "temporarySessionExpiredTitle": "Notice",
+      "temporarySessionExpiredText": "Your temporary session with {{username}} has expired. You will no longer be able to request songs until they create a new session.",
+      "sessionEndedTitle": "Notice",
+      "sessionEndedText": "Your friend {{username}} has ended the session. You will no longer be able to request songs until they create a new session.",
+      "errorTitle": "Error",
+      "errorText": "There was an error joining the session.",
+      "leaveSession": "Leave Session",
+      "createSession": "Create Session",
+      "expirationDateTitle": "Expiration Date",
+      "expirationDateText": "Choose an expiration date for this session. After this date, the session will be deleted. The expiration date cannot be changed. The maximum length is one week.",
+      "invalidDateTitle": "Invalid Date",
+      "invalidDateText": "The expiration date must be in the future.",
+      "createErrorTitle": "Error",
+      "createErrorText": "There was an error creating a session. Please try again later.",
+      "deleteConfirmTitle": "Are you sure?",
+      "deleteConfirmText": "This will delete the session immediately and the QR code will no longer be valid. You can't undo this action!"
+    },
+    "friends": {
+      "requestTitle": "Friend Request",
+      "requestText": "Send a friend request to <strong>{{username}}</strong>?",
+      "sendingRequestTitle": "Sending friend request...",
+      "requestSentTitle": "Success",
+      "requestSentText": "Friend request sent to {{username}} successfully.",
+      "deleteRequestTitle": "Are you sure?",
+      "deleteRequestText": "Are you sure you want to delete your friend request from {{username}}?",
+      "deleteRequestErrorTitle": "Error",
+      "deleteRequestErrorText": "{{message}}",
+      "deleteRequestSuccessTitle": "Friend request deleted",
+      "cancelRequestTitle": "Are you sure?",
+      "cancelRequestText": "Are you sure you want to cancel your friend request to {{username}}?",
+      "removeFriendTitle": "Are you sure?",
+      "removeFriendText": "Are you sure you want to remove {{username}} from your friends list?",
+      "removeFriendSuccessTitle": "Success!",
+      "removeFriendSuccessText": "You have removed {{username}} from your friends list.",
+      "removeFriendErrorTitle": "Error!",
+      "removeFriendErrorText": "You have not removed {{username}} from your friends list.",
+      "friendRemovedYouTitle": "Notice",
+      "friendRemovedYouText": "Your friend {{username}} has removed you from their friends list. You will no longer be able to request songs until they add you back.",
+      "unattendedQueuesDisabledTitle": "Notice",
+      "unattendedQueuesDisabledText": "Your friend {{username}} has disabled remote queues. You will no longer be able to request songs until it has been turned back on.",
+      "unattendedQueuesErrorTitle": "Error!",
+      "unattendedQueuesErrorText": "{{username}} does not have unattended queues enabled. Ask them to enable it if you want to queue songs."
+    },
+    "user": {
+      "deleteAccountTitle": "Are you sure you want to delete your account?",
+      "deleteAccountText": "This action CANNOT be undone!",
+      "unlinkSpotifyTitle": "Are you sure you want to unlink your Spotify Account?",
+      "unlinkSpotifyText": "This action CANNOT be undone!",
+      "changeUsernameTitle": "Change Username.",
+      "changeUsernameLabel": "Your new username. Choose up to 16 characters.",
+      "usernameTooLongTitle": "Your username is too long.",
+      "usernameTakenTitle": "{{username}} is already taken. Please try another.",
+      "usernameChangedTitle": "Username changed to {{username}} successfully."
+    },
+    "options": {
+      "saveConfirmTitle": "Are you sure?",
+      "saveConfirmText": "This will save your selected options.",
+      "saveConfirmButton": "Yes, save it!",
+      "saveConfirmCancelButton": "No, cancel!",
+      "savedTitle": "Saved!",
+      "savedText": "Your commercial options have been saved.",
+      "saveErrorTitle": "Error!",
+      "saveErrorText": "There was an error saving your commercial options.",
+      "unsavedChangesTitle": "Are you sure?",
+      "unsavedChangesText": "You have unsaved changes. Are you sure you want to go back?",
+      "validationErrorTitle": "Error!",
+      "validationErrorText": "Please enter a value greater than 0 for both fields."
+    },
+    "qr": {
+      "copiedTitle": "Copied to Clipboard",
+      "copiedText": "The link has been copied to your clipboard.",
+      "savedTitle": "Saved",
+      "savedText": "The QR code has been saved successfully."
+    },
+    "mobile": {
+      "betterOnMobileTitle": "Better on Mobile",
+      "betterOnMobileText": "Partyfy is designed with mobile in mind. We encourage you to use this site on your mobile device for a better experience."
+    },
+    "playlist": {
+      "needPermissionTitle": "Need Liked Songs Permission",
+      "needPermissionText": "To access your liked songs, Spotify requires that you to grant additional permissions. You'll be redirected to Spotify to grant this permission, and you'll only need to do this once.",
+      "queueInfoTitle": "Queue Information",
+      "queueInfoText": "Please be aware that Partyfy uses Spotify's \"Get The User's Queue\" API, which currently does not differentiate between your manually curated queue and Spotify's 'Next From' recommendations. This limitation prevents us from distinguishing the tracks you've personally queued from those recommended by Spotify. However, songs queued from Partyfy will always appear first, despite this limitation. We appreciate your understanding as we continue to provide the best possible Partyfy experience within these constraints."
+    }
+  },
+  "pages": {
+    "landing": {
+      "title": "Partyfy",
+      "logoAlt": "Partyfy Logo",
+      "description": "Add to your friend's Spotify queue without accessing their session directly.",
+      "loginButton": "Log In / Sign Up"
+    },
+    "dashboard": {
+      "almostReady": "You're almost ready to party!",
+      "authenticateSpotify": "Authenticate Spotify"
+    }
+  },
+  "components": {
+    "request": {
+      "controlling": "Controlling:",
+      "queueQuotaRemaining": "{{remaining}} of {{max}} queues remaining in {{username}}'s quota",
+      "queueQuotaTimeRemaining": "{{time}} remaining until your next queue",
+      "addSong": "Add Song",
+      "tabs": {
+        "search": "Search",
+        "yourMusic": "Your Music",
+        "session": "Session"
+      }
+    },
+    "selectFriend": {
+      "addTo": "Add to:",
+      "noFriends": "No friends found. Add some through the friends menu.",
+      "remoteQueuesEnabled": "Remote Queues: Enabled",
+      "remoteQueuesDisabled": "Remote Queues: Disabled",
+      "remoteQueuesEnabledInfo": "Your friends can add to your queue.",
+      "remoteQueuesDisabledInfo": "Your friends cannot add to your queue.",
+      "commercialOptions": "Commercial Options",
+      "queueLimit": "Queue Limit",
+      "queueLimitDescription": "Set the maximum number of songs that can be added to your queue through Partyfy in a given time period (rolling), via your friends or the QR code method.",
+      "maximumSongs": "Maximum Songs",
+      "perTimePeriod": "Per Time Period of"
+    },
+    "friends": {
+      "title": "Friends",
+      "findSomeone": "Find Someone",
+      "incomingRequests": "Incoming Requests",
+      "outgoingRequests": "Outgoing Requests",
+      "noIncomingRequests": "You have no incoming friend requests.",
+      "noOutgoingRequests": "You have not sent any friend requests.",
+      "noFriends": "You have no friends yet.",
+      "addFriends": "Add Friends"
+    },
+    "qr": {
+      "title": "QR Code",
+      "scanPrompt": "Ask your friends to scan this code to join your temporary session.",
+      "createPrompt": "You can create a temporary session, which allows friends to join from a QR Code without a Partyfy or Spotify account."
+    },
+    "settings": {
+      "title": "Settings",
+      "deleteAccount": "Delete Account",
+      "changeUsername": "Change Username",
+      "unlinkSpotify": "Unlink Spotify",
+      "logout": "Log Out {{username}}"
+    },
+    "host": {
+      "options": "Options",
+      "unattendedQueuesEnabled": "Unattended Queues Enabled. Disable...",
+      "allowUnattendedQueues": "Allow Unattended Queues",
+      "nowPlaying": "Now Playing",
+      "upNext": "Up Next",
+      "recentlyPlayed": "Recently Played",
+      "clearQueue": "Clear Queue",
+      "clearRecentlyPlayed": "Clear Recently Played",
+      "columns": {
+        "name": "Name",
+        "artist": "Artist",
+        "album": "Album",
+        "playedAt": "Played At",
+        "status": "Status"
+      }
+    },
+    "session": {
+      "noActiveSession": "No active session.",
+      "autoRefresh": "This page will automatically refresh when {{username}} recreates an online session.",
+      "nothingPlaying": "Nothing is playing.",
+      "next": "Next",
+      "noQueue": "No queue available. Potential Reasons:",
+      "noQueueReason1": "{{username}} is listening to a local file",
+      "noQueueReason2": "{{username}} has a Spotify free account",
+      "apiLimitations": "[because of Spotify API Limitations]",
+      "playback": {
+        "repeatOff": "Repeat is off",
+        "repeatContext": "Repeat context",
+        "repeatTrack": "Repeat track",
+        "shuffleOn": "Shuffle is on",
+        "shuffleOff": "Shuffle is off",
+        "playingOnSmartphone": "Playing on smartphone",
+        "playingOnSpeaker": "Playing on speaker",
+        "playingOnComputer": "Playing on computer",
+        "playingFromArtist": "Playing from artist",
+        "playingFromPlaylist": "Playing from playlist",
+        "playingFromAlbum": "Playing from album",
+        "playingFromPodcast": "Playing from podcast"
+      }
+    },
+    "playlists": {
+      "yourMusic": "Your Music",
+      "yourMusicCount": "Your Music ({{count}})",
+      "noSongsQueued": "You haven't queued any songs yet!",
+      "endOfList": "You've reached the end",
+      "endOfPlaylist": "You've reached the end.",
+      "emptyPlaylist": "This playlist is either empty or contains all local files which are inaccessible by this application.",
+      "likedSongs": "Your Liked Songs",
+      "songCount": "{{count}} song",
+      "songCountPlural": "{{count}} songs"
+    },
+    "promotional": {
+      "webAppAlt": "Partyfy Web App",
+      "iosAppAlt": "Partyfy iOS App"
+    },
+    "spotify": {
+      "logoAlt": "Spotify Logo"
+    }
+  }
+}

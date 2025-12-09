@@ -1,19 +1,24 @@
 import { useContext, useEffect, useState } from "react";
-import { BsExplicitFill, BsGlobe, BsPeopleFill } from "react-icons/bs";
-import { FaExclamationCircle, FaEye, FaHeart, FaHistory, FaPlusCircle, FaSpotify } from "react-icons/fa";
+import { FaPlusCircle } from "react-icons/fa";
 import { TiArrowBack } from "react-icons/ti";
+import { Button } from "@/components/ui/button";
 
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useAlert } from "@/hooks/useAlert";
 
 import { CONSTANTS } from "@/assets/Constants";
+import { OAuthRedirect } from "@/helpers/OAuthRedirect";
 import Loading from "@/components/misc/Loading";
 import SpotifyLinkBack from "@/components/misc/SpotifyLinkBack";
+import ScrollingText from "@/components/misc/ScrollingText";
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
 import UserContext from '@/providers/UserContext';
 import { UserProfile } from "@auth0/nextjs-auth0/client";
 import ListContentCard from "@/components/misc/ListContentCard";
+import PlaylistCard from "@/components/misc/PlaylistCard";
+import { usePlaylistsStore } from "@/stores/usePlaylistsStore";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
 
 interface IActivePlaylist {
     name?: string;
@@ -26,11 +31,15 @@ interface IActivePlaylist {
 }
 
 const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, spotifyAuth: SpotifyAuth, addToQueue: Function }) => {
-    
+    const alert = useAlert();
+
+    // Use Zustand store for playlists data
+    const { playlists: cachedPlaylists, isLoading: playlistsLoading, fetchPlaylists } = usePlaylistsStore();
     const [playlists, setPlaylists] = useState([]);
     const [activePlaylist, setActivePlaylist] = useState<IActivePlaylist>(null);
     const [nextURL, setNextURL] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loadingSongs, setLoadingSongs] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const { user } = useContext(UserContext);
 
@@ -62,6 +71,7 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
             return;
         }
         if (playlist_id) {
+            if (isFirstLoad) setLoadingSongs(true);
             let accessToken = await spotifyAuth.getAccessToken();
             if (!accessToken) return;
             const response = await fetch('/api/spotify/playlist?action=get&access_token=' + accessToken + '&playlist_id=' + playlist_id + '&offset=' + offset);
@@ -77,19 +87,20 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                     tags
                 });
             }
+            setLoadingSongs(false);
         }
-        setLoading(false);
         if (isFirstLoad) window.scrollTo(0, 0);
     }
 
     async function getRecentSongs() {
+        setLoadingSongs(true);
         let accessToken = await spotifyAuth.getAccessToken();
         if (!accessToken) return;
         const response = await fetch('/api/spotify/recentlyplayed?user=' + user.getUserID() + '&access_token=' + accessToken);
         if (response.status === 204) {
             setActivePlaylist(null);
-            setLoading(false);
-            Swal.fire({
+            setLoadingSongs(false);
+            await alert.fire({
                 title: "You haven't queued any songs yet!",
                 icon: 'info'
             })
@@ -104,159 +115,163 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                 tracks: data.tracks.length,
                 tags: ['recent', 'up to 50 available']
             });
-            setLoading(false);
-        } 
+            setLoadingSongs(false);
+        }
     }
 
     async function acquireLikedSongsPermission() {
-        Swal.fire({
+        const result = await alert.fire({
             title: 'Need Liked Songs Permission',
             text: 'To access your liked songs, Spotify requires that you to grant additional permissions. You\'ll be redirected to Spotify to grant this permission, and you\'ll only need to do this once.',
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Grant Permission',
             cancelButtonText: 'Cancel'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                window.location.href = CONSTANTS.SPOTIFY_AUTH_URL;
-            }
-        })
+        });
+
+        if (result.isConfirmed) {
+            // Store the current origin before redirecting to Spotify
+            OAuthRedirect.storeOrigin();
+            window.location.href = CONSTANTS.SPOTIFY_AUTH_URL;
+        }
     }
     
     useEffect(() => {
         async function fn() {
             setNextURL(null);
-            const playlists = await getPlaylists();
-            if (playlists) {
-                if (playlists.length > 0 && playlists.some((playlist: any) => playlist.id === 'likedSongs') === false){
-                    // Add fake liked songs playlist with id 'needLikedSongsPermission' if user has not given permission to access liked songs
-                    playlists.unshift({
-                        id: 'needLikedSongsPermission',
-                        name: 'Liked Songs',
-                        images: [],
-                        owner: { display_name: 'Requires additional permissions' }
-                    });
-                }
-                playlists.unshift({
-                    id: 'recentSongs',
-                    name: 'Recently Queued',
-                    images: [],
-                    owner: { display_name: 'from you to others' }
-                })
-                setLoading(false);
-                setPlaylists(playlists);
+
+            // Fetch playlists (will use cache if available)
+            let accessToken = await spotifyAuth.getAccessToken();
+            if (accessToken) {
+                await fetchPlaylists(accessToken);
             }
         }
 
         fn();
     }, []);
 
-    if (loading) return <Loading />;
+    // Sync cached playlists to local state with modifications
+    useEffect(() => {
+        if (cachedPlaylists.length > 0) {
+            const playlistsCopy = [...cachedPlaylists];
+
+            if (playlistsCopy.length > 0 && playlistsCopy.some((playlist: any) => playlist.id === 'likedSongs') === false){
+                // Add fake liked songs playlist with id 'needLikedSongsPermission' if user has not given permission to access liked songs
+                playlistsCopy.unshift({
+                    id: 'needLikedSongsPermission',
+                    name: 'Liked Songs',
+                    images: [],
+                    owner: { display_name: 'Requires additional permissions' }
+                });
+            }
+            playlistsCopy.unshift({
+                id: 'recentSongs',
+                name: 'Recently Queued',
+                images: [],
+                owner: { display_name: 'from you to others' }
+            });
+
+            setPlaylists(playlistsCopy);
+
+            // Show skeleton for minimum 400ms to provide loading feedback
+            setTimeout(() => {
+                setIsInitialLoad(false);
+            }, 400);
+        }
+    }, [cachedPlaylists]);
+
+    // Stop showing skeleton once loading completes (even if no playlists)
+    useEffect(() => {
+        if (!playlistsLoading && isInitialLoad) {
+            setIsInitialLoad(false);
+        }
+    }, [playlistsLoading, isInitialLoad]);
+
+    const showPlaylistsSkeleton = isInitialLoad || (playlistsLoading && playlists.length === 0);
 
     return (
-        <>
-            { !activePlaylist && <h3 className="text-2xl text-center my-4">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
-            <div className="flex flex-col justify-center items-center w-full">
+        <div className="h-full flex flex-col overflow-hidden">
+            { !activePlaylist && <h3 className="text-2xl text-center my-4 flex-shrink-0">Your Music { playlists && !activePlaylist && `(${playlists.length})`}</h3> }
+            <div className="flex-1 flex flex-col justify-center items-center w-full overflow-hidden">
                 {
-                    !activePlaylist && playlists.length > 0 &&
-                    <div className="w-full">
-                        <div className="max-h-[70vh] overflow-auto" id="playlists">
-                            <InfiniteScroll
-                                dataLength={playlists.length}
-                                next={() => getMorePlaylists()}
-                                hasMore={nextURL}
-                                loader={<Loading />}
-                                endMessage={<h6 className="text-center">You've reached the end.</h6>}
-                                scrollableTarget="playlists"
-                            >
-                                {
-                                    playlists.map((playlist: any, key: number) => {
-                                        const isLikedSongs = playlist.id === 'likedSongs';
-                                        const isRecentSongs = playlist.id === 'recentSongs';
-                                        const isNeedLikedSongsPermission = playlist.id === 'needLikedSongsPermission';
-
-                                        let tags = [playlist.public ? 'public' : 'private'];
-                                        if (playlist.collaborative) tags.push('collaborative');
-
-                                        const listContentCardProps = {
-                                            // Image source configuration
-                                            imgSrc: playlist.images && playlist.images.length > 0
-                                                ? <img src={playlist.images[0].url} width={'50px'} height={'50px'} />
-                                                : isLikedSongs
-                                                ? <FaHeart size={50} />
-                                                : isRecentSongs
-                                                ? <FaHistory size={50} />
-                                                : <FaSpotify size={50} />, 
-                                        
-                                            // Spotify link (only for non-liked, non-recent songs)
-                                            spotifyLinkBack: 
-                                                !isLikedSongs && !isNeedLikedSongsPermission && !isRecentSongs 
-                                                    ? playlist.external_urls.spotify 
-                                                    : undefined,
-                                        
-                                            // Primary content including title and icons
-                                            primaryContent: (
-                                                <>
-                                                    <h6 className="p-2">{playlist.name}</h6>
-                                                    {playlist.collaborative && <BsPeopleFill /> }
-                                                    {playlist.public && <BsGlobe /> }
-                                                    {isNeedLikedSongsPermission && <FaExclamationCircle className="text-red-600" />} 
-                                                </>
-                                            ),
-                                        
-                                            // Secondary content (owner's display name or liked songs description)
-                                            secondaryContent:
-                                                playlist.id === 'likedSongs' ? 'Your Liked Songs' : playlist.owner.display_name,
-                                        
-                                            // Button click handler and icon
-                                            btnOnClick: isNeedLikedSongsPermission
-                                                ? acquireLikedSongsPermission
-                                                : () => {
-                                                    setLoading(true);
-                                                    getPlaylistSongs(true, playlist.id, tags, playlist.name);
-                                                },
-
-                                            // Button icon (Spotify login or view)
-                                            btnIcon: isNeedLikedSongsPermission ? <FaSpotify /> : <FaEye />,
-                                        
-                                            // Button styling class
-                                            btnColorClass: isNeedLikedSongsPermission ? 'bg-green-600' : 'btn-primary',
-                                        
-                                            // Position (used for ordering purposes)
-                                            position: key + 1,
-                                        
-                                            // Explicit flag (currently not used)
-                                            explicit: null,
-                                        };
-                                        
-                                        return <ListContentCard key={key} {...listContentCardProps} />;
-                                        
-                                          
-                                    })
-                                }
-                            </InfiniteScroll>
+                    !activePlaylist && showPlaylistsSkeleton &&
+                    <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0">
+                        <div className="grid grid-cols-2 gap-3">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-48" />
+                            ))}
                         </div>
                     </div>
                 }
                 {
+                    !activePlaylist && playlists.length > 0 && !showPlaylistsSkeleton &&
+                    <div className="w-full flex-1 overflow-y-auto overflow-x-hidden px-1 min-h-0" id="playlists">
+                        <InfiniteScroll
+                            dataLength={playlists.length}
+                            next={() => getMorePlaylists()}
+                            hasMore={nextURL}
+                            loader={<Loading />}
+                            endMessage={<p className="text-center text-gray-400 text-sm mt-4 mb-2">You've reached the end</p>}
+                            scrollableTarget="playlists"
+                        >
+                            <div className="grid grid-cols-2 gap-3">
+                                {
+                                    playlists.map((playlist: any, key: number) => {
+                                        const isNeedLikedSongsPermission = playlist.id === 'needLikedSongsPermission';
+                                        let tags = [playlist.public ? 'public' : 'private'];
+                                        if (playlist.collaborative) tags.push('collaborative');
+
+                                        return (
+                                            <PlaylistCard
+                                                key={key}
+                                                playlist={playlist}
+                                                onClick={
+                                                    isNeedLikedSongsPermission
+                                                        ? acquireLikedSongsPermission
+                                                        : () => getPlaylistSongs(true, playlist.id, tags, playlist.name)
+                                                }
+                                            />
+                                        );
+                                    })
+                                }
+                            </div>
+                        </InfiniteScroll>
+                    </div>
+                }
+                {
                     activePlaylist &&
-                    <div className="w-full flex flex-col items-center">
-                        <div className="flex justify-center items-center mt-4">
-                            <h3 className="text-center me-4 text-2xl"><strong>{activePlaylist.name}</strong></h3>
-                            <button className="btn btn-primary" onClick={() => setActivePlaylist(null)}><TiArrowBack size={30}/></button>
+                    <div className="w-full h-full flex flex-col items-center overflow-hidden">
+                        <div className="flex justify-center items-center mt-4 flex-shrink-0 gap-4 min-w-0 w-full px-4">
+                            <div className="flex-grow min-w-0">
+                                <ScrollingText
+                                    text={activePlaylist.name}
+                                    className="text-center text-2xl font-bold"
+                                />
+                            </div>
+                            <Button onClick={() => setActivePlaylist(null)} className="flex-shrink-0"><TiArrowBack size={30}/></Button>
                         </div>
-                        <h6 className="text-sm text-gray-400 my-2 cursor-pointer"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
+                        <h6 className="text-sm text-gray-400 my-2 cursor-pointer flex-shrink-0"><i>{activePlaylist.tracks} song{activePlaylist.tracks > 1 && 's'} {activePlaylist.id != 'likedSongs' && '-'} {activePlaylist.id != 'likedSongs' && activePlaylist.tags.join(', ')}</i></h6>
                         {
-                            activePlaylist.items.length > 0 &&
-                            <div className="w-full max-h-[67vh] overflow-auto" id="playlistItems">
+                            loadingSongs &&
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 px-2 min-h-0">
+                                {[...Array(8)].map((_, i) => (
+                                    <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-16" />
+                                ))}
+                            </div>
+                        }
+                        {
+                            !loadingSongs && activePlaylist.items.length > 0 &&
+                            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden min-h-0 px-2" id="playlistItems">
                                  <InfiniteScroll
                                     dataLength={activePlaylist.items.length}
                                     next={() => getPlaylistSongs(false, activePlaylist.id, activePlaylist.tags, activePlaylist.name, parseInt(new URL(activePlaylist.next).searchParams.get('offset')))}
                                     hasMore={activePlaylist.next != null}
-                                    loader={<Loading />} 
-                                    endMessage={<h6 className="text-center">You've reached the end.</h6>}
+                                    loader={<Loading />}
+                                    endMessage={<h6 className="text-center mt-2">You've reached the end.</h6>}
                                     scrollableTarget="playlistItems"
+                                    className="w-full"
                                 >
+                                    <div className="flex flex-col gap-2 w-full">
                                     {
                                         activePlaylist.items.map((item: any, key: number) => {
                                             let result = activePlaylist.id == 'recentSongs' ? item : item.track;
@@ -272,23 +287,25 @@ const YourPlaylists = ({ you, spotifyAuth, addToQueue } : { you: UserProfile, sp
                                                 explicit: result.explicit,
                                                 btnOnClick: () => addToQueue(result),
                                                 btnIcon: <FaPlusCircle />,
-                                                btnColorClass: 'btn-success',
+                                                btnColorClass: 'btn-success w-full',
                                             }
 
-                                            return <ListContentCard key={key} {...listContentCardProps} />
+                                            return <ListContentCard key={key} {...listContentCardProps} />;
                                         })
                                     }
+                                    </div>
                                 </InfiniteScroll>
                             </div>
                         }
                         {
-                            (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
+                            !loadingSongs && (activePlaylist.items.length === 0 || activePlaylist.items.every((song: any) => song.is_local === true)) &&
                             <h3 className="text-center m-4">This playlist is either empty or contains all local files which are inaccessible by this application.</h3>
                         }
                     </div>
                 }
             </div>
-        </>
+            <alert.AlertComponent />
+        </div>
     );
 }
 

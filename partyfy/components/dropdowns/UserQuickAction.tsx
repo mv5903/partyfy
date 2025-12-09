@@ -1,19 +1,26 @@
-import { BsFillPersonFill } from 'react-icons/bs';
-import { IoMdArrowDropdown } from 'react-icons/io';
-
 import { PartyfyProductType } from '@/helpers/PartyfyProductType';
-import useComponentVisible from '@/hooks/useComponentVisible';
 import UserContext from '@/providers/UserContext';
-import { useContext } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { FaLinkSlash, FaPersonWalkingArrowRight } from "react-icons/fa6";
-import Swal from 'sweetalert2/dist/sweetalert2.js';
+import { useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaBars, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaLinkSlash, FaPersonWalkingArrowRight, FaRightFromBracket } from "react-icons/fa6";
+import { useAlert } from '@/hooks/useAlert';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser } : { isAHost: boolean, setIsAHost: Function, setSpotifyAuthenticated: Function, getUser: Function }) =>  {
 
-    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
-
+    const alert = useAlert();
     const { user } = useContext(UserContext);
+    const router = useRouter();
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     async function checkUsername(username) {
         if (username.length < 1 || username.length > 16) return false;
@@ -37,12 +44,12 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
       }
 
     const deleteAccount = async () => {
-        let confirmation = await Swal.fire({
-            title: 'Are you sure?',
+        let confirmation = await alert.fire({
+            title: 'Are you sure you want to delete your account?',
             text: "This action CANNOT be undone!",
             icon: 'warning',
             showCancelButton: true
-        })
+        });
         if (confirmation.isConfirmed) {
             const res = await fetch('/api/database/users?UserID=' + user.getUserID(), {
                 method: 'DELETE',
@@ -51,18 +58,18 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                 }
             });
             if (res.ok) {
-                window.location.href = '/api/auth/logout';
+                router.push('/api/auth/logout');
             }
         }
     }
 
     const unlinkSpotify = async () => {
-        let confirmation = await Swal.fire({
+        let confirmation = await alert.fire({
             title: 'Are you sure you want to unlink your Spotify Account?',
             text: "This action CANNOT be undone!",
             icon: 'warning',
             showCancelButton: true
-        })
+        });
         if (confirmation.isConfirmed) {
             const res = await fetch('/api/database/users?action=unlink&UserID=' + user.getUserID(), {
                 method: 'DELETE',
@@ -71,33 +78,35 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
                 }
             });
             setSpotifyAuthenticated(false);
+            setIsSheetOpen(false);
         }
     }
 
     const changeUsername = async () => {
         let newUsername = null;
-          let { value: username } = await Swal.fire({
+          let result = await alert.fire({
             title: 'Change Username.',
             input: 'text',
             inputLabel: 'Your new username. Choose up to 16 characters.',
             inputPlaceholder: 'johndoe24',
             showCancelButton: true,
           })
-          if (!username) return;
-          newUsername = username;
+          if (!result.value) return;
+          alert.showLoading();
+          newUsername = result.value;
           let usernameOK = false;
           while (!usernameOK) {
             if (!(await checkUsername(newUsername))) {
               let alertTitle = newUsername.length > 16 ? 'Your username is too long.' : `${newUsername} is already taken. Please try another.`;
-              let { value: userName } = await Swal.fire({
+              let retryResult = await alert.fire({
                 title: alertTitle,
                 input: 'text',
                 inputLabel: 'Your new username. Choose up to 16 characters.',
                 inputPlaceholder: 'johndoe24',
                 showCancelButton: true,
               })
-              if (!userName) return;
-              newUsername = userName;
+              if (!retryResult.value) return;
+              newUsername = retryResult.value;
             } else {
               usernameOK = true;
               fetch('/api/database/users', {
@@ -113,15 +122,15 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
               })
                 .then(response => response.json())
                 .then(data => {
-                    Swal.fire({
+                    alert.close();
+                    alert.fire({
                         title: `Username changed to ${newUsername} successfully.`,
                         icon: 'success',
-                        timer: 1000,
-                        showConfirmButton: false
-                    })     
+                    })
                     // Refetch User details to show that the username has changed on top of screen
                     getUser();
-                    window.location.reload();
+                    router.refresh();
+                    setIsSheetOpen(false);
                 })
               return;
             }
@@ -142,28 +151,62 @@ const UserQuickAction = ({ isAHost, setIsAHost, setSpotifyAuthenticated, getUser
     }
 
     return (
-        <div ref={ref}>
-            <div id="user-quick-action-btn" className={`flex align-center mr-2 cursor-pointer p-1 mt-2 ps-2 btn rounded-lg shadow-md text-white ${isComponentVisible ? 'tab-active' : 'bg-primary'}`} onClick={() => setIsComponentVisible(!isComponentVisible)}>
-                <BsFillPersonFill size={40} />
-                <IoMdArrowDropdown className='mt-2' size={25} />
-            </div>
-            {
-                isComponentVisible &&
-                <div className='z-[2] p-3 min-w-40 absolute right-0 mr-2 bg-zinc-800 rounded-md flex flex-col gap-2 shadow-lg'>
-                    {
-                        user &&
-                        <div>
-                            <h3 className="text-center mb-2 text-xl">Quick Actions</h3>
-                            <p className="text-center">User type: {getProductTypeAsString(user.getProductType())}</p>
-                        </div>
-                    }
-                    <button id="delete-account-btn" className="btn btn-error flex justify-start" onClick={() => deleteAccount()}><FaTrash className='mr-2'/> Delete Account</button>
-                    <button id="change-username-btn" className="btn btn-secondary flex justify-start" onClick={() => changeUsername()}><FaEdit className='mr-2' /> Change Username</button>
-                    <button id="unlink-spotify-btn" className="btn bg-green-700 flex justify-start" onClick={() => unlinkSpotify()}><FaLinkSlash className='mr-2'/> Unlink Spotify</button>
-                    <a id="logout-btn" href="/api/auth/logout" className="btn btn-primary flex justify-start" onClick={() => setIsComponentVisible(!isComponentVisible)}><FaPersonWalkingArrowRight className='mr-2' />Log Out {user.db.Username}</a>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+                <Button
+                    id="user-quick-action-btn"
+                    className="flex align-center mr-2 cursor-pointer mt-2 rounded-lg shadow-md"
+                >
+                    <FaBars size={18} />
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="flex flex-col gap-4 bg-stone-900 border-stone-700">
+                <SheetHeader>
+                    <SheetTitle className="text-white">Settings</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-3 justify-between h-full">
+                  <div className="flex flex-col gap-3 mt-4">
+                    <Button
+                        id="delete-account-btn"
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => deleteAccount()}
+                    >
+                        <FaTrash className='mr-2'/> Delete Account
+                    </Button>
+                    <Button
+                        id="change-username-btn"
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => changeUsername()}
+                    >
+                        <FaEdit className='mr-2' /> Change Username
+                    </Button>
+                    <Button
+                        id="unlink-spotify-btn"
+                        className="flex justify-start w-full bg-stone-800 text-white"
+                        onClick={() => unlinkSpotify()}
+                    >
+                        <FaLinkSlash className='mr-2'/> Unlink Spotify
+                    </Button>
+                  </div>
+                  <div>
+                    <Button
+                        id="logout-btn"
+                        asChild
+                        variant="secondary"
+                        className="flex justify-start w-full bg-stone-700 text-white mb-6"
+                    >
+                        <a href="/api/auth/logout" className="flex align-center">
+                            <FaRightFromBracket className='mr-2' />
+                            <p className="text-sm">Log Out {user?.db?.Username}</p>
+                        </a>
+                    </Button>
+                  </div>
                 </div>
-            }
-        </div>
+            </SheetContent>
+            <alert.AlertComponent />
+        </Sheet>
     )
 }
 

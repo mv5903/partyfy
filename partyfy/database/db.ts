@@ -14,8 +14,7 @@ export default class Database {
         console.log(errDetails);
         // Ignore load failed errors as these are most likely due to user error
         if (errDetails?.error === 'Load failed') {
-            await prisma.$disconnect();
-            winston.info(`[Database] Ignoring fetch client error: Load failed`);
+                winston.info(`[Database] Ignoring fetch client error: Load failed`);
             return false;
         }
         await prisma.clientSideErrors.create({
@@ -27,7 +26,6 @@ export default class Database {
                 user_agent: errDetails.userAgent
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully added new client error`);
         return true;
     }
@@ -42,7 +40,6 @@ export default class Database {
                 song_id: song_uri
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully added song ${song_uri} to device queue for ${requesteeUserID}`);
     }
 
@@ -58,8 +55,7 @@ export default class Database {
                     created_at: 'asc'
                 }
             });
-            await prisma.$disconnect();
-            if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeUserID}`);
+                if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeUserID}`);
             else winston.info(`[Database] User ${requesteeUserID} has no device queues`);
             return queues;
         } else {
@@ -72,8 +68,7 @@ export default class Database {
                     created_at: 'asc'
                 }
             });
-            await prisma.$disconnect();
-            if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeDeviceID}`);
+                if (queues) winston.info(`[Database] Successfully got device queues for ${requesteeDeviceID}`);
             else winston.info(`[Database] Device ${requesteeDeviceID} has no device queues`);
             return queues;
         }
@@ -91,7 +86,6 @@ export default class Database {
                 options: JSON.parse(json)  
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully set options for ${UserID}`);
         return data;
     }
@@ -103,7 +97,6 @@ export default class Database {
                 session_id: SessionID
             }
         });
-        await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully got session from ID ${SessionID}`);
         else winston.info(`[Database] Failed to get session from ID ${SessionID}, likely does not exist`);
         return data;
@@ -117,8 +110,7 @@ export default class Database {
                     user_id: UserID
                 }
             });
-            await prisma.$disconnect();
-            winston.info(`[Database] Successfully deleted session for ${UserID}`);
+                winston.info(`[Database] Successfully deleted session for ${UserID}`);
             return data;
         } catch (err: any) {
             winston.error(`[Database] Failed to delete session for ${UserID}: does not exist`);
@@ -137,7 +129,6 @@ export default class Database {
             }
         });
         let sortedData = data.sort((a, b) => a.created_date.getTime() - b.created_date.getTime());
-        await prisma.$disconnect();
         if (sortedData) winston.info(`[Database] Successfully got session for ${UserID}`);
         else winston.info(`[Database] Failed to get session for ${UserID}, likely does not exist`);
         return sortedData[sortedData.length - 1];
@@ -153,7 +144,6 @@ export default class Database {
                 expiration_date: NewExpirationDate
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully updated session for ${UserID} to ${NewExpirationDate}`);
         return data;
     }
@@ -166,7 +156,6 @@ export default class Database {
                 expiration_date: ExpirationDate
             }
         });
-        await prisma.$disconnect();
         let sessionID = data.session_id;
         winston.info(`[Database] Successfully created session for ${UserID}, with session ID ${sessionID}`);
         return data;
@@ -182,7 +171,6 @@ export default class Database {
                 Username: newUsername
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully updated username for ${UserID} to ${newUsername}`);
         return data;
     }
@@ -196,7 +184,6 @@ export default class Database {
                 last_login: new Date()
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully Set last_login of users for ${UserID} to now`);
         return data;
     }
@@ -212,7 +199,6 @@ export default class Database {
             },
             take: 50
         }))
-        await prisma.$disconnect();
         if (data.length > 0) winston.info(`[Database] Successfully got ${data.length} recent songs for ${OwnerUserID}`);
         return data;
     }
@@ -231,7 +217,6 @@ export default class Database {
                 SongExplicit: SongExplicit
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully inserted recent song for ${OwnerUserID}, content: ${SongName} by ${SongArtist}`);
         return data;
     }
@@ -243,7 +228,6 @@ export default class Database {
                 OwnerUserID: OwnerUserID
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted recent songs for ${OwnerUserID}`);
         return data;
     }
@@ -255,12 +239,26 @@ export default class Database {
                 UserID: UserID
             }
         });
-        await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully got user ${UserID}`);
         else {
             winston.info(`[Database] Failed to get user ${UserID}, likely does not exist`);
             return null;
-        } 
+        }
+        return data;
+    }
+
+    async getUserByUsername(Username: string) {
+        winston.info(`[Database] Getting user by username ${Username}`);
+        const data = await prisma.users.findFirst({
+            where: {
+                Username: Username
+            }
+        });
+        if (data) winston.info(`[Database] Successfully got user by username ${Username}`);
+        else {
+            winston.info(`[Database] Failed to get user by username ${Username}, likely does not exist`);
+            return null;
+        }
         return data;
     }
 
@@ -271,7 +269,6 @@ export default class Database {
                 UserID: UserID
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully added new user ${UserID}`);
         return data;
     }
@@ -286,7 +283,6 @@ export default class Database {
                 RefreshToken: RefreshToken
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully added refresh token ${RefreshToken} for ${UserID}`);
         return data;
     }
@@ -314,8 +310,7 @@ export default class Database {
                     Username: Username
                 }
             });
-            await prisma.$disconnect();
-            winston.info(`[Database] Successfully added username ${Username} for ${UserID}`);
+                winston.info(`[Database] Successfully added username ${Username} for ${UserID}`);
             return data;
         } catch (err: any) {
             if (err.toString().includes('Cannot insert duplicate key')) {
@@ -337,7 +332,6 @@ export default class Database {
                 UnattendedQueues: true
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully enabled unattended queues for ${UserID}`);
         return data;
     }
@@ -353,7 +347,6 @@ export default class Database {
             }
         });
         winston.info(`[Database] Successfully disabled unattended queues for ${UserID}`);
-        await prisma.$disconnect();
         return data;
     }
 
@@ -367,7 +360,6 @@ export default class Database {
                 UnattendedQueues: true
             }
         });
-        await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully got unattended queues for ${UserID}`);
         return data;
     }
@@ -394,7 +386,6 @@ export default class Database {
             },
             take: 8
         })).filter((user, index, array) => array.findIndex(u => u.UserID === user.UserID) === index && user.Username !== UserID);
-        await prisma.$disconnect();
         if (data) winston.info(`[Database] Successfully searched for users with query ${Query} for ${UserID}`);
         else winston.info(`[Database] User ${UserID}'s search for users with query ${Query} returned no results`);
         return data;
@@ -410,7 +401,6 @@ export default class Database {
                 IsFriendRequest: true
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully added friend request from ${UserID} to ${FriendUserID}`);
         return data;
     }
@@ -427,7 +417,6 @@ export default class Database {
                 IsFriendRequest: false
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully accepted friend request from ${FriendUserID} to ${UserID}`);
     }
 
@@ -466,7 +455,6 @@ export default class Database {
                 }
             },
         });
-        await prisma.$disconnect();
         friends.sort((a, b) => a.Username.localeCompare(b.Username));
         if (friends) winston.info(`[Database] Successfully got friends for ${UserID}`);
         else winston.info(`[Database] User ${UserID} has no friends`);
@@ -488,7 +476,6 @@ export default class Database {
                 }
             },
         });
-        await prisma.$disconnect();
         if (usernamesForData) winston.info(`[Database] Successfully got sent friend requests for ${UserID}`);
         else winston.info(`[Database] User ${UserID} has no sent friend requests`);
         return usernamesForData;
@@ -509,7 +496,6 @@ export default class Database {
                 }
             },
         });
-        await prisma.$disconnect();
         if (usernamesForData) winston.info(`[Database] Successfully got incoming friend requests for ${UserID}`);
         else winston.info(`[Database] User ${UserID} has no incoming friend requests`);
         return usernamesForData;
@@ -531,7 +517,6 @@ export default class Database {
                 IsFriendRequest: true
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted friend request from ${UserID} to ${FriendUserID}`);
     }
 
@@ -551,7 +536,6 @@ export default class Database {
                 IsFriendRequest: false
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted friendship between ${UserID} and ${FriendUserID}`);
     }
 
@@ -574,7 +558,6 @@ export default class Database {
                 ]
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully deleted user ${UserID}`);
     }
 
@@ -588,7 +571,6 @@ export default class Database {
                 RefreshToken: null
             }
         });
-        await prisma.$disconnect();
         winston.info(`[Database] Successfully unlinked user ${UserID}`);
     }
 
@@ -610,7 +592,6 @@ export default class Database {
                 ]
             }
         });
-        await prisma.$disconnect();
         if (data) winston.info(`[Database] ${UserID} is friends with ${FriendUserID}`);
         else winston.info(`[Database] ${UserID} is not friends with ${FriendUserID}`);
         return data;

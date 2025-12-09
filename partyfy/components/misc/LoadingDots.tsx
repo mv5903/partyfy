@@ -1,8 +1,9 @@
+import { Spinner } from "@/components/ui/spinner";
 
 const LoadingDots = function ({ className }: { className?: string } ) {
     return (
         <div className="flex justify-center">
-            <div className={`spinner-dot-intermittent ${className}`}></div>
+            <Spinner variant="dots" className={className} />
         </div>
     );
 }

@@ -1,10 +1,14 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TiArrowBack } from "react-icons/ti";
 
 import { SpotifyAuth } from "@/helpers/SpotifyAuth";
 import UserContext from '@/providers/UserContext';
-import Swal from 'sweetalert2/dist/sweetalert2.js';
-import Loading from "../misc/Loading";
+import { useAlert } from "@/hooks/useAlert";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useQueueStatusStore } from "@/stores/useQueueStatusStore";
 
 import BackgroundEffectColor from "@/helpers/BackgroundEffectColor";
 import { getArtistList } from "@/helpers/SpotifyDataParser";
@@ -12,13 +16,15 @@ import { Supabase } from "@/helpers/SupabaseHelper";
 import { getDeviceIdentifier } from "@/utils/deviceIdentifier";
 import { sessions, Users } from "@prisma/client";
 import { FastAverageColor } from 'fast-average-color';
-import { FaList, FaMusic, FaSearch } from "react-icons/fa";
+import { FaList, FaMusic, FaQuestionCircle, FaSearch } from "react-icons/fa";
 import PromotionalHeader from "../misc/PromotionalHeader";
 import Search from "./tabs/Search";
 import TheirSession from "./tabs/TheirSession";
 import YourPlaylists from "./tabs/YourPlaylists";
+import { ScrollingSyncProvider } from "@/contexts/ScrollingSyncContext";
+// Using native title tooltip instead of reactstrap Tooltip to avoid requiring a target prop.
 
-const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function }) => {
+const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSession, setShowFriendInTopBar, setQueueUsage: setParentQueueUsage } : { currentFriend: Users, setCurrentFriend: Function, temporarySession: sessions, exitSession: Function, setShowFriendInTopBar?: (show: boolean) => void, setQueueUsage?: (queueUsage: any) => void }) => {
 
     enum RequestPageView {
         Search,
@@ -26,12 +32,46 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         YourPlaylists
     }
 
+    const alert = useAlert();
     const { user } = useContext(UserContext);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { setLoading, setSuccess, setError } = useQueueStatusStore();
 
     const [friendSpotifyAuth, setFriendSpotifyAuth] = useState<SpotifyAuth>(null);
-    const [requestPageView, setRequestPageView] = useState(RequestPageView.Search);
     const [friendUserObject, setFriendUserObject] = useState<Users>(null);
     const [nowPlaying, setNowPlaying] = useState<any>(null);
+    const [queueUsage, setQueueUsage] = useState<any>(null);
+
+    // Callback ref for the tabs element to detect when it's hidden
+    const [tabsElement, setTabsElement] = useState<HTMLDivElement | null>(null);
+
+    // Get tab from URL params, default to YourPlaylists for friends, Search for temporary sessions
+    const tabParam = searchParams.get('tab');
+    const getRequestPageView = () => {
+        if (tabParam === 'session') return RequestPageView.TheirSession;
+        if (tabParam === 'search') return RequestPageView.Search;
+        if (tabParam === 'playlists' && !temporarySession) return RequestPageView.YourPlaylists;
+        // Default: YourPlaylists for friends, Search for temporary sessions
+        return temporarySession ? RequestPageView.Search : RequestPageView.YourPlaylists;
+    };
+    const requestPageView = getRequestPageView();
+
+    const setRequestPageView = (view: RequestPageView) => {
+        const tabMap = {
+            [RequestPageView.Search]: 'search',
+            [RequestPageView.TheirSession]: 'session',
+            [RequestPageView.YourPlaylists]: 'playlists'
+        };
+        const newTab = tabMap[view];
+        const currentPath = window.location.pathname;
+
+        // Preserve the session query parameter if it exists
+        const sessionId = searchParams.get('session');
+        const queryString = sessionId ? `tab=${newTab}&session=${sessionId}` : `tab=${newTab}`;
+
+        router.push(`${currentPath}?${queryString}`, { scroll: false });
+    };
 
     const RGBtoHSL = (r, g, b) => {
         r /= 255;
@@ -53,22 +93,62 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         ];
     };
 
+    // IntersectionObserver to detect when tabs are hidden
+    useEffect(() => {
+        console.log('[DEBUG] IntersectionObserver effect running', {
+            hasElement: !!tabsElement,
+            hasCallback: !!setShowFriendInTopBar,
+            currentFriend: currentFriend?.Username
+        });
+
+        if (!tabsElement || !setShowFriendInTopBar) {
+            console.log('[DEBUG] Missing requirements, not setting up observer');
+            return;
+        }
+
+        console.log('[DEBUG] Setting up observer on element:', tabsElement);
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                console.log('[DEBUG] Intersection changed:', {
+                    isIntersecting: entry.isIntersecting,
+                    willShowFriend: !entry.isIntersecting,
+                    boundingRect: entry.boundingClientRect.top
+                });
+                // When tabs are NOT intersecting (hidden), show friend in top bar
+                setShowFriendInTopBar(!entry.isIntersecting);
+            },
+            {
+                threshold: 0,
+                rootMargin: '-80px 0px 0px 0px' // Trigger when tabs are 80px from top
+            }
+        );
+
+        observer.observe(tabsElement);
+        console.log('[DEBUG] Observer started observing');
+
+        return () => {
+            console.log('[DEBUG] Cleaning up observer');
+            observer.disconnect();
+        };
+    }, [tabsElement, setShowFriendInTopBar, currentFriend]);
+
     useEffect(() => {
         loadFriendSpotifyAuth();
         unattendedQueuesAllowed();
         isTemporarySessionNotExpired();
 
-        if (!temporarySession) isStillFriends();
+        isStillFriends();
 
         const subscription = Supabase
             .channel('UserRequest')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Users' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
+                isStillFriends();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'Friends' }, (payload: any) => {
                 unattendedQueuesAllowed();
-                if (!temporarySession) isStillFriends();
+                isStillFriends();
             })
             .subscribe();
 
@@ -85,18 +165,39 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         }
 
         loadFriendUserObject();
-        let timeout = setInterval(loadFriendUserObject, 1000);
+        // Reduced from 1s to 10s - friend user object doesn't change frequently
+        let timeout = setInterval(loadFriendUserObject, 10000);
         return () => clearInterval(timeout);
     }, [currentFriend])
-    
+
+    useEffect(() => {
+        if (!currentFriend) return;
+
+        getQueueUsage();
+        // Update queue usage every 5 seconds
+        let interval = setInterval(getQueueUsage, 5000);
+        return () => clearInterval(interval);
+    }, [currentFriend])
+
+    // Handle loading state with navigation loader
+    useEffect(() => {
+    }, [friendSpotifyAuth]);
+
+    // Sync queueUsage to parent component
+    useEffect(() => {
+        if (setParentQueueUsage) {
+            setParentQueueUsage(queueUsage);
+        }
+    }, [queueUsage, setParentQueueUsage]);
+
     async function loadFriendSpotifyAuth() {
         if (currentFriend && currentFriend.RefreshToken) {
             let friendSpotifyAuth = new SpotifyAuth(currentFriend.RefreshToken);
             setFriendSpotifyAuth(friendSpotifyAuth);
         } else {
-            Swal.fire({
+            await alert.fire({
                 title: 'No Spotify account linked',
-                html: `Your friend <strong>${currentFriend.Username}</strong> needs to link their Spotify account to account before you can request songs.`,
+                text: `Your friend ${currentFriend.Username} needs to link their Spotify account to account before you can request songs.`,
                 icon: 'error',
             });
             setCurrentFriend(null);
@@ -112,7 +213,7 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 const response = await fetch('/api/spotify/nowplaying?access_token=' + accessToken);
                 if (response.status == 204) setNowPlaying(false);
                 const data = await response.json();
-    
+
                 // Decide background color based on album art
                 let albumArt = null;
                 if (!data?.item?.album?.images[0]?.url) return;
@@ -121,9 +222,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 fac.getColorAsync(albumArt).then(color => {
                     let rgb = color.value;
                     let [h, s, l] = RGBtoHSL(rgb[0], rgb[1], rgb[2]);
-                    BackgroundEffectColor.setBackgroundEffectColor(h); 
+                    BackgroundEffectColor.setBackgroundEffectColor(h);
                 });
-    
+
                 if (data) {
                     setNowPlaying(data);
                 }
@@ -131,31 +232,40 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 console.error(e);
             }
         }
-    
+
         getNowPlaying();
-        let interval = setInterval(getNowPlaying, 1000);
+        // Reduced from 1s to 5s - better balance between UX and API load
+        let interval = setInterval(getNowPlaying, 5000);
         return () => clearInterval(interval);
     }, [friendSpotifyAuth]);    
 
     async function addToQueue(song: any) {
-        let result = await Swal.fire({
+        console.log("SONG", song)
+        let result = await alert.fire({
             title: 'Queue Confirmation',
-            html: `You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''}</strong> by <i>${getArtistList(song.artists)}</i> to ${currentFriend.Username}'s queue.`,
+            text: `You're about to add ${song.name}${song.explicit ? ' (Explicit Version)' : ''} by ${getArtistList(song.artists)} to ${currentFriend.Username}'s queue.`,
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'Add it!',
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
+            html: ` <div className="">
+                        <img src="${song.album.images[0].url}" style="width: 6rem; margin-left: auto; margin-right: auto;"  />
+                        <p style="margin-top: 10px;">You're about to add <strong>${song.name}${song.explicit ? ' (Explicit Version)' : ''} by ${getArtistList(song.artists)}</strong> to <i>${currentFriend.Username}</i>'s queue.</p>
+                    </div>`
         });
 
         if (result.isConfirmed) {
-            // Show loading dialog while we add the song to the queue
-            Swal.fire({
-                title: 'Sending to queue...',
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
-            });
+            // Show non-blocking loading indicator in nav bar
+            if (temporarySession) alert.showLoading();
+            setLoading(song.name);
+
+            // Optimistically decrement queue usage if there's a restriction
+            if (queueUsage && queueUsage.hasRestriction && queueUsage.currentQueueCount < queueUsage.maxQueueCount) {
+                setQueueUsage({
+                    ...queueUsage,
+                    currentQueueCount: queueUsage.currentQueueCount + 1
+                });
+            }
 
             // Obtain device id
             const device_id = getDeviceIdentifier();
@@ -176,42 +286,59 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                 })
             });
 
+            const data = await response.json();
+            if (temporarySession) alert.close();
+
             if (response.status == 201) {
-                const data = await response.json();
-                Swal.fire({
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
+                await alert.fire({
                     title: 'Time Restricted',
-                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
+                    text: `You cannot add songs to ${currentFriend.Username}'s queue because you have attempted to queue more songs than their enforced limit. ${data.name}.`,
                     icon: 'warning'
-                })
+                });
                 return;
             }
 
-            const data = await response.json(); // ERROR LINE
             // User attempts to queue to a free friend
             if (data && data.name && data.name === "Player command failed: Premium required") {
-                Swal.fire({
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
+                await alert.fire({
                     title: 'Error',
-                    html: `You cannot add songs to <strong>${currentFriend.Username}</strong>'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
+                    text: `You cannot add songs to ${currentFriend.Username}'s queue because they are using a free Spotify account. Encourage them to upgrade to Spotify Premium to enable this feature.`,
                     icon: 'error'
-                })
+                });
+                return;
             }
 
             // User attempts to queue when friend does not have an active Spotify session
             if (data && data.name && data.name === 'Not Found') {
-                Swal.fire({
+                setError();
+                // Revert optimistic update
+                await getQueueUsage();
+                await alert.fire({
                     title: 'Error',
-                    html: `${song.name} may not have added to queue. <strong>${currentFriend.Username}</strong> may have temporarily lost their internet connection. Try again in a few minutes.`,
+                    text: `${song.name} may not have added to queue. ${currentFriend.Username} may have temporarily lost their internet connection. Try again in a few minutes.`,
                     icon: 'error'
-                })   
+                });
+                return;
             }
-            // User can susccessfully queue
+
+            // User can successfully queue
             if (data && data.name && data.name === 'OK') {
-                Swal.fire({
-                    title: song.name + ' added to queue!',
-                    icon: 'success',
-                    timer: 800,
-                    showConfirmButton: false
-                })
+                setSuccess(song.name);
+                if (temporarySession) {
+                    await alert.fire({
+                        title: 'Success',
+                        text: `${song.name} has been added to ${currentFriend.Username}'s queue successfully.`,
+                        icon: 'success'
+                    });
+                }
+                // Refresh queue usage to get accurate count from server
+                await getQueueUsage();
             }
         }
     }
@@ -224,9 +351,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         if (data) {
             if (!data.UnattendedQueues)  {
                 // show warning and then exit when pressed ok
-                await Swal.fire({
+                await alert.fire({
                     title: 'Notice',
-                    html: `Your friend <strong>${currentFriend.Username}</strong> has disabled remote queues. You will no longer be able to request songs until it has been turned back on.`,
+                    text: `Your friend ${currentFriend.Username} has disabled remote queues. You will no longer be able to request songs until it has been turned back on.`,
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });
@@ -237,18 +364,19 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
     }
 
     async function isStillFriends() {
+        console.log("[DEBUG] Checking if still friends", { temporarySession, currentFriend });
         if (temporarySession) return;
         if (!currentFriend) return;
         const response = await fetch(`/api/database/friends?action=isFriend&UserID=${user.getUserID()}&FriendUserID=${currentFriend.UserID}`);
         const data = await response.json();
-        
+
         if (!data) {
             setCurrentFriend(null);
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your friend <strong>${currentFriend.Username}</strong> has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
+                text: `Your friend ${currentFriend.Username} has removed you from their friends list. You will no longer be able to request songs until they add you back.`,
                 icon: 'warning'
-            })
+            });
         }
     }
 
@@ -256,9 +384,9 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         if (!temporarySession) return;
         const expirationDate = new Date(temporarySession.expiration_date);
         if (expirationDate < new Date()) {
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your temporary session with <strong>${currentFriend.Username}</strong> has expired. You will no longer be able to request songs until they create a new session.`,
+                text: `Your temporary session with ${currentFriend.Username} has expired. You will no longer be able to request songs until they create a new session.`,
                 icon: 'warning'
             });
             setTimeout(exitSession, 3000);
@@ -267,12 +395,34 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
         const response = await fetch(`/api/database/sessions?UserID=${currentFriend.UserID}`);
         const data = await response.json();
         if (!data) {
-            Swal.fire({
+            await alert.fire({
                 title: 'Notice',
-                html: `Your friend <strong>${currentFriend.Username}</strong> has ended the session. You will no longer be able to request songs until they create a new session.`,
+                text: `Your friend ${currentFriend.Username} has ended the session. You will no longer be able to request songs until they create a new session.`,
                 icon: 'warning'
             });
             setTimeout(exitSession, 3000);
+        }
+    }
+
+    async function getQueueUsage() {
+        if (!currentFriend) return;
+        const deviceId = getDeviceIdentifier();
+        const userId = temporarySession ? null : user.getUserID();
+
+        const params = new URLSearchParams({
+            FriendUserID: currentFriend.UserID,
+            DeviceID: deviceId
+        });
+
+        if (userId) {
+            params.append('UserID', userId);
+        }
+
+        const response = await fetch(`/api/database/queueusage?${params.toString()}`);
+        const data = await response.json();
+
+        if (data) {
+            setQueueUsage(data);
         }
     }
 
@@ -289,30 +439,27 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
 
     let expirationDate = temporarySession ? new Date(temporarySession.expiration_date) : null;
 
-    const currentView = () => {
-        switch (requestPageView) {
-            case RequestPageView.Search:
-                return <Search you={temporarySession ? currentFriend : user} spotifyAuth={temporarySession ? friendSpotifyAuth : user.spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />;
-            case RequestPageView.TheirSession:
-                return <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />;
-            case RequestPageView.YourPlaylists:
-                return <YourPlaylists you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />;
-        }
-    }
-
     return (
-        <div>
-            {
-                !friendSpotifyAuth ? <Loading /> :
+        <div className="text-white">
+            {!friendSpotifyAuth && (
+                <div className="flex flex-col items-center justify-center h-full">
+                    <h3 className="text-xl pt-2 mb-4 text-white">To <span><strong>{currentFriend?.Username}</strong></span></h3>
+                    <div className="w-full px-2">
+                        <div className="grid grid-cols-2 gap-3">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-stone-900 animate-shimmer rounded-lg h-48" />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {friendSpotifyAuth && (
                 <>
-                    <div className="flex items-center justify-between place-content-center p-2 mb-4">
-                        <h3 className="text-xl me-2 pt-2 mb-2">Controlling: <span><strong>{currentFriend.Username}</strong></span></h3>
+                    <div className="flex items-center justify-center place-content-center p-2 mb-2">
+                        <h3 className={`text-xl pt-2 mb-2 text-white ${temporarySession ? '' : 'me-2'}`}>To <span><strong>{currentFriend.Username}</strong></span></h3>
                         {
-                            temporarySession 
-                            ?
-                            <button className="btn btn-error p-3" onClick={() => exitSession()}><TiArrowBack className="mr-2" size={25}/> Leave Session</button>
-                            :
-                            <button className="btn btn-primary" onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></button>
+                            !temporarySession &&
+                            <Button onClick={() => setCurrentFriend(null)}><TiArrowBack size={25}/></Button>
                         }
                     </div>
                     {
@@ -321,27 +468,72 @@ const RequestSong = ({ currentFriend, setCurrentFriend, temporarySession, exitSe
                     }
                     {
                         temporarySession &&
-                        <h3 className="text-center mb-4">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                        (expirationDate.getFullYear() == 2200 ? (
+                            <h3 className="text-center mb-4 text-white"><i>Session never expires.</i></h3>
+                        ) : (
+                            <h3 className="text-center mb-4 text-white">Session expires on {expirationDate.toLocaleDateString()} at {expirationDate.toLocaleTimeString()}</h3>
+                        ))
                     }
                     {
-                        friendUserObject && friendUserObject.options && friendUserObject.options["queueLimitTimeRestriction"] && friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount > 0 &&
-                        <h3 className="text-center mb-4">Important: Your friend has a queue limit of {friendUserObject.options["queueLimitTimeRestriction"].maxQueueCount} songs per {friendUserObject.options["queueLimitTimeRestriction"].intervalValue} {friendUserObject.options["queueLimitTimeRestriction"].intervalUnit}(s) per person. </h3>
+                        queueUsage && queueUsage.hasRestriction && (
+                            <div className="text-center mb-4 text-white flex justify-center items-center gap-1">
+                                {queueUsage.timeUntilNextQueue ? (
+                                    <h3 className="text-yellow-400">
+                                        <strong>{queueUsage.timeUntilNextQueue}</strong> remaining until your next queue
+                                    </h3>
+                                ) : (
+                                    <h3>
+                                        <strong>{queueUsage.maxQueueCount - queueUsage.currentQueueCount}</strong> of <strong>{queueUsage.maxQueueCount}</strong> queues remaining
+                                    </h3>
+                                )}
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <div className="inline-block ml-1 cursor-pointer">
+                                            <FaQuestionCircle className="text-stone-400" size={16} />
+                                        </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="bg-stone-900 text-white text-sm border-0 text-center me-2">
+                                        <p>{currentFriend.Username} has a rolling queue limit of <strong>{queueUsage.maxQueueCount} item every {queueUsage.intervalValue + " " + queueUsage.intervalUnit + (queueUsage.intervalValue > 1 ? "s" : "")}</strong> for their session.</p>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        )
                     }
                     <div className="flex flex-col items-center">
-                        <div role="tablist" className="tabs tabs-boxed bg-primary p-0">
-                            <button className={`tab flex place-items-center ${requestPageView == RequestPageView.Search ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.Search)}><FaSearch className="mr-2" size={10} />Search</button>
+                        <Tabs value={requestPageView.toString()} onValueChange={(value: string) => setRequestPageView(parseInt(value))} className={`w-full`}>
+                            <TabsList ref={setTabsElement} className="grid w-full bg-stone-900 text-white" style={{ gridTemplateColumns: temporarySession ? '1fr 1fr' : '1fr 1fr 1fr' }}>
+                                <TabsTrigger value={RequestPageView.Search.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                    <FaSearch size={10} />Search
+                                </TabsTrigger>
+                                {
+                                    !temporarySession &&
+                                    <TabsTrigger value={RequestPageView.YourPlaylists.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                        <FaList size={10} />Your Music
+                                    </TabsTrigger>
+                                }
+                                <TabsTrigger value={RequestPageView.TheirSession.toString()} className="flex place-items-center gap-2 data-[state=active]:bg-stone-700 data-[state=active]:text-white text-stone-300">
+                                    <FaMusic size={10}/>Session
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value={RequestPageView.Search.toString()} className="w-full">
+                                <Search you={temporarySession ? currentFriend : user} spotifyAuth={temporarySession ? friendSpotifyAuth : user.spotifyAuth} addToQueue={addToQueue} isTemporarySession={temporarySession != null} />
+                            </TabsContent>
                             {
-                                !temporarySession && 
-                                <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.YourPlaylists ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.YourPlaylists)}><FaList className="mr-2" size={10} />Your Music</button>
+                                !temporarySession &&
+                                <TabsContent value={RequestPageView.YourPlaylists.toString()} className="w-full">
+                                    <YourPlaylists key={currentFriend?.UserID} you={user.db} spotifyAuth={user.spotifyAuth} addToQueue={addToQueue} />
+                                </TabsContent>
                             }
-                            <button className={`tab  flex place-items-center ${requestPageView == RequestPageView.TheirSession ? "tab-active" : "bg-primary"}`} onClick={() => setRequestPageView(RequestPageView.TheirSession)}><FaMusic className="mr-2" size={10}/>Session</button>
-                        </div>
-                        <div className="w-full">
-                            { currentView() }
-                        </div>
+                            <TabsContent value={RequestPageView.TheirSession.toString()} className="w-full">
+                                <ScrollingSyncProvider>
+                                    <TheirSession friendSpotifyAuth={friendSpotifyAuth} friend={currentFriend} />
+                                </ScrollingSyncProvider>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </>
-            }
+            )}
+            <alert.AlertComponent />
         </div>
     )
 }
