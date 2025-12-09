@@ -296,7 +296,7 @@ const SelectFriend = ({ isLoading = false }: { isLoading?: boolean }) => {
                         ))
                     ) : friendsList.length === 0 ? (
                         <div>
-                            <h3 className="mx-3 text-xl" id="no-friends-label">No friends yet!</h3>
+                            <h3 className="mx-3 text-xl" data-testid="no-friends-label">No friends yet!</h3>
                             <p className="text-gray-400 mt-2">Add some in the friends menu.</p>
                         </div>
                     ) : (
